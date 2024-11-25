@@ -1,0 +1,42 @@
+<%  include ('../partials/header.ejs')%>
+<!-- <html>
+<head> -->
+    <title>Calliope Login</title>
+    <link rel="stylesheet" href="/User/css/userLogin.css">
+    <!-- <href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"> -->
+    <style>
+
+    </style>
+<!-- </head>
+<body> -->
+    <div class="header">
+        <h1>CAlliope</h1>
+    </div>
+    <h2 class="text-center mb-4">Log In</h2>
+
+    <form action="/user/login" method="post" id="userloginForm"></form>
+    <div class="login-container">
+        <label for="email"><b>Email</b></label>
+        <input type="text" placeholder="E-mail">
+
+        <label for="password"><b>Password</b></label>
+        <input type="password" placeholder="Password">
+
+        <div class="forgot-password">
+            <a href="#">Forgot Password</a>
+        </div>
+        <button type="submit">Log In</button>
+        <div class="signup">
+            <a href="#">Don’t have an account?</a>
+            <a href="/signup">Sign Up..</a>
+        </div>
+        <div class="social-login">
+            <p>- Log In with social media -</p>
+            <a href="#" class="facebook">Facebook</a>
+            <a href="#" class="google">Google</a>
+        </div>
+    </div>
+<!-- </body>
+</html> -->
+<%  include ('../partials/footer.ejs')%>

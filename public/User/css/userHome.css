@@ -1,0 +1,126 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.header {
+    background-color: #d3c1b2;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+.header h1 {
+    font-family: 'Shadows Into Light', cursive;
+    font-size: 48px;
+    margin: 0;
+}
+.header .search-bar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+.header .search-bar input {
+    padding: 5px;
+    font-size: 16px;
+}
+.header .search-bar button {
+    padding: 5px 10px;
+    font-size: 16px;
+}
+.nav {
+    background-color: #d3c1b2;
+    padding: 10px 0;
+    text-align: center;
+}
+.nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+}
+.nav a:hover {
+    text-decoration: underline;
+}
+.categories, .new-arrivals, .christmas-special, .discount-section, .footer {
+    padding: 20px;
+    text-align: center;
+}
+.categories h2, .new-arrivals h2, .christmas-special h2 {
+    font-family: 'Shadows Into Light', cursive;
+    font-size: 36px;
+}
+.categories .category-item, .new-arrivals .arrival-item, .christmas-special .special-item {
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+}
+.categories .category-item img, .new-arrivals .arrival-item img, .christmas-special .special-item img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+.categories .category-item p, .new-arrivals .arrival-item p, .christmas-special .special-item p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+.discount-section {
+    background-color: #fff;
+    padding: 40px;
+    margin: 20px 0;
+}
+.discount-section h2 {
+    font-size: 36px;
+    margin: 0 0 20px;
+}
+.discount-section p {
+    font-size: 16px;
+    margin: 0 0 20px;
+}
+.discount-section input {
+    padding: 10px;
+    font-size: 16px;
+    width: 300px;
+}
+.discount-section button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+.footer {
+    background-color: #f5f5f5;
+    padding: 20px;
+    margin-top: 20px;
+}
+.footer .footer-section {
+    display: inline-block;
+    width: 30%;
+    vertical-align: top;
+    text-align: left;
+    padding: 0 10px;
+}
+.footer .footer-section h3 {
+    font-size: 18px;
+    margin: 0 0 10px;
+}
+.footer .footer-section p, .footer .footer-section a {
+    font-size: 14px;
+    margin: 5px 0;
+    color: black;
+    text-decoration: none;
+}
+.footer .footer-section a:hover {
+    text-decoration: underline;
+}
+.footer .social-icons {
+    text-align: center;
+    margin-top: 20px;
+}
+.footer .social-icons i {
+    font-size: 24px;
+    margin: 0 10px;
+}
