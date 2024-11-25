@@ -1,0 +1,87 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}
+.header {
+    width: 100%;
+    background-color: #c7bdbd;
+    text-align: center;
+    padding: 20px 0;
+}
+.header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    margin: 0;
+    color: #000000;
+}
+.login-container {
+    width: 500px;
+    text-align: center;
+}
+.login-container label{
+    padding-right:450px;
+}
+.login-container input[type="text"], .login-container input[type="password"] {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border: none;
+    background-color: #d3d3d3;
+    font-size: 18px;
+}
+.login-container .forgot-password {
+    text-align: right;
+    margin: -10px 0 10px 0;
+}
+.login-container .forgot-password a {
+    color: #000000;
+    text-decoration: none;
+}
+.login-container button {
+    width: 100%;
+    padding: 15px;
+    background-color: #8c8c8c;
+    border: none;
+    font-size: 24px;
+    color: #000000;
+    cursor: pointer;
+}
+.social-login {
+    margin-top: 20px;
+}
+.social-login p {
+    margin: 10px 0;
+    font-size: 18px;
+}
+.social-login a {
+    display: inline-block;
+    width: 120px;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+}
+.social-login .facebook {
+    background-color: #3b5998;
+}
+.social-login .google {
+    background-color: #34a853;
+}
+.signup {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.signup a {
+    color: #000000;
+    text-decoration: none;
+}
