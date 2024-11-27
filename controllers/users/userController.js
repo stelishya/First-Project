@@ -1,4 +1,4 @@
-const User = require('../../models/userModel')
+const User = require('../../models/userSchema')
 const bcrypt = require('bcrypt')
 
 const securePassword = async (password) => {
@@ -15,27 +15,33 @@ const loadRegister = async (req, res) => {
         return res.render('users/signup');
 
     } catch (error) {
-        console.log(error.message);
+        console.log('Home page not loading',error.message);
+        res.status(500).send('Server error')
     }
 }
 
 const insertUser = async (req, res) => {
     try {
         console.log('Request Body:',req.body);
-        if (req.body.password !== req.body.confirm_password) {
-            return res.status(400).render('users/signup', { message: 'Passwords do not match' });
+        const {email,password,confirm_password}=req.body
+        if(password !==confirm_password){
+            return res.render('signup',{message:'passwords do not match'})
         }
+        const findUser=await User.findOne
+        // if (req.body.password !== req.body.confirm_password) {
+        //     return res.status(400).render('users/signup', { message: 'Passwords do not match' });
+        // }
 
         const spassword = await securePassword(req.body.password);
-
-        const user = new User({
-            username: req.body.username,
-            email: req.body.email,
-            password: spassword,
-            mobile: req.body.mobile,
-            address:req.body.address,
-            is_admin: 0,
-        });
+        const user = new User({username,email,mobile,password,address})
+        // const user = new User({
+        //     username: req.body.username,
+        //     email: req.body.email,
+        //     password: spassword,
+        //     mobile: req.body.mobile,
+        //     address:req.body.address,
+        //     is_admin: 0,
+        // });
         console.log('User Object:', user);
         const userData = await user.save(); // Mongoose will validate here
 
@@ -45,7 +51,8 @@ const insertUser = async (req, res) => {
             return res.render("users/signup", { message: "Registration has failed" });
         }
     } catch (error) {
-        console.log(error.message);
+        console.error('error for save user\n',error.message);
+        res.status(500).send('internal server error')
         return res.render("users/signup", { message: "Error occurred during registration" });
     }
 }
@@ -72,7 +79,7 @@ const verifyLogin = async (req, res) => {
                 req.session.user_id = userData._id; // Set session after successful login
                 req.session.username= userData.username;
                 console.log('Login successful!');
-                return res.redirect('/user/Lhome');// Redirect to home page after login
+                return res.redirect('/user/home');// Redirect to home page after login
                 
             } else {
                 return res.render('users/login', { message: "Invalid email or password" });

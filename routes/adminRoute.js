@@ -1,14 +1,15 @@
 const express = require('express');
 const admin_route =express.Router();
+const adminController =require("../controllers/admin/adminController");
 
-const session = require('express-session');
-const config = require('../config/config');
-admin_route.use(session({
-    secret:config.sessionSecret,
-    resave: false,// Don't save unmodified session
-    saveUninitialized: true,//sessions won't be created until the session has data.
-    cookie: { secure: false } // Set to true when using HTTPS
-}));
+// const session = require('express-session');
+// const config = require('../config/config');
+// admin_route.use(session({
+//     secret:config.sessionSecret,
+//     resave: false,// Don't save unmodified session
+//     saveUninitialized: true,//sessions won't be created until the session has data.
+//     cookie: { secure: false } // Set to true when using HTTPS
+// }));
 
 const bodyParser = require("body-parser");
 admin_route.use(bodyParser.json());
@@ -18,9 +19,8 @@ admin_route.use(bodyParser.urlencoded({extended:true}));
 
 // const auth = require('../middleware/adminAuth'); 
 
-const adminController =require("../controllers/adminController");
 
-admin_route.get('/',adminController.loadLogin);
+// admin_route.get('/',adminController.loadLogin);
 admin_route.get('/login',adminController.loadLogin);
 
 
@@ -46,8 +46,8 @@ admin_route.get('/search',adminController.searchUsers);
 
 
 
-admin_route.get('*',function (req,res){
-    res.redirect('/admin');
-})
+// admin_route.get('*',function (req,res){
+//     res.redirect('/admin');
+// })
 
 module.exports =admin_route;
