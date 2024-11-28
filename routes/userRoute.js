@@ -23,7 +23,7 @@ const userController =require("../controllers/users/userController");
 user_route.get('/signup',userController.loadRegister);
 
 user_route.post("/signup",userController.insertUser);
-
+user_route.post('/verifyOTP',userController.verifyOTP);
 
 // user_route.get("/",userController.loginLoad);
 user_route.get('/login',userController.loginLoad);

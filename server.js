@@ -1,80 +1,52 @@
-const express= require("express"); 
-const session = require('express-session');
-// const env=require('dotenv').config();
-const ejs = require('ejs')
-const path=require('path');
-const nocache = require('nocache');
-const bodyParser=require('body-parser')
-// const db=require('./config/db')
-// db()
+const express = require('express')
+const config = require('./config')
+const path = require('path')
+const session = require('express-session')
 
-const userRoute=require('./routes/userRoute');//import userRoute
-const adminRoute=require('./routes/adminRoute');//import adminRoute
+// Load environment variables at the very beginning
+require('dotenv').config({ path: path.resolve(__dirname, '.env') })
 
-const app=express();
+// Check if email credentials are loaded
+console.log('Email configured for:', process.env.NODEMAILER_EMAIL ? process.env.NODEMAILER_EMAIL : 'NOT SET');
 
-const mongoose=require("mongoose");
-const { db } = require("./models/userSchema");
-mongoose.connect("mongodb://127.0.0.1:27017/mydatabase");
- 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
-// app.use(session({
-//     secret: process.env.SECRET,
-//     resave: false,
-//     saveUninitialized: true
-//     cookie: { 
-//     secure: false,
-//     httpOnly:true
-//     maxAge:72*60*60*1000
-//     } 
-// }));
+const app = express()
+const db = require('./config/db')
 
-// app.use(session({
-//     secret:config.sessionSecret, 
-//     resave: false, 
-//     saveUninitialized: true,
-//     cookie: { secure: false }  // Set to true when using HTTPS
-// }));
-app.use((req,res,next)=>{
-    res.set('cache-control','no-store')
-    next()
+// console.log('Configuration loaded:', config)
+
+const port = config.PORT || 4000
+
+// Set up middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Set up session middleware
+app.use(session({
+    secret: 'your-secret-key',  // Change this to a secure secret
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }  // Set to true if using HTTPS
+}));
+
+// Set up view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serve static files - make sure this comes before routes
+app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/', express.static(path.join(__dirname, 'public')));
+
+// Connect to database
+db()
+
+// Import user routes
+const userRoute = require('./routes/userRoute');
+
+// Mount user routes
+app.use('/user', userRoute);
+
+app.listen(port, () => {
+    console.log(`Server is running at port ${port}`)
 })
 
-
-
-app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, 'public')))
-// app.set('views', [path.join(__dirname, 'views/user'),path.join(__dirname, 'views/admin')]);
-
-app.use(nocache()); //prevents caching
-
-//for user routes
-app.use('/user',userRoute);
-// app.use('/', userRoute);
-
-//for admin routes
-app.use('/admin',adminRoute);
-
-
-app.listen(4000,function(){
-    console.log("Server is running at port 4000")
-});
-
-
-
-
-// const port=process.env.PORT || 4000;
-// const dbUrl=process.env.DATABASE_URL;
-// const secretKey=process.env.SECRET;
-// const password=process.env.PASSWORD
-// const email=process.env.EMAIL
-// console.log(port,dbUrl,email,password,secretKey)
-
-// app.use(session({
-//     secret: process.env.SECRET,
-//     resave: false,
-//     saveUninitialized: true
-// }));
-
-// const port = process.env.PORT
+module.exports = app

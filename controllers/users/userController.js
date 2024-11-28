@@ -1,14 +1,16 @@
 const User = require('../../models/userSchema')
+const env=require('dotenv').config();
+const nodemailer=require('nodemailer')
 const bcrypt = require('bcrypt')
 
-const securePassword = async (password) => {
-    try {
-        const passwordHash = await bcrypt.hash(password, 10)
-        return passwordHash;
-    } catch (error) {
-        console.log('Error hashing password:',error.message)
-    }
-} 
+// const securePassword = async (password) => {
+//     try {
+//         const passwordHash = await bcrypt.hash(password, 10)
+//         return passwordHash;
+//     } catch (error) {
+//         console.log('Error hashing password:',error.message)
+//     }
+// } 
 
 const loadRegister = async (req, res) => {
     try {
@@ -20,42 +22,139 @@ const loadRegister = async (req, res) => {
     }
 }
 
-const insertUser = async (req, res) => {
+function generateOtp(){
+    return Math.floor(100000 + Math.random()*900000).toString()
+}
+
+async function sendVerificationEmail(email,otp){
     try {
-        console.log('Request Body:',req.body);
-        const {email,password,confirm_password}=req.body
-        if(password !==confirm_password){
-            return res.render('signup',{message:'passwords do not match'})
-        }
-        const findUser=await User.findOne
-        // if (req.body.password !== req.body.confirm_password) {
-        //     return res.status(400).render('users/signup', { message: 'Passwords do not match' });
-        // }
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
+            }
+        });
 
-        const spassword = await securePassword(req.body.password);
-        const user = new User({username,email,mobile,password,address})
-        // const user = new User({
-        //     username: req.body.username,
-        //     email: req.body.email,
-        //     password: spassword,
-        //     mobile: req.body.mobile,
-        //     address:req.body.address,
-        //     is_admin: 0,
-        // });
-        console.log('User Object:', user);
-        const userData = await user.save(); // Mongoose will validate here
+        const info = await transporter.sendMail({
+            from: process.env.NODEMAILER_EMAIL,
+            to: email,
+            subject: 'Calliope - Verify Your Account',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #333; text-align: center;">Welcome to Calliope!</h2>
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
+                        <p style="font-size: 16px;">Your verification code is:</p>
+                        <h1 style="color: #4CAF50; text-align: center; font-size: 36px; margin: 20px 0;">${otp}</h1>
+                        <p style="font-size: 14px; color: #666;">This code will expire in 10 minutes.</p>
+                    </div>
+                    <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+                        If you didn't request this code, you can safely ignore this email.
+                    </p>
+                </div>
+            `
+        });
+        
+        console.log("Email sent successfully");
+        return true;
 
-        if (userData) {
-            return res.render("users/login", { message: "Registration successful! Please log in." });
-        } else {
-            return res.render("users/signup", { message: "Registration has failed" });
-        }
     } catch (error) {
-        console.error('error for save user\n',error.message);
-        res.status(500).send('internal server error')
-        return res.render("users/signup", { message: "Error occurred during registration" });
+        console.error('Error sending email:', error);
+        return false;
     }
 }
+
+const insertUser = async (req, res) => {
+    try {
+        console.log('Request Body:', req.body);
+        const {username,email, mobile,address,password, confirm_password} = req.body;
+        
+        if(password !== confirm_password) {
+            return res.status(400).render('users/signup', {message: 'Passwords do not match'});
+        }
+        
+        const findUser = await User.findOne({email});
+        if(findUser) {
+            return res.render('users/signup', {message: 'User with this email already exists'});
+        }
+        
+        const otp = generateOtp();
+        const emailSent = await sendVerificationEmail(email, otp);
+        console.log('emailsent: ', emailSent);
+
+        if(!emailSent) {
+            return res.status(500).render('users/signup', {message: 'Failed to send verification email'});
+        }
+
+        // Store data in session
+        req.session.userOtp = otp;
+        req.session.userData = {username,email,password,mobile,address};
+        
+        console.log('OTP sent:', otp);
+        return res.render('users/signup_verifyOTP', { email: email });
+        
+    } catch(error) {
+        console.error('signup error', error);
+        return res.status(500).render('users/signup', {message: 'An error occurred during signup'});
+    }
+};
+
+const securePassword = async (password) => {
+    try {
+        const passwordHash = await bcrypt.hash(password, 10)
+        return passwordHash;
+    } catch (error) {
+        console.error('Error hashing password:',error.message)
+    }
+}
+
+const verifyOTP = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        console.log('Received OTP:', otp);
+        console.log('Stored OTP:', req.session.userOtp);
+        
+        if(otp === req.session.userOtp) {
+            const userData = req.session.userData;
+            const spassword = await securePassword(userData.password);
+
+            const saveUserData = new User({
+                username: userData.username,
+                email: userData.email,
+                password: spassword,
+                mobile: userData.mobile,
+                address: userData.address,
+                is_admin: 0
+            });
+
+            await saveUserData.save();
+            
+            // Clear sensitive data from session
+            delete req.session.userOtp;
+            delete req.session.userData;
+            
+            // Set user session
+            req.session.user_id = saveUserData._id;
+            
+            res.json({
+                success: true,
+                message: 'Registration successful!',
+                redirectUrl: '/user/login'
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid OTP. Please try again.'
+            });
+        }
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
 
 //Login user methods started
 const loginLoad = async (req, res) => {
@@ -135,6 +234,7 @@ const userLogout = async(req,res)=>{
 
 module.exports = {
     loadRegister,
+    verifyOTP,
     insertUser,
     loginLoad,
     verifyLogin,
