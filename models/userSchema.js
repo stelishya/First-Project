@@ -85,8 +85,8 @@ const userschema=new Schema({
         }
     }],
     is_verified:{
-        type:Number,
-        default:0
+        type:Boolean,
+        default:false
     }
 });
 

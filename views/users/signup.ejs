@@ -18,11 +18,11 @@
     <form action="/user/signup" method="post" id="signupForm">
     <div class="form-row">
         <!-- <div class="form-group">    -->
-            <label for="name"><b>Username</b></label>
+            <label for="name"><b>Full Name</b></label>
             <input 
                 id="name" 
                 type="text" 
-                placeholder="Username" 
+                placeholder="Enter full name" 
                 name="username"
                 required>
             <span id="usernameError" class="error" style="color:rgb(216, 8, 8)"></span>
@@ -31,7 +31,7 @@
             <label for="email"><b>Email</b></label>
             <input 
                 type="email" 
-                placeholder="E-mail"
+                placeholder="Enter E-mail"
                 name="email"
                 required>
             <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
@@ -41,31 +41,32 @@
                 <label for="mobile"><b>Phone Number</b></label>
                 <input 
                     type="text" 
-                    placeholder="Phone Number" 
+                    placeholder="Enter Phone Number" 
                     name="mobile"
                     required>
                 <span id="mobileError" class="error" style="color:rgb(193, 4, 4)"></span>
             </div>
     <!-- </div> -->
     <div class="form-row">
+        <label for="language"><b>Preferred Language</b></label>
+        <input 
+            type="text" 
+            placeholder="Enter Language" 
+            name="language"
+            required>
+    </div>
+    <div class="form-row">
         <!-- <div class="form-group"> -->
             <label for="password"><b>Password</b></label>
             <input 
                 id="password" 
                 type="password" 
-                placeholder="Password" 
+                placeholder="Enter Password" 
                 name="password"
                 required>
             <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
         </div>
-        <div class="form-row">
-            <label for="address"><b>Address</b></label>
-            <input 
-                type="text" 
-                placeholder="Address" 
-                name="address"
-                required>
-        </div>
+        
         <div class="form-row">
             <label for="password"><b>Confirm Password</b></label>
             <input 
