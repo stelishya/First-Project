@@ -1,19 +1,12 @@
 const express = require('express');
 const admin_route =express.Router();
+
 const adminController =require("../controllers/admin/adminController");
 const customerController =require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController")
+const productController = require("../controllers/admin/productController")
 const bodyParser = require("body-parser");
-const  { userAuth,adminAuth}=require('../middlewares/auth')
 
-// const session = require('express-session');
-// const config = require('../config/config');
-// admin_route.use(session({
-//     secret:config.sessionSecret,
-//     resave: false,// Don't save unmodified session
-//     saveUninitialized: true,//sessions won't be created until the session has data.
-//     cookie: { secure: false } // Set to true when using HTTPS
-// }));
 
 admin_route.use(bodyParser.json());
 admin_route.use(bodyParser.urlencoded({extended:true}));
@@ -35,26 +28,45 @@ admin_route.get('/logout',adminController.logout);
 
 //Customer Management
 admin_route.get('/users',customerController.customerInfo);
-// adminAuth,
 admin_route.get('/blockCustomer',customerController.blockCustomer)
-// adminAuth,
 admin_route.get('/unblockCustomer',customerController.unblockCustomer)
-// adminAuth,
 
 //Category Management
 admin_route.get('/category',categoryController.categoryInfo)
-// adminAuth,
 admin_route.post('/addCategory',categoryController.addCategory)
-// adminAuth,
 admin_route.post('/addCategoryOffer',categoryController.addCategoryOffer)
-// adminAuth,
 admin_route.post('/removeCategoryOffer',categoryController.removeCategoryOffer)
-// adminAuth,
 admin_route.get('/listCategory',categoryController.getListCategory)
-// adminAuth,
 admin_route.get('/unlistCategory',categoryController.getUnlistCategory)
-// adminAuth,
 admin_route.get('/editCategory',categoryController.getEditCategory)
+admin_route.post('/editCategory/:id',categoryController.editCategory)
+
+
+// Product Management
+admin_route.get('/products',productController.products)
+admin_route.get('/products/add',productController.addProductPage)
+admin_route.post('/products/add',productController.addProduct)
+admin_route.post('/listProduct',productController.list_unlist)
+admin_route.get('/deleteProduct',productController.deleteProduct)
+admin_route.get('/editProduct',productController.editPage)
+admin_route.post('/editProduct',productController.edittingProduct)
+admin_route.get('/viewProduct',productController.productDetails)
+
+
+
+// admin_route.get('/addProducts',productController.getProductAddPage)
 // adminAuth,
+
+
+
+
+
+
+
+
+
+// admin_route.post('/addProducts',uploads.array("images",4),productController.addProducts);
+// adminAuth,
+
 
 module.exports =admin_route;

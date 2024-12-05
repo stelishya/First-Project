@@ -14,7 +14,9 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
+    "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
+    "fs": "^0.0.1-security",
     "mongodb": "^6.11.0",
     "mongoose": "^8.8.2",
     "nocache": "^4.0.0",
@@ -22,7 +24,9 @@
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "path": "^0.12.7",
+    "sharp": "^0.33.5"
   },
   "description": ""
 }

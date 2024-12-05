@@ -1,177 +1,212 @@
-<%-  include ('../partials/admin/sidebar')%>
-<title>
-   Customer Management
-  </title>
-  <link rel="stylesheet" href="/Admin/css/category.css">
-  <div class="container">
-   <div class="main-content">
-    <div class="header">
-    <form action="/admin/category" method="get" class="d-inline" >
-     <div class="search-bar">
-      <input placeholder="Search categories..." type="text"/>
-      <button>
-       <i class="fas fa-search">
-       </i>
-      </button>
-     </div>
-    </form>
-     <div class="user-info">
-      <img alt="User profile picture" height="40" src="https://storage.googleapis.com/a1aa/image/6Frmd66qfz37V6OkvJHOKto7rafaEUORfStf9uiesPYqTb5eE.jpg" width="40"/>
-      <div>
-       <!-- <div class="name">%= user.adminName %></div> -->
-        <!-- Selin Stelishya Oliver -->
-       <div class="role">Admin</div>
-      </div>
-     </div>
-    </div>
-    <div style="display: flex; gap: 20px; margin-top: 20px;">
-    <div class="col-md-3">
-        <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit()">
-          <div class="mb-4">
-            <label for="product_name" class="form-label">Name</label>
-            <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
-            <div id="name-error" class="error-message"></div>
-          </div>
-          <div class="mb-4">
-            <label class="form-label">Description</label>
-            <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId" ></textarea>
-            <div id="description-error" class="error-message"></div>
-          </div>
-          <div class="d-grid">
-            <button class="btn btn-primary" type="submit">
-              Create category
-            </button>
-          </div>
-        </form>
-      </div>
+<%- include ('../partials/admin/sidebar')%>
 
-        <div id="offerDiv" style="display: none; width: 200px; padding: 20px; background-color: #fff; border-radius: 5px; height: fit-content; margin-top: 10px;">
-          <h4>Add Offer</h4>
-          <div class="mb-3">
-            <label class="form-label">Offer Percentage</label>
-            <input type="number" class="form-control" id="offerInput" placeholder="Enter %" min="0" max="100">
-          </div>
-          <!-- <button type="button" class="swal2-confirm swal-2-styled" aria-label style="display:inline-block">OK</button> -->
-          <!-- <button type="button" class="swal2-cancel swal-2-styled" aria-label style="display:none">Cancel</button> -->
+<div class="min-h-screen bg-[#f5f5f5] ml-64 p-8">
+    <div class="flex justify-between items-center mb-8 bg-white rounded-lg p-4 shadow-sm">
+        <form action="/admin/category" method="get" class="flex-1 max-w-md">
+            <div class="relative">
+                <input placeholder="Search categories..." type="text" class="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"/>
+                <button class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <i class="fas fa-search text-gray-400"></i>
+                </button>
+            </div>
+        </form>
+        <div class="flex items-center gap-4">
+            <img alt="User profile picture" class="w-10 h-10 rounded-full" src="https://storage.googleapis.com/a1aa/image/6Frmd66qfz37V6OkvJHOKto7rafaEUORfStf9uiesPYqTb5eE.jpg"/>
+            <div>
+                <div class="text-sm font-medium text-gray-900">Admin</div>
+            </div>
         </div>
     </div>
 
-    <div class="table-container">
-     <table>
-      <thead>
-       <tr>
-        <!-- <th>
-         <input type="checkbox"/>
-        </th> -->
-        <th>Category Name</th>
-        <th>Description</th>
-        <th>Offer Price</th>
-        <th>Offer</th>
-        <th>Status</th>
-        <th>List/Unlist</th>
-        <th class="text-start">Edit</th>
-        <!-- <th>
-            Sales
-        </th>
-        <th>
-            Stock
-        </th>
-        <th>
-            Added
-        </th> -->
-        
-        
-        <!-- <th>
-         Action
-        </th> -->
-        
-       </tr>
-      </thead>
-      <tbody>
-        <% cat.reverse().forEach((category,index)=>{%>
-       <tr>
-        <!-- <td>
-         <input type="checkbox"/>
-        </td> -->
-        <td class="text-start"><%= category.name %></td>
-        <td class="text-start"><%= category.description %></td>
-        <td>
-            <% if(category.categoryOffer){ %>
-                <%= category.categoryOffer %>
-            <% } else{ %>
-                0%
-            <% } %>
-        </td>
-        <td class="text-start">
-            <% if(category.categoryOffer === 0){ %>
-                <button class="btn btn-info" style="width:100px">
-                    <a href="#" class="text-white" onclick="addOffer('<%= category._id %>',event)">Add Offer</a>
-                </button>
-            <% } else{%>
-            <button class="btn btn-info" style="width:100px">
-                <a href="#" class="text-white" onclick="removeOffer('<%= category._id %>')">Remove</a>
-            </button>
-            <% } %>
-        </td>
-        <td class="text-start">
-            <% if(category.isListed){ %>
-            <span 
-            class="badge rounded-pill alert-success" 
-            style="width:60px"
-            >Listed</span>
-            <% } else{%>
-            <span 
-            class="badge rounded-pill alert-danger" 
-            style="width:60px"
-            >UnListed</span>
-            <% } %>
-        </td>
-        <td class="text-start">
-            <% if(category.isListed){%>
-        <button class="btn btn-danger" style="width:70px">
-            <a href="/admin/listCategory?id=<%=category._id%>" class="text-white">Unlist</a>
-        </button>
-        <% } else{%>
-        <button class="btn btn-danger" style="width:70px">
-            <a href="/admin/unlistCategory?id=<%=category._id%>" class="text-white">List</a>
-        </button>
-        <% } %>
-        </td>
-        <td class="text-start">
-            <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info text-white">Edit</a>
-        </td>
-    </tr>
-    <% }) %>
-       
-      </tbody>
-     </table>
-     <div class="pagination">
-      <div class="showing-info">
-        <!-- Showing %= ((currentPage -1)*3) + 1 %> - %= Math.min(currentPage * 3 , count) %> from %= count %> -->
-       <!-- Showing 1-10 from 100 -->
-      </div>
-      <div class="pagination-container">
-        <% if(currentPage > 1) {%>
-        <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-        <% } %><% for(let i=1;i <= totalPages;i++) {%> <% if(i === currentPage){ %>
-        <span class="current-page"><%= i %></span>
-        <% }else { %>
-        <a href="?page=<%= i %>"><%= i %></a>
-        <% } %> <% } %> 
-        <% if (currentPage < totalPages){%>
-        <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-        <% } %>
-      </div>
-      
+    <div class="grid grid-cols-12 gap-8">
+        <!-- Add Category Form -->
+        <div class="col-span-4">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold mb-6">Add New Category</h2>
+                <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit()">
+                    <div class="mb-4">
+                        <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" name="name" placeholder="Enter category name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" id="product_name" />
+                        <div id="name-error" class="text-red-500 text-sm mt-1"></div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea placeholder="Enter category description" name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" id="descriptionId" rows="4"></textarea>
+                        <div id="description-error" class="text-red-500 text-sm mt-1"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="discountType" class="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
+                        <select id="discountType" name="discountType" onchange="handleDiscountTypeChange()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400">
+                            <% discountTypes.forEach((type, index) => { %>
+                                <option value="<%= type %>" <%= index === 0 ? 'selected' : '' %>><%= type %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div id="percentageFields" class="mb-4">
+                        <label for="percentage" class="block text-sm font-medium text-gray-700 mb-1">Discount Percentage</label>
+                        <div class="flex items-center">
+                            <input type="number" id="percentage" name="offer" oninput="validatePercentage()" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-400" placeholder="Enter percentage">
+                            <span class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-r-md">%</span>
+                        </div>
+                        <p id="percentageError" class="text-red-500 text-sm mt-1 hidden"></p>
+                    </div>
+
+                    <div id="fixedFields" class="mb-4 hidden">
+                        <label for="fixedAmount" class="block text-sm font-medium text-gray-700 mb-1">Fixed Discount Amount</label>
+                        <div class="flex items-center">
+                            <span class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-l-md">₹</span>
+                            <input type="number" id="fixedAmount" name="fixedAmount" oninput="validateFixedAmount()" class="w-full px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-gray-400" placeholder="Enter fixed amount">
+                        </div>
+                        <p id="fixedAmountError" class="text-red-500 text-sm mt-1 hidden"></p>
+                    </div>
+
+                    <button class="w-full bg-[#5a5a5a] text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors" type="submit">
+                        Create Category
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="col-span-8">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Offer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% cat.reverse().forEach((category,index)=>{%>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= category.name %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= category.description %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <% if(category.categoryOffer){ %>
+                                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"> 
+                                  <%= category.categoryOffer %> %
+                                  </span> 
+                                  <% } else if(category.fixedAmount) { %>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                      ₹<%= category.fixedAmount %>
+                                    </span>
+                                <% } else{ %>
+                                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                    No Offer
+                                  </span>
+                                  <% } %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <% if(category.isListed){ %>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                  Listed
+                                </span>
+                                <% } else{%>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                                  UnListed
+                                </span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <div class="flex space-x-2">
+                                    <% if(category.isListed){%>
+                                    <a href="/admin/listCategory?id=<%=category._id%>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Unlist</a>
+                                    <% } else{%>
+                                    <a href="/admin/unlistCategory?id=<%=category._id%>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">List</a>
+                                    <% } %>
+                                    <a href="/admin/editCategory?id=<%= category._id %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    <!-- Showing %= ((currentPage -1)*3) + 1 %> - %= Math.min(currentPage * 3 , count) %> from %= count %> -->
+                </div>
+                <div class="flex space-x-2">
+                    <% if(currentPage > 1) {%>
+                    <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
+                    <% } %>
+                    <% for(let i=1; i <= totalPages; i++) {%>
+                        <% if(i === currentPage){ %>
+                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"><%= i %></span>
+                        <% } else { %>
+                        <a href="?page=<%= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"><%= i %></a>
+                        <% } %>
+                    <% } %>
+                    <% if (currentPage < totalPages){%>
+                    <a href="?page=<%= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
     </div>
-   </div>
-  </div>
-  <script src="/Admin/jsFiles/category.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</div>
 
- </body>
-</html>
+<script>
+function handleDiscountTypeChange() {
+    const discountType = document.getElementById('discountType').value;
+    const percentageFields = document.getElementById('percentageFields');
+    const fixedFields = document.getElementById('fixedFields');
+    
+    if (discountType === 'Percentage Discount') {
+        percentageFields.classList.remove('hidden');
+        fixedFields.classList.add('hidden');
+        document.getElementById('fixedAmount').value = '';
+    } else {
+        percentageFields.classList.add('hidden');
+        fixedFields.classList.remove('hidden');
+        document.getElementById('percentage').value = '';
+    }
+}
 
-<%-  include ('../partials/admin/footer')%>
+function validatePercentage() {
+    const percentage = document.getElementById('percentage').value;
+    const error = document.getElementById('percentageError');
+    
+    if (percentage < 0 || percentage > 100) {
+        error.textContent = 'Percentage must be between 0 and 100';
+        error.classList.remove('hidden');
+        return false;
+    }
+    error.classList.add('hidden');
+    return true;
+}
+
+function validateFixedAmount() {
+    const amount = document.getElementById('fixedAmount').value;
+    const error = document.getElementById('fixedAmountError');
+    
+    if (amount < 0) {
+        error.textContent = 'Amount cannot be negative';
+        error.classList.remove('hidden');
+        return false;
+    }
+    error.classList.add('hidden');
+    return true;
+}
+
+// Modify your existing handleFormSubmit function
+const originalHandleFormSubmit = window.handleFormSubmit || function() { return true; };
+window.handleFormSubmit = function() {
+    if (!originalHandleFormSubmit()) return false;
+    
+    const discountType = document.getElementById('discountType').value;
+    if (discountType === 'Percentage Discount') {
+        return validatePercentage();
+    } else {
+        return validateFixedAmount();
+    }
+};
+</script>
+
+<script src="/Admin/jsFiles/category.js"></script>

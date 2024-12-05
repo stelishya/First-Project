@@ -1,17 +1,27 @@
-<div class="sidebar">
-  <h1>CAlliope</h1>
-  <ul>
-    <li><a href="#"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
-    <li><a href="#"><i class="fas fa-box"></i>Product</a></li>
-    <li><a href="#"><i class="fas fa-list"></i>Categories</a></li>
-    <li><a href="#"><i class="fas fa-shopping-cart"></i>Orders</a></li>
-    <li><a href="#" class="active"><i class="fas fa-users"></i>Customers</a></li>
-    <li><a href="#"><i class="fas fa-tags"></i>Coupons</a></li>
-  </ul>
-  <div class="support-setting">
-    <ul>
-      <li><a href="#"><i class="fas fa-headset"></i>Support</a></li>
-      <li><a href="#"><i class="fas fa-cog"></i>Settings</a></li>
+<aside class="fixed top-0 left-0 w-64 min-h-screen bg-[#e0d5d5] p-5 border-r border-gray-200">
+  <div class="flex flex-col h-full">
+    <h1 class="text-4xl font-bold mb-8">CAlliope</h1>
+    <nav class="flex-1">
+    <ul class="space-y-2">
+        <li><a href="/admin/dashboard" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-tachometer-alt mr-3"></i>Dashboard</a></li>
+        <li><a href="/admin/addProducts" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-box mr-3"></i>Product</a></li>
+        <li><a href="/admin/category" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-list mr-3"></i>Categories</a></li>
+        <li><a href="/admin/orders" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-shopping-cart mr-3"></i>Orders</a></li>
+        <li><a href="/admin/users" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-users mr-3"></i>Customers</a></li>
+        <li><a href="/admin/coupons" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-tags mr-3"></i>Coupons</a></li>
     </ul>
+  </nav>
+    <div class="absolute bottom-5 w-[calc(100%-40px)]">
+        <ul class="space-y-5">
+            <li><a href="#" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-headset mr-3"></i>Support</a></li>
+            <li><a href="#" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-cog mr-3"></i>Settings</a></li>
+        </ul>
+    </div>
+    <div class="mt-auto pt-4 border-t border-gray-300">
+      <a href="/admin/logout" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded-lg px-4 py-2.5 flex items-center transition-all duration-200">
+          <i class="fas fa-sign-out-alt w-6"></i>
+          <span>Logout</span>
+      </a>
   </div>
-</div>
+  </div>
+</aside>

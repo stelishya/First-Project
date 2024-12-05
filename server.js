@@ -5,8 +5,11 @@ const path = require('path')
 const session = require('express-session')
 const passport = require('./config/passport')
 const db = require('./config/db')
+const expressLayouts = require('express-ejs-layouts')
 const userRoute = require('./routes/userRoute');// Import user routes
 const adminRoute = require('./routes/adminRoute');// Import admin routes
+const  { userAuth,adminAuth}=require('./middlewares/auth')
+
 
 db()    // Connect to database
 
@@ -45,15 +48,15 @@ app.use((req,res,next)=>{
     next();
 })
 
-// Set up view engine
+// Set up view engine and layouts
+app.use(expressLayouts);
+app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-//app.set('views', [path.join(__dirname, 'views/user'),path.join(__dirname, 'views/admin')]);
 app.use(express.static(path.join(__dirname, 'public')));
-app.set('layout', 'layouts/main');
 
 app.use('/user', userRoute);
-app.use('/admin',adminRoute)
+app.use('/admin',adminAuth,adminRoute)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)

@@ -25,11 +25,14 @@ exports.categoryInfo = async(req,res)=>{
         // const adminName = req.session.adminName || "Admin";
 
         res.render("admin/category",{
+            title: 'Category Management',
             cat: categoryData,
             currentPage: page,
             totalPages: totalPages,
             totalCategories: totalCategories,
-            adminName:adminName
+            adminName:adminName,
+            discountTypes: ['Percentage Discount', 'Fixed Amount'],
+            path: '/admin/category'
         });
         
     } catch (error) {
@@ -148,9 +151,88 @@ exports.getEditCategory = async(req,res)=>{
     try {
         let id = req.query.id;
         const category = await Category.findOne({_id:id});
-        res.render("/admin/edit-category",{category:category});
+
+        if (!category) {
+            return res.redirect('/admin/category');
+        }
+        res.render("admin/edit-category",{
+            title: 'Edit Category',
+            category:category,
+            discountTypes: ['Percentage Discount', 'Fixed Amount'] ,
+            path: '/admin/category'  
+            });
     } catch (error) {
-        console.error(error);
+        console.error('Error in getEditCategory:',error);
         res.redirect("/pageError");
     }
 }
+
+exports.editCategory = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { category: categoryName, description, discountType, offer, fixedAmount } = req.body;
+        
+        const existingCategory = await Category.findOne({ 
+            name: categoryName,
+            _id: { $ne: id } // Exclude current category from duplicate check
+        });
+
+        if (existingCategory) {
+            return res.status(400).json({ error: "Category exists, please choose another name" });
+        }
+
+        const updateData = {
+            name: categoryName,
+            description: description
+        };
+
+        // Add offer details if provided
+        if (discountType === 'Percentage Discount' && offer) {
+            updateData.categoryOffer = offer;
+            updateData.fixedAmount = null;
+        } else if (discountType === 'Fixed Amount' && fixedAmount) {
+            updateData.categoryOffer = null;
+            updateData.fixedAmount = fixedAmount;
+        }
+
+        const updatedCategory = await Category.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        );
+
+        if (updatedCategory) {
+            res.redirect("/admin/category");
+        } else {
+            res.status(404).json({ error: "Category not found" });
+        }
+    } catch (error) {
+        console.error('Error in editCategory:', error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+// exports.editCategory= async (req,res)=>{
+//     try {
+//         const id = req.params.id;
+//         const {category,description} = req.body;
+//         const existingCategory = await Category.findOne({name:categoryName});
+
+//         if(existingCategory){
+//             return res.status(400).json({error:"Category exists, please choose another name"})
+//         }
+//         const updateCategory = await category.findByIdandUpdate(id,{
+//             name:categoryName,
+//             description:description
+//         },{new:true});
+
+//         if(updateCategory){
+//             res.redirect("/admin/category");
+//         }else{
+//             res.status(404).json({error:"Category not found"})
+//         }
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({error:"Internal server error" })
+//     }
+// }

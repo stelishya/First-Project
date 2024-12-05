@@ -18,18 +18,13 @@ exports.pageError = async(req,res)=>{
     res.render('admin/admin-error')
 }
 
-exports.loadLogin = async (req, res) => {
-        try {  
-            if(req.session.admin){
-                return res.redirect('admin/dashboard')
-            }else{
-                res.render('admin/admin-login',{message:null})
-            }
-            
-        } catch (error) {
-            console.log(error.message);
-        }
+exports.loadLogin = (req, res) => {
+    try {
+        res.render('admin/admin-login',{message:null})
+    } catch (error) {
+        console.error("error on rendering login page")
     }
+}
 
 exports.login =async (req,res)=>{
     console.log('login req vann')
