@@ -1,0 +1,204 @@
+   body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            width:auto;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #e0d5d5;
+            padding: 20px;
+            box-sizing: border-box;
+            height: 100vh;
+        }
+        .sidebar h1 {
+            font-size: 36px;
+            margin: 0;
+            margin-bottom: 20px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin-bottom: 20px;
+        }
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #000;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar ul li a i {
+            margin-right: 10px;
+        }
+        .sidebar ul li a.active {
+            color: #fff;
+            background-color: #5a5a5a;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .sidebar .support-setting {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+        .sidebar .support-setting ul {
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .support-setting ul li a {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .main-content {
+            flex: 1;
+            background-color: #d1cfcf;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header .search-bar {
+            display: flex;
+            align-items: center;
+        }
+        .header .search-bar input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .header .search-bar button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .header .search-bar button i {
+            font-size: 20px;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .header .user-info .name {
+            margin-right: 10px;
+        }
+        .header .user-info .role {
+            color: #888;
+        }
+        .col-md-3 {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin: 10px;
+    }
+
+    .form-label {
+      margin-bottom: 8px;
+    }
+
+    .form-control {
+      width: 50%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    .d-grid button{
+        margin:10px;
+        width:150px;
+        height:30px;
+        border:0;
+        border-radius: 5px;
+        color:#fefcfc;
+        background-color: #5a5a5a;
+    }
+    .form-label{
+        padding-bottom:20px
+    }
+
+
+        .table-container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-container table th, .table-container table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .table-container table th {
+            background-color: #f9f9f9;
+        }
+        .table-container table td .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .table-container table td .status.active {
+            background-color: #e0f7e9;
+            color: #34a853;
+        }
+        .table-container table td .status.blocked {
+            background-color: #fdecea;
+            color: #ea4335;
+        }
+        .table-container .pagination {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .table-container .pagination a {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-left: 5px;
+            text-decoration: none;
+            color: #000;
+        }
+        .table-container .pagination a.active {
+            background-color: #5a5a5a;
+            color: #fff;
+        }
+        .table-container .pagination a:hover {
+            background-color: #ddd;
+        }
+        .table-container .pagination a i {
+            margin: 0 5px;
+        }
+        .table-container .actions i {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .table-container .showing-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #888;
+            text-align: right;
+        }
+        .status a {
+            text-decoration: none;
+        }
+ 

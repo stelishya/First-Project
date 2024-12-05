@@ -9,17 +9,92 @@
   <link rel="stylesheet" href="/User/css/LHome.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
- </head>
+  <style>
+    header h1{
+      padding-left: 160px;
+
+    }
+    header .sign-in-link{
+      font-size:16px;
+      color:#333;
+      margin-right:15px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    header.sign-in-link:hover{
+      color:#ff7f50;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      right: 0;
+    }
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .header{
+      position:relative;
+      z-index: 500;
+    }
+  </style>
+</head>
  <body>
   <header>
+    <div class="search-bar">
+      <input placeholder="Search..." type="text"/>
+      <button>
+       <i class="fas fa-search">
+       </i>
+      </button>
+     </div>
    <h1>
     CAlliope
    </h1>
-   <div class="search-bar">
-    <input placeholder="Search..." type="text"/>
-    <button>
-     <i class="fas fa-search">
+   <div class="nav-icons">
+    <a href="#">
+     <i class="fas fa-question-circle">
      </i>
-    </button>
+    </a>
+    <a href="#">
+     <i class="fas fa-heart">
+     </i>
+    </a>
+    <a href="#">
+     <i class="fas fa-shopping-cart">
+     </i>
+    </a>
    </div>
+   <!-- %if(locals.user){%> -->
+    <div class="dropdown">
+      <a href="#"class="btn btn-secondary dropdown-toggle">
+        selu
+        <!-- %=locals.user.username%> -->
+      </a>
+      <div class="dropdown-content">
+        <a href="/userProfile">Profile</a>
+        <a href="/user/logout">Logout</a>
+      </div>
+    </div>
+   <!-- %}else{%> -->
+    <a href="/user/signup" class="sign-in-link">Sign Up</a>
+    <a href="/user/login"  class="sign-in-link">Log In</a>
+   <!-- %}%> -->
   </header>

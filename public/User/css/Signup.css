@@ -16,32 +16,28 @@ body {
 }
 .container {
     text-align: center;
-    padding: 20px;
+    /* padding: 0px; */
 }
-.container h2 {
+.container h5 {
     font-family: 'Roboto', sans-serif;
     font-size: 36px;
-    margin: 20px 0 10px;
+    margin: 30px 0 10px;
 }
 .container p {
     font-family: 'Roboto', sans-serif;
     font-size: 16px;
-    margin: 0 0 20px;
+    margin: 0 0 1px;
 }
 
 .form-container {
+  margin-top: 20px;
     margin-left: 350px;
     background: #fff;
-    padding: 20px;
+    padding: 10px;
     padding-left: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 500px;
-    /* width:1200px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin:40px; */
+    /* border-radius: 8px; */
+    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+    width: 700px;
 }
 h1 {
     text-align: center;
@@ -58,6 +54,7 @@ h1 {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Two columns */
     gap: 16px;
+    /* margin-left: 80px; */
   }
   .form-row {
     display: flex;
@@ -81,9 +78,12 @@ h1 {
     text-align: center;
   }
   button {
+    margin:5px 0px 0px 0px ;
+    /* width:300px; */
     padding: 10px 20px;
-    background-color: #333;
+    background-color: #383636;
     color: white;
+    font-size: medium;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -92,34 +92,30 @@ h1 {
   button:hover {
     background-color: #555;
   }
-/* .form-container label{
-    padding:10px;
-    margin:30px
+.google-login{
+  margin-top: 10px;
 }
-.form-container input {
-    width: 300px;
-    padding: 10px;
-    margin: 50px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: #d3d3d3;
+
+.google-login p {
+    margin: 5px 0;
+    font-size: 18px;
 }
-.form-container .button {
-    width: 620px;
-    padding: 15px;
-    margin: 20px 0;
-    background-color: #8c8c8c;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 24px;
-    cursor: pointer;
-    font-family: 'Playfair Display', serif;
+
+.google-login a {
+  display: inline-block;
+  width: 120px;
+  padding: 5px;
+  margin: 5px;
+  border-radius: 15px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 18px;
 }
-.form-container .button:hover {
-    background-color: #7a7a7a;
-} */
+
+.google-login .google {
+  background-color: #449469;
+}
+
 .footer {
     text-align: center;
     margin: 20px 0;

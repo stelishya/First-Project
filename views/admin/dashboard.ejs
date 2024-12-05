@@ -1,0 +1,741 @@
+
+<!-- ```html
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/> -->
+  <title>
+   Dashboard
+  </title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/> -->
+
+  <link rel="stylesheet" href="/Admin/css/dashboard.css">
+ 
+ <!-- </head> -->
+ <!-- <body> -->
+  <div class="container">
+   <div class="sidebar">
+    <h1>
+     CAlliope
+    </h1>
+    <ul>
+     <li>
+      <a class="active" href="#">
+       <i class="fas fa-tachometer-alt">
+       </i>
+       Dashboard
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       <i class="fas fa-box">
+       </i>
+       Product
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       <i class="fas fa-list">
+       </i>
+       Categories
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       <i class="fas fa-shopping-cart">
+       </i>
+       Orders
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       <i class="fas fa-users">
+       </i>
+       Customers
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       <i class="fas fa-tags">
+       </i>
+       Coupons
+      </a>
+     </li>
+    </ul>
+    <div class="bottom-links">
+     <a href="#">
+      <i class="fas fa-cog">
+      </i>
+      Setting
+     </a>
+     <a href="#">
+      <i class="fas fa-sign-out-alt">
+      </i>
+      Logout
+     </a>
+    </div>
+   </div>
+   <div class="main-content">
+    <div class="header">
+     <div class="search-bar">
+      <i class="fas fa-search">
+      </i>
+      <input placeholder="Search..." type="text"/>
+     </div>
+     <div class="user-info">
+      <img alt="User Avatar" height="40" src="https://storage.googleapis.com/a1aa/image/odB6jOttMcZKNxCJPxIJwfe9ulM5V1xa53pkbe7CMAsgROunA.jpg" width="40"/>
+      <div class="name">
+       Selin Steilshya Oliver
+      </div>
+      <div class="role">
+       Admin
+      </div>
+     </div>
+     <div class="notifications">
+      <i class="fas fa-bell">
+       <span class="badge">
+        4
+       </span>
+      </i>
+      <i class="fas fa-envelope">
+       <span class="badge">
+        3
+       </span>
+      </i>
+     </div>
+     <a class="add-product" href="#">
+      + Add Product
+     </a>
+    </div>
+    <div class="content">
+     <div class="row">
+      <div class="card">
+       <h3>
+        Total Revenue
+       </h3>
+       <div class="value">
+        $75,500
+        <span class="percentage">
+         +10%
+        </span>
+       </div>
+      </div>
+      <div class="card">
+       <h3>
+        Total Sales
+       </h3>
+       <div class="value">
+        31,500
+        <span class="percentage">
+         +15%
+        </span>
+       </div>
+      </div>
+      <div class="card">
+       <h3>
+        Product SKU
+       </h3>
+       <div class="value">
+        247
+        <span class="percentage">
+         0%
+        </span>
+       </div>
+      </div>
+      <div class="card">
+       <h3>
+        Balance
+       </h3>
+       <div class="value">
+        $24,500
+        <span class="percentage negative">
+         -25%
+        </span>
+       </div>
+      </div>
+     </div>
+     <div class="row">
+      <div class="card sales-progress">
+       <div class="progress-circle">
+        <img alt="Sales Progress Circle" height="100" src="https://storage.googleapis.com/a1aa/image/hYZqbK3gmOIAE1ElaHYLDfk8e7coYeNKz9AqRfJsrNPJjccPB.jpg" width="100"/>
+       </div>
+       <div class="details">
+        <h3>
+         Sales Progress
+        </h3>
+        <p>
+         You succeed earn $240 today, It's higher than yesterday
+        </p>
+        <div>
+         Target: $20k
+        </div>
+        <div>
+         Revenue: $16k
+        </div>
+        <div>
+         Today: $1.5k
+        </div>
+       </div>
+      </div>
+      <div class="card statistics">
+       <div class="chart">
+        <h3>
+         Statistics
+        </h3>
+        <img alt="Statistics Graph" height="200" src="https://storage.googleapis.com/a1aa/image/FpmPJ3uFuQIEA5OjnkfeJvoCXDKcNe5KW8ZMsSMxj9GmROunA.jpg" width="400"/>
+       </div>
+      </div>
+     </div>
+     <div class="row">
+      <div class="card">
+       <h3>
+        Top Selling Product
+       </h3>
+       <table class="table">
+        <thead>
+         <tr>
+          <th>
+           Product
+          </th>
+          <th>
+           Sales
+          </th>
+          <th>
+           Amount
+          </th>
+          <th>
+           Price
+          </th>
+          <th>
+           Status
+          </th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td>
+           Wall Art
+          </td>
+          <td>
+           401
+          </td>
+          <td>
+           $84,611
+          </td>
+          <td>
+           $121.00
+          </td>
+          <td>
+           <span class="status low-stock">
+            Low <br><br> Stock
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Metal Print
+          </td>
+          <td>
+           301
+          </td>
+          <td>
+           $177,000
+          </td>
+          <td>
+           $590.00
+          </td>
+          <td>
+           <span class="status published">
+            Published
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Canvas Prints
+          </td>
+          <td>
+           300
+          </td>
+          <td>
+           $37,500
+          </td>
+          <td>
+           $125.00
+          </td>
+          <td>
+           <span class="status low-stock">
+            Low <br><br> Stock
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Wall Murals
+          </td>
+          <td>
+           298
+          </td>
+          <td>
+           $103,704
+          </td>
+          <td>
+           $348.00
+          </td>
+          <td>
+           <span class="status published">
+            Published
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Wood Wall Art
+          </td>
+          <td>
+           256
+          </td>
+          <td>
+           $150,000
+          </td>
+          <td>
+           $607.00
+          </td>
+          <td>
+           <span class="status published">
+            Published
+           </span>
+          </td>
+         </tr>
+        </tbody>
+       </table>
+       
+      </div>
+      <div class="card sales-by-location">
+       <h3>
+        Sales by Location
+       </h3>
+       <table class="table">
+        <thead>
+         <tr>
+          <th>
+           Location
+          </th>
+          <th>
+           Sales
+          </th>
+          <th>
+           Amount
+          </th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td>
+           United Kingdom
+          </td>
+          <td>
+           340
+          </td>
+          <td>
+           $17,678
+           <span class="percentage">
+            +12%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Spain
+          </td>
+          <td>
+           100
+          </td>
+          <td>
+           $5,500
+           <span class="percentage negative">
+            -5%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Indonesia
+          </td>
+          <td>
+           50
+          </td>
+          <td>
+           $2,500
+           <span class="percentage">
+            +5%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           France
+          </td>
+          <td>
+           147
+          </td>
+          <td>
+           $7,456
+           <span class="percentage">
+            +19%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Germany
+          </td>
+          <td>
+           540
+          </td>
+          <td>
+           $24,189
+           <span class="percentage negative">
+            -25%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           United Arab Emirates
+          </td>
+          <td>
+           346
+          </td>
+          <td>
+           $15,700
+           <span class="percentage">
+            +10%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Turkey
+          </td>
+          <td>
+           506
+          </td>
+          <td>
+           $24,700
+           <span class="percentage negative">
+            -12%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           United States
+          </td>
+          <td>
+           48
+          </td>
+          <td>
+           $2,000
+           <span class="percentage">
+            +7%
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           Japan
+          </td>
+          <td>
+           23
+          </td>
+          <td>
+           $1,500
+           <span class="percentage">
+            0%
+           </span>
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+     <div class="row">
+      <div class="card" style="flex: 1;">
+       <h3>
+        Recent Orders
+       </h3>
+       <table class="table">
+        <thead>
+         <tr>
+          <th>
+           Order ID
+          </th>
+          <th>
+           Product
+          </th>
+          <th>
+           Date
+          </th>
+          <th>
+           Customer
+          </th>
+          <th>
+           Payment
+          </th>
+          <th>
+           Status
+          </th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td>
+           #302012
+          </td>
+          <td>
+           Wall Art
+          </td>
+          <td>
+           1 min ago
+          </td>
+          <td>
+           Antony Rone Oliver
+          </td>
+          <td>
+           Mastercard
+          </td>
+          <td>
+           <span class="status processing">
+            Processing
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #302011
+          </td>
+          <td>
+           Metal Print
+          </td>
+          <td>
+           1 min ago
+          </td>
+          <td>
+           Mary Princy P T
+          </td>
+          <td>
+           Visa
+          </td>
+          <td>
+           <span class="status processing">
+            Processing
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #302002
+          </td>
+          <td>
+           Wood Wall Art
+          </td>
+          <td>
+           5 hour ago
+          </td>
+          <td>
+           Sihona Oliver
+          </td>
+          <td>
+           Transfer
+          </td>
+          <td>
+           <span class="status shipped">
+            Shipped
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301901
+          </td>
+          <td>
+           Cabin in the woods Wood Wall Art
+          </td>
+          <td>
+           4 Nov 2024
+          </td>
+          <td>
+           Selin Steilshya Oliver
+          </td>
+          <td>
+           COD
+          </td>
+          <td>
+           <span class="status delivered">
+            Delivered
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301900
+          </td>
+          <td>
+           Blooming 2A Wall Tapestry
+          </td>
+          <td>
+           1 Nov 2024
+          </td>
+          <td>
+           Selin Steilshya Oliver
+          </td>
+          <td>
+           Visa
+          </td>
+          <td>
+           <span class="status delivered">
+            Delivered
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301881
+          </td>
+          <td>
+           Snow Sugar on Mountain Peak Canvas Print
+          </td>
+          <td>
+           10 Oct 2024
+          </td>
+          <td>
+           Selin Steilshya Oliver
+          </td>
+          <td>
+           COD
+          </td>
+          <td>
+           <span class="status cancelled">
+            Cancelled
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301643
+          </td>
+          <td>
+           Wall Murals
+          </td>
+          <td>
+           1 Jan 2023
+          </td>
+          <td>
+           Mary Delna Pinto
+          </td>
+          <td>
+           Transfer
+          </td>
+          <td>
+           <span class="status shipped">
+            Shipped
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301600
+          </td>
+          <td>
+           Digital prints
+          </td>
+          <td>
+           24 Dec 2022
+          </td>
+          <td>
+           Carmeli Dulcy Pinto
+          </td>
+          <td>
+           Mastercard
+          </td>
+          <td>
+           <span class="status delivered">
+            Delivered
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301555
+          </td>
+          <td>
+           Blooming 2A Wall Tapestry
+          </td>
+          <td>
+           1 Nov 2024
+          </td>
+          <td>
+           Augustine Lavin Oliver
+          </td>
+          <td>
+           Paypal
+          </td>
+          <td>
+           <span class="status delivered">
+            Delivered
+           </span>
+          </td>
+         </tr>
+         <tr>
+          <td>
+           #301002
+          </td>
+          <td>
+           Mini Art Prints
+          </td>
+          <td>
+           2 Dec 2022
+          </td>
+          <td>
+           John Delwin Pinto
+          </td>
+          <td>
+           Paypal
+          </td>
+          <td>
+           <span class="status delivered">
+            Delivered
+           </span>
+          </td>
+         </tr>
+        </tbody>
+       </table>
+       <div class="pagination">
+        <p>Showing 1 to 5 from 15</p>
+            <a href="#">
+             1
+            </a>
+            <a class="active" href="#">
+             2
+            </a>
+            <a href="#">
+             3
+            </a>
+            <a href="#">
+             4
+            </a>
+            <a href="#">
+             5
+            </a>
+        </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ <!-- </body>
+</html> -->

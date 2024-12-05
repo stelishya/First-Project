@@ -1,18 +1,12 @@
-<!-- %  include ('../partials/user/header.ejs')%> -->
-<html>
-<head>
+
     <title>Calliope Sign Up</title>
     <link rel="stylesheet" href="/user/css/signup.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
-</head>
-<body>
     <div class="header">
         <h1>CAlliope</h1>
     </div>
     <div class="container">
-        <h2>Welcome To Calliope</h2>
+        <h5>Welcome To Calliope</h5>
         <p>Create an account to check out faster and keep track of your orders and wishlist.</p>
         <div class="form-container">
     <form action="/user/signup" method="post" id="signupForm">
@@ -37,7 +31,6 @@
             <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
         </div>
         <div class="form-row">
-            <!-- <div class="form-group"> -->
                 <label for="mobile"><b>Phone Number</b></label>
                 <input 
                     type="text" 
@@ -46,7 +39,6 @@
                     required>
                 <span id="mobileError" class="error" style="color:rgb(193, 4, 4)"></span>
             </div>
-    <!-- </div> -->
     <div class="form-row">
         <label for="language"><b>Preferred Language</b></label>
         <input 
@@ -56,7 +48,6 @@
             required>
     </div>
     <div class="form-row">
-        <!-- <div class="form-group"> -->
             <label for="password"><b>Password</b></label>
             <input 
                 id="password" 
@@ -77,10 +68,11 @@
                 required>
             <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
         </div>
-    <!-- </div> -->
-    
-        
-    <!-- </div> -->
+        <% if(locals.message && message.length>0){ %>
+            <div class="alert alert-danger text-center">
+                <%= message %>
+            </div>
+        <% } %>
         
             <button 
                 class="button" 
@@ -89,9 +81,12 @@
     </form>
         </div>
         <div class="footer">
-            <p>Already have an account? <a href="/login">Sign In.</a></p>
+            <p>Have an account? <a href="/user/login">Sign In.</a></p>
         </div>
+        <div class="google-login">
+            <p>- or you can sign in with -</p>
+            <a href="/user/auth/google" class="google">Google</a>
+        </div>
+        
     </div>
-</body>
-</html>
-<!-- %  include ('../partials/user/footer.ejs')%> -->
+

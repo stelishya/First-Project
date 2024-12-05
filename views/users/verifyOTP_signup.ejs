@@ -6,6 +6,8 @@
     <title>OTP Verification</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <style>
     body {
         font-family: Arial, sans-serif;
@@ -42,7 +44,7 @@
     .otp-input {
         display: flex;
         justify-content: center;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
     .otp-input input {
         width: 40px;
@@ -55,6 +57,12 @@
         background-color: #2a2a2a;
         color: #ffffff;
     }
+    .buttons{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        margin-top: 10px;
+    }
     button {
         background-color: #484f48;
         color: white;
@@ -63,7 +71,6 @@
         font-size: 1rem;
         border-radius: 4px;
         cursor: pointer;
-        margin: 5px;
     }
     button:hover {
         background-color: #506051;
@@ -87,25 +94,29 @@
     <div class="container">
         <h1>OTP Verification</h1>
         <p>Enter the 6-digit code sent to your email: <strong><%= email %></strong></p>
-        <div id="timer">Time remaining: 3:00</div>
-        <div class="otp-input">
-        <form action="/user/verifyOTP" method="post">
-            <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
-            <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
-            <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
-            <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
-            <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
-            <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
-        
-        <!-- </div> -->
-        <!-- onclick="verifyOTP()" -->
-        <button type='submit' >Verify</button>
-        <button id="resendButton" onclick="resendOTP()" disabled>Resend Code</button>
+        <div id="timer">Time remaining: 0:30</div>
+        <form action="/user/verifyOTP" method="post" >
+        <!-- onsubmit="return validateOTPForm()"> -->
+            <div class="otp-input">
+                <input type="number" min="0" max="9" class="otp-digit" aria-label="OTP digit 1" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
+                <input type="number" min="0" max="9" class="otp-digit" aria-label="OTP digit 1" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
+                <input type="number" min="0" max="9" class="otp-digit" aria-label="OTP digit 1" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
+                <input type="number" min="0" max="9" class="otp-digit" aria-label="OTP digit 1" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
+                <input type="number" min="0" max="9" class="otp-digit" aria-label="OTP digit 1" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
+                <input type="number" min="0" max="9" class="otp-digit" aria-label="OTP digit 1" name="otp[]" required maxlength="1" oninput="handleInput(this, event)">
+            </div>
+            <div class="buttons">
+                <button type='submit' onclick="verifyOTP()">Verify</button>
+            </div>
+    </form>
+    <form action="/user/resendOTP" method="post">
+        <div class="buttons">
+            <button id="resendButton" type="submit" disabled onClick="resendOTP()">Resend Code</button>
+        </div>
     </form>
     </div>
-    </div>
 
-    <script>
+<script>
 
 function handleInput(input, event) {
     // Ensure only one digit
@@ -138,7 +149,8 @@ function handleInput(input, event) {
         const inputs = document.querySelectorAll('.otp-digit');
         const timerDisplay = document.getElementById('timer');
         const resendButton = document.getElementById('resendButton');
-        let timeLeft = 180; // 3 minutes in seconds
+        let timeLeft = 30;//30 sec demo
+        // let timeLeft = 180; // 3 minutes in seconds
         let timerId;
 
         function startTimer() {
@@ -160,7 +172,8 @@ function handleInput(input, event) {
         function resendOTP() {
               // Here you would typically call your backend to resend the OTP
               alert("New OTP sent!");
-              timeLeft = 180;
+              let timeLeft = 30;//30 sec demo
+            //   timeLeft = 180;
               inputs.forEach(input => {
                   input.value = '';
                   input.disabled = false;
@@ -195,22 +208,227 @@ function handleInput(input, event) {
               });
           });
 
-          function verifyOTP() {
-              const otp = Array.from(inputs).map(input => input.value).join('');
-              if (otp.length === 6) {
-                  if (timeLeft > 0) {
-                      alert(`Verifying OTP: ${otp}`);
-                      // Here you would typically send the OTP to your server for verification
-                  } else {
-                      alert('OTP has expired. Please request a new one.');
-                  }
-              } else {
-                  alert('Please enter a 6-digit OTP');
-              }
-          }
+async function verifyOTP() {
+    // Get all OTP input fields
+    const otpInputs = document.querySelectorAll('.otp-digit');
+    const otpArray = [];
 
-          startTimer();
+    // Validate and collect OTP values
+    let isValid = true;
+    let isEmpty = false;
+
+    otpInputs.forEach(input => {
+        if (!input.value) {
+            isEmpty = true;
+        }
+        else if (input.value.length !== 1 || isNaN(input.value) || input.value < 0 || input.value > 9) {
+            isValid = false;
+        }
+        else{
+            otpArray.push(input.value);
+        }
+    });
+
+    // Validation checks
+    if (isEmpty || !isValid) {
+    otpArray.length = 0; // Clear array
+    Swal.fire({
+        icon: isEmpty ? 'error' : 'error',
+        title: isEmpty ? 'Incomplete OTP' : 'Invalid OTP',
+        text: isEmpty 
+            ? 'Please enter all 6 digits of the OTP' 
+            : 'Each OTP digit must be a number between 0 and 9',
+    });
+    return;
+}
+
+    // if (isEmpty) {
+    //     Swal.fire({
+    //         icon: 'error',
+    //         title: 'Incomplete OTP',
+    //         text: 'Please enter all 6 digits of the OTP'
+    //     });
+    //     return;
+    // }
+
+    // if (!isValid) {
+    //     Swal.fire({
+    //         icon: 'error',
+    //         title: 'Invalid OTP',
+    //         text: 'Each OTP digit must be a number between 0 and 9'
+    //     });
+    //     return;
+    // }
+    if (otpArray.length !== otpInputs.length) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'OTP submission failed. Please try again.',
+    });
+    return;
+}
+
+    try{
+       const response = await axios.post('/user/verifyOTP', { otp: otpArray.join('') });
+        if (response.data.success) { 
+            Swal.fire({
+                icon: "success",
+                title: "OTP Verified Successfully",
+                showConfirmButton: false,
+                timer: 1500,
+            }).then(() => {
+                window.location.href = response.data.redirectUrl || '/user/login';
+            });
+        } else if (response.data.message === "OTP Expired") {
+            Swal.fire({
+                icon: "error",
+                title: "OTP Expired",
+                text: "Your OTP has expired. Please request a new one.",
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: response.data.message,
+            });
+        }
+    }catch(error){
+        console.error('Error in verifying OTP: ',error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.response?.data?.message || "Failed to verify OTP",
+        });
+    }
+}
+    // function validateOTPForm(){
+    //    const otpInput = document.querySelectorAll("otp-digit");
+    //    let otpValue = '';
+    //     otpInputs.forEach(input => {
+    //         otpValue += input.value;
+    //     });
+
+    //     if (otpValue.length !== 6) {
+    //     Swal.fire({
+    //         icon: 'error',
+    //         title: 'Incomplete OTP',
+    //         text: 'Please enter all 6 digits of the OTP',
+    //     });
+    //     return false;
+    //     }
+    // // Send OTP to server
+    // axios.post('/user/verifyOTP', { otp: otpInput })
+    //     .then(response => {
+    //         if (response.data.success) {
+    //             Swal.fire({
+    //                 icon: "success",
+    //                 title: "OTP Verified Successfully",
+    //                 showConfirmButton: false,
+    //                 timer: 1500,
+    //             }).then(() => {
+    //                 window.location.href = response.data.redirectUrl;
+    //             });
+    //         } else if (response.data.message === "OTP Expired") {
+    //             Swal.fire({
+    //                 icon: "error",
+    //                 title: "OTP Expired",
+    //                 text: "Your OTP has expired. Please request a new one.",
+    //             });
+    //         } else {
+    //             Swal.fire({
+    //                 icon: "error",
+    //                 title: "Error",
+    //                 text: response.data.message,
+    //             });
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.error('Error:', error);
+    //         Swal.fire({
+    //             icon: "error",
+    //             title: "Error",
+    //             text: error.response?.data?.message || "Failed to verify OTP",
+    //         });
+    //     });
+    // }
+
+
+        //   function verifyOTP() {
+        //     const inputs = document.querySelectorAll('.otp-digit');
+        //     let isValid = true;
+        //     let isEmpty = false;
+
+        //     inputs.forEach(input => {
+        //         if (!input.value) {
+        //             isEmpty = true;
+        //         }
+        //         if (input.value.length !== 1 || isNaN(input.value) || input.value < 0 || input.value > 9) {
+        //             isValid = false;
+        //         }
+        //     });
+        
+        //     if (isEmpty) {
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Incomplete OTP',
+        //             text: 'Please enter all 6 digits of the OTP'
+        //         });
+        //         return false;
+        //     }
+        
+        //     if (!isValid) {
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Invalid OTP',
+        //             text: 'Each OTP digit must be a number between 0 and 9'
+        //         });
+        //         return false;
+        //     }
+        
+        //     return true;
+        // }
+
+        //   startTimer();
+        
+        // function validateOTPForm(){
+        //     const otpInput = document.getElementById("otp").value;
+
+        //     axios.post('/user/verifyOTP',{otp:otpInput})
+        //         .then(response =>{
+        //             if(response.data.success){
+        //                 Swal.fire({
+        //                     icon: "success",
+        //                     title: "OTP Verified Successfully",
+        //                     showConfirmButton: false,
+        //                     timer: 1500,
+        //                 }).then(() => {
+        //                     window.location.href = response.data.redirectUrl;
+        //                 });
+        //             }else if(response.data.message === "OTP Expired"){
+        //                 Swal.fire({
+        //                     icon: "error",
+        //                     title: "OTP Expired",
+        //                     text: "Your OTP has expired. Please request a new one.",
+        //                 });
+        //             }else{
+        //                 Swal.fire({
+        //                     icon: "error",
+        //                     title: "Error",
+        //                     text: response.data.message,
+        //                 });
+        //             }
+        //         })
+        //         .catch(()=>{
+        //             Swal.fire({
+        //                 icon: "error",
+        //                 title: "Invalid OTP",
+        //                 text: "Please try again",
+        //             });
+        //         });
+        //     return false;
+        // }
         
     </script>
+    <!-- <script src="User/JS/functions.js"></script> -->
 </body>
 </html>

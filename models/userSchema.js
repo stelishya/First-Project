@@ -4,22 +4,22 @@ const {Schema}=mongoose;
 const userschema=new Schema({
     username:{
         type:String,
-        required: [true, 'Username is required'],
+        required: false, 
         unique:true,
         sparse:true,
     },
     email:{
         type:String,
-        required:[true, 'Email is required'],
+        required:true, 
         unique:true,
     },
     password:{
         type:String,
-        required:[true, 'Password is required'],
+        required:false,
     },
     mobile:{
         type:String,
-        required:[true, 'Mobile number is required'],
+        required:false,
         unique:true,
         sparse:true,
         default:null

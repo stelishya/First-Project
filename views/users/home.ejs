@@ -1,253 +1,422 @@
-<%  include ('../partials/header.ejs')%>
+<%-  include ('../partials/user/header')%>
 
-<!-- <html>
- <head> -->
-  <!-- <title> -->
-   <!-- CAlliope -->
-  <!-- </title> -->
-  <!-- <link rel="stylesheet" href="/User/css/userHome.css"> -->
-  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/> -->
-  <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Shadows+Into+Light&amp;display=swap" rel="stylesheet"/> -->
+<!-- <header>
+     <div class="search-bar">
+      <input placeholder="Search..." type="text"/>
+      <button>
+       <i class="fas fa-search">
+       </i>
+      </button>
+     </div>
+     <h1>
+      Calliope
+     </h1>
+     <div class="nav-icons">
+      <a href="#">
+       <i class="fas fa-question-circle">
+       </i>
+      </a>
+      <a href="#">
+       <i class="fas fa-heart">
+       </i>
+      </a>
+      <a href="#">
+       <i class="fas fa-shopping-cart">
+       </i>
+      </a>
+     </div>
+    </header> -->
+    <nav>
+     <div class="nav-links">
+      <a href="#">
+       Home
+      </a>
+      <span class="divider">
+      </span>
+      <a href="#">
+       Contact
+      </a>
+      <span class="divider">
+      </span>
+      <a href="#">
+       About
+      </a>
+      <span class="divider">
+      </span>
+      <a href="#">
+       Products
+      </a>
+     </div>
+     <div class="user-info">
+      <span class="username">
+          <!-- % user.username%> -->
+       Selin Stelishya Oliver
+      </span>
+      <a href="#">
+       <i class="fas fa-user">
+       </i>
+      </a>
+     </div>
+    </nav>
+    <div class="categories">
+     <h2>
+      Categories
+     </h2>
+     <div class="category-item">
+      <img alt="Canvas Prints" height="250"
+      src="https://ctl.s6img.com/society6/img/HzFCAnMDwxCmwm-kbxSPtzEGpRI/h_700,w_700/canvas/~artwork/s6-original-art-uploads/society6/uploads/misc/770ca30064254c13bc007e50556f7613?width=720&crop=center"/>
+      <p>
+       Canvas Prints
+      </p>
+     </div>
+     <div class="category-item">
+      <img alt="Wall Murals" height="250" src="https://ctl.s6img.com/society6/img/EONWVmT4lvI65eabr70uvIzymh8/h_700,w_700/wall-murals/8x8/lifestyle/~artwork/s6-original-art-uploads/society6/uploads/misc/27691b6f96d642b0bf6f4662158658af?width=720&crop=center"/>
+      <p>
+       Wall Murals
+      </p>
+     </div>
+     <div class="category-item">
+      <img alt="Metal Prints" height="250" src="https://ctl.s6img.com/society6/img/DBEyq30ddzoaUN75WF2Go3D9YjM/h_700,w_700/metal-prints/1x1/front/~artwork/s6-original-art-uploads/society6/uploads/misc/3d4cb0101e984af29f8ffe0d176194c7?width=720&crop=center" />
+      <p>
+       Metal Prints
+      </p>
+     </div>
+     <div class="category-item">
+      <img alt="Wood Wall Arts" height="150" src="https://ctl.s6img.com/society6/img/NsOTLsKv4MXIY957s2QtcnW8moU/h_700,w_700/wood-wall-art/3x3/front/~artwork,bg_FFFFFFFF,fw_2601,fh_2601,fx_-5,fy_-1,iw_2600,ih_3733/s6-original-art-uploads/society6/uploads/misc/f0a9939f943846358f3ee8fd4b9fa2ab?width=720&crop=center"/>
+      <p>
+       Wood Wall Arts
+      </p>
+     </div>
+    </div>
+    <div class="divider">
+    </div>
+    <div class="new-arrivals">
+     <h2>
+      NEW Wall Art Arrivals
+     </h2>
+     <div class="arrival-item">
+      <img alt="Macrame Floral Crescent Moon" height="150" src="https://storage.googleapis.com/a1aa/image/c51ca1c0-831c-4914-8417-d17b0a82b2b5.jpeg" width="150"/>
+      <p>
+       Macrame Floral Crescent Moon
+      </p>
+     </div>
+     <div class="arrival-item">
+      <img alt="Art Prints 40% Off" height="150" src="https://ctl.s6img.com/society6/img/gLaePRUnyB0mwUqk29FqqVDeR9Q/h_700,w_700/posters/top/~artwork,fw_2718,fh_3618,fy_-230,iw_2718,ih_4077/s6-original-art-uploads/society6/uploads/misc/4c40fcb56f7e4ce1ac6407946181f89b?width=720&crop=center" width="150"/>
+      <p>
+          Black Stallion Poster
+      </p>
+     </div>
+     <div class="arrival-item">
+      <img alt="Stationery Cards 50% Off" height="150" src="https://ctl.s6img.com/society6/img/2Z6DsNGpJIgotoN0vODme6VUEbM/h_700,w_700/wall-hangings/small/front/~artwork,fw_5678,fh_4058,fy_-810,iw_5678,ih_5678/s6-original-art-uploads/society6/uploads/misc/4ac645b426e14e59b365c65e69b57581?width=720&crop=center" width="150"/>
+      <p>
+          Antique Greek sculpture face 
+      </p>
+     </div>
+    </div>
+    <div class="divider">
+    </div>
+    <div class="christmas-special">
+     <h2>
+      CHRISTMAS SPECIAL
+     </h2>
+     <div class="special-item">
+      <img alt="Christmas Keep Sakes" height="150" src="https://ctl.s6img.com/society6/img/qCR35wGMj96sURRPN0eZ1LqUX3c/h_700,w_700/posters/top/~artwork,fw_2718,fh_3618,fx_-1352,iw_5421,ih_3618/s6-original-art-uploads/society6/uploads/misc/bfd70bef64f04214b7a6b1cf0fa2941c?width=720&crop=center" width="150"/>
+      <p>
+          Watercolor Pine Tree Poster
+      </p>
+     </div>
+     <div class="special-item">
+          <img alt="Christmas Decorations" height="150" src="https://storage.googleapis.com/a1aa/image/6e8d06c2-fe9d-4c11-a683-908090cd7bca.jpeg" width="150"/>
+          <p>
+           Christmas Canvas Prints
+          </p>
+     </div>
+     <!-- <div class="special-item">
+      <img alt="Christmas Jewellery" height="150" src="https://storage.googleapis.com/a1aa/image/fTP3QmaeifDnWJlKnJNzxbtySIOK2mI6gaY79xyu56nG9qtnA.jpg" width="150"/>
+      <p>
+       Christmas Jewellery
+      </p>
+     </div> -->
+     <div class="special-item">
+      <img alt="Christmas Kids &amp; Babies" height="150" src="https://ctl.s6img.com/society6/img/9FOqR3_oHCYRfPdjBVjWHIzJ1OY/h_700,w_700/prints/~artwork/s6-original-art-uploads/society6/uploads/misc/f39d26a075734b49bda6e2cee63bc9f2?width=720&crop=center" width="150"/>
+      <p>
+          Vintage Christmas Wreath Art Print
+      </p>
+     </div>
+     <div class="special-item">
+      <img alt="Christmas Home &amp; Decor" height="150" src="https://files.oaiusercontent.com/file-Lj4wmyCmAV6zty1RopGCcX?se=2024-12-04T05%3A06%3A23Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D8787afef-cfc1-4249-8e8c-3101eb1bfa71.webp&sig=xv%2BAcPleOqZsaDWry%2B/oEj2g1FZ/2ctIwP1Hr1z%2BBU0%3D" width="150"/>
+      <p>
+       Christmas Wall Hangings
+      </p>
+     </div>
+    </div>
+    <div class="divider">
+    </div>
+    <div class="new-arrivals">
+     <h2>
+          OFFERS
+     </h2>
+     <div class="arrival-item">
+      <img alt="Wall Hangings 20% Off" height="150" src="https://society6.com/cdn/shop/files/mini_art_prints3a_1.jpg?v=1731253439&width=2700&height=2692&crop=center" width="150"/>
+      <p>
+       60% OFF Mini Art Prints
+      </p>
+     </div>
+     <div class="arrival-item">
+      <img alt="Mix Art Prints 30% Off" height="150" src="https://society6.com/cdn/shop/files/stationery_lifestyle_1300x13001_4.jpg?v=1731254199&width=2700&height=2700&crop=center" width="150"/>
+      <p>
+       30% OFF Stationery Cards
+      </p>
+     </div>
+     <div class="arrival-item">
+      <img alt="Canvas Prints 20% Off" height="150" src="https://society6.com/cdn/shop/files/ArtGifts2.jpg?v=1732173347&width=2700&height=2700&crop=center" width="150"/>
+      <p>
+       50% OFF Framed Art Prints 
+      </p>
+     </div>
+    </div>
+    <div class="divider">
+    </div>
+    <div class="discount-section">
+     <h2>
+      Get 25% Off Your First Order
+     </h2>
+     <form>
+      <input placeholder="Enter your email address" type="email"/>
+      <button type="submit">
+       <i class="fas fa-arrow-right">
+       </i>
+      </button>
+     </form>
+    </div>
+    <!-- <footer>
+     <div class="footer-links">
+      <div>
+       <h3>
+        Contact Us
+       </h3>
+       <a href="#">
+        Email
+       </a>
+       <a href="#">
+        Phone
+       </a>
+       <a href="#">
+        Address
+       </a>
+      </div>
+      <div>
+       <h3>
+        About
+       </h3>
+       <a href="#">
+        Our Story
+       </a>
+       <a href="#">
+        Careers
+       </a>
+       <a href="#">
+        Press
+       </a>
+      </div>
+      <div>
+       <h3>
+        Help
+       </h3>
+       <a href="#">
+        FAQ
+       </a>
+       <a href="#">
+        Shipping
+       </a>
+       <a href="#">
+        Returns
+       </a>
+      </div>
+      <div>
+       <h3>
+        Shop
+       </h3>
+       <a href="#">
+        New Arrivals
+       </a>
+       <a href="#">
+        Best Sellers
+       </a>
+       <a href="#">
+        Sale
+       </a>
+      </div>
+     </div>
+     <div class="social-icons">
+      <a href="#">
+       <i class="fab fa-facebook-f">
+       </i>
+      </a>
+      <a href="#">
+       <i class="fab fa-twitter">
+       </i>
+      </a>
+      <a href="#">
+       <i class="fab fa-instagram">
+       </i>
+      </a>
+     </div>
+    </footer> -->
+   <!-- </body>
+  </html> -->
   
- <!-- </head> -->
- <!-- <body> -->
-  <!-- <div class="container">
-   <div class="header">
-    <h1>
-     Calliope
-    </h1>
-    <div class="search-bar">
-     <input placeholder="Search..." type="text"/>
-     <button>
-      <i class="fas fa-search">
-      </i>
-     </button>
-    </div>
-   </div>
-   <div class="nav">
-    <a href="#">
-     Free Shipping Gifts
-    </a>
-    <a href="#">
-     Shop New Gifts
-    </a>
-    <a href="#">
-     Shop Sale Gifts
-    </a>
-    <a href="#">
-     <i class="fas fa-question-circle">
-     </i>
-    </a>
-    <a href="#">
-     <i class="fas fa-shopping-cart">
-     </i>
-    </a>
-    <a href="#">
-     Sign In
-    </a>
-    <a href="#">
-     Sign Up
-    </a>
-   </div>
-   <div class="categories">
-    <h2>
-     Categories
-    </h2>
-    <div class="category-item">
-     <img alt="Canvas Prints" height="200" src="https://storage.googleapis.com/a1aa/image/BcM5HXh2oO48ARmnhfirJz1bmWqzntoPqcvJZTtVuePj5Q0TA.jpg" width="200"/>
-     <p>
-      Canvas Prints
-     </p>
-    </div>
-    <div class="category-item">
-     <img alt="Wall Murals" height="200" src="https://storage.googleapis.com/a1aa/image/V3e7P6pUQm0LIKFjgdqTeZ8TSPNrw4wCgQuc8JXnXMAu5Q0TA.jpg" width="200"/>
-     <p>
-      Wall Murals
-     </p>
-    </div>
-    <div class="category-item">
-     <img alt="Metal Prints" height="200" src="https://storage.googleapis.com/a1aa/image/RImzTcf6Db2PDCAThjSIzsP9z4Kf4flYKPFZuaNFXGZQzhonA.jpg" width="200"/>
-     <p>
-      Metal Prints
-     </p>
-    </div>
-    <div class="category-item">
-     <img alt="Wood Wall Arts" height="200" src="https://storage.googleapis.com/a1aa/image/Ler8pmQl3vy5WynIyxmbUHD8GNaMlMEad0emZD6ldhSn5Q0TA.jpg" width="200"/>
-     <p>
-      Wood Wall Arts
-     </p>
-    </div>
-   </div>
-   <div class="new-arrivals">
-    <h2>
-     NEW Wall Art Arrivals
-    </h2>
-    <div class="arrival-item">
-     <img alt="Macrame Floral Crescent Moon" height="200" src="https://storage.googleapis.com/a1aa/image/5j6LuS2Qug5UI5HeeykLvPeAT6rEwa9S12ybcNaTwvn5yhonA.jpg" width="200"/>
-     <p>
-      Macrame Floral Crescent Moon
-     </p>
-     <p>
-      The Knotty Bee Macrame Creations
-     </p>
-    </div>
-    <div class="arrival-item">
-     <img alt="Art Prints 40% Off" height="200" src="https://storage.googleapis.com/a1aa/image/gXWWDeQIHfjIfJlnr8Gdmt5G5gEf2ptwxTZikhycYIVwmDRPB.jpg" width="200"/>
-     <p>
-      Art Prints 40% Off
-     </p>
-    </div>
-    <div class="arrival-item">
-     <img alt="Stationery Cards 50% Off" height="200" src="https://storage.googleapis.com/a1aa/image/Kfm9gedD4nkci0R6GvclqFQYYvi9CEFYn12eOKVCHhP7yhonA.jpg" width="200"/>
-     <p>
-      Stationery Cards 50% Off
-     </p>
-    </div>
-   </div>
-   <div class="christmas-special">
-    <h2>
-     CHRISTMAS SPECIAL
-    </h2>
-    <div class="special-item">
-     <img alt="Christmas Decorations" height="200" src="https://storage.googleapis.com/a1aa/image/Qj7FznL6RBaVDpc9K1PhPoelVqcS8NDB1G9SgreAmPGg5Q0TA.jpg" width="200"/>
-     <p>
-      Christmas Decorations
-     </p>
-    </div>
-    <div class="special-item">
-     <img alt="Christmas Keep Sakes" height="200" src="https://storage.googleapis.com/a1aa/image/OckRpaiHTALBDhv3Y3PN8q33AxM87WMMD1uCDs6vtleycI6JA.jpg" width="200"/>
-     <p>
-      Christmas Keep Sakes
-     </p>
-    </div>
-    <div class="special-item">
-     <img alt="Christmas Jewellery" height="200" src="https://storage.googleapis.com/a1aa/image/oGHcJqxD0PZdF1ktWyWNkCImIHLiK32cJZ2P8IP2znpXOE9E.jpg" width="200"/>
-     <p>
-      Christmas Jewellery
-     </p>
-    </div>
-    <div class="special-item">
-     <img alt="Christmas Kids &amp; Babies" height="200" src="https://storage.googleapis.com/a1aa/image/uP6k8zHJ55InOpoLFg9HbWOlDeYLycQtYcEB5u7ns7twcI6JA.jpg" width="200"/>
-     <p>
-      Christmas Kids &amp; Babies
-     </p>
-    </div>
-    <div class="special-item">
-     <img alt="Christmas Home &amp; Decor" height="200" src="https://storage.googleapis.com/a1aa/image/zCvgKb7aDeXPaSqanefxFU2juU6y9MaDQfmsrSaJxBZpmDRPB.jpg" width="200"/>
-     <p>
-      Christmas Home &amp; Decor
-     </p>
-    </div>
-   </div>
-   <div class="discount-section">
-    <h2>
-     Get 25% Off Your First Order
-    </h2>
+
+  <!-- <div class="top-nav">
+   <a href="#">
+    Free Shipping Gifts
+   </a>
+   <a href="#">
+    Shop New Gifts
+   </a>
+   <a href="#">
+    Shop Sale Gifts
+   </a>
+   <a href="#">
+    <i class="fas fa-heart">
+    </i>
+   </a>
+   <a href="#">
+    <i class="fas fa-shopping-cart">
+    </i>
+   </a>
+   <a href="#">
+    <i class="fas fa-question-circle">
+    </i>
+   </a>
+   <a href="#">
+    <i class="fas fa-user">
+    </i>
+   </a> -->
+   <!-- ************************************************** -->
+   <!-- % if (user){ %>
+    <a href="user/logout">Log Out</a>
+   % } else { %>
+    <a href="/user/signup">Sign Up</a>
+    <a href="/user/login">Sign In</a>
+   % } %> -->
+   
+   
+<!-- ***************************************************** -->
+  <!-- </div>
+  <div class="main-nav">
+   <a href="#">
+    Home
+   </a>
+   <a href="#">
+    Products
+   </a>
+   <a href="#">
+    Contact
+   </a>
+   <a href="#">
+    About
+   </a>
+   
+  </div>
+  <div class="welcome">
+   Welcome , stelishya  -->
+   <!-- %- user.username %> -->
+  <!-- </div>
+  <div class="categories">
+   <h2>
+    Categories
+   </h2>
+   <div class="category-item">
+    <img alt="Canvas Prints" height="200" src="https://storage.googleapis.com/a1aa/image/NzqcBSKcWL4aI9MY18OYf7uXeugfImkVrJkcnb5fSbGxdESPB.jpg" width="200"/>
     <p>
-     Sign up to receive exclusive offers, decor tips and features about Calliope artists.
+     Canvas Prints
     </p>
-    <input placeholder="Email address" type="email"/>
-    <button>
-     <i class="fas fa-arrow-right">
-     </i>
-    </button>
    </div>
-   <div class="footer">
-    <div class="footer-section">
-     <h3>
-      Contact Us
-     </h3>
-     <p>
-      Contact Us
-     </p>
-     <p>
-      Address Finder
-     </p>
-     <p>
-      Shipping
-     </p>
-     <p>
-      Returns
-     </p>
-     <p>
-      Order Status
-     </p>
-     <p>
-      FAQs
-     </p>
-    </div>
-    <div class="footer-section">
-     <h3>
-      Customer Support
-     </h3>
-     <p>
-      Help Center
-     </p>
-     <p>
-      Shipping Information
-     </p>
-     <p>
-      Returns
-     </p>
-     <p>
-      Order Status
-     </p>
-     <p>
-      Gift Cards
-     </p>
-     <p>
-      Student Discount
-     </p>
-    </div>
-    <div class="footer-section">
-     <h3>
-      About Us
-     </h3>
-     <p>
-      Our Story
-     </p>
-     <p>
-      Careers
-     </p>
-     <p>
-      Sustainability
-     </p>
-     <p>
-      Press
-     </p>
-     <p>
-      Wholesale Program
-     </p>
-     <p>
-      Trade Program
-     </p>
-    </div>
-    <div class="footer-section">
-     <h3>
-      Artist Support
-     </h3>
-     <p>
-      Sell Your Art
-     </p>
-     <p>
-      Artist Resources
-     </p>
-     <p>
-      Artist Blog
-     </p>
-    </div>
-    <div class="social-icons">
-     <i class="fab fa-facebook-f">
-     </i>
-     <i class="fab fa-twitter">
-     </i>
-     <i class="fab fa-instagram">
-     </i>
-     <i class="fab fa-pinterest">
-     </i>
-    </div>
+   <div class="category-item">
+    <img alt="Wall Murals" height="200" src="https://storage.googleapis.com/a1aa/image/v7OhqEdZUWqnLlSkH2tA4x4QOHNHyEtCFMCqV7pJhTl5RI9E.jpg" width="200"/>
+    <p>
+     Wall Murals
+    </p>
    </div>
+   <div class="category-item">
+    <img alt="Metal Prints" height="200" src="https://storage.googleapis.com/a1aa/image/ACRXihNYt8LOGFqFPbCdfAltYzleStBgzMGOvlHv77WhHh0TA.jpg" width="200"/>
+    <p>
+     Metal Prints
+    </p>
+   </div>
+   <div class="category-item">
+    <img alt="Wood Wall Arts" height="200" src="https://storage.googleapis.com/a1aa/image/CvSpiRRirU5hIB75t8AAlldqggeCwwZgUJ6yxvsJRTTwjQ6JA.jpg" width="200"/>
+    <p>
+     Wood Wall Arts
+    </p>
+   </div>
+  </div>
+  <div class="new-arrivals">
+   <h2>
+    NEW Wall Art Arrivals
+   </h2>
+   <div class="arrival-item">
+    <img alt="Macrame Floral Crescent Moon" height="200" src="https://storage.googleapis.com/a1aa/image/eNejRHpks3k8eoM8IKnUfCHkf0d4XA0KJmHzufs7RXFU1RI9E.jpg" width="200"/>
+    <p>
+     Macrame Floral Crescent Moon
+    </p>
+   </div>
+   <div class="arrival-item">
+    <img alt="Art Prints 40% Off" height="200" src="https://storage.googleapis.com/a1aa/image/O0te1OvPp73OUquGSfo1D3fa4F2xq3S2v1d06qOvSFkKPCpnA.jpg" width="200"/>
+    <p>
+     Art Prints 40% Off
+    </p>
+   </div>
+   <div class="arrival-item">
+    <img alt="Stationery Cards 50% Off" height="200" src="https://storage.googleapis.com/a1aa/image/Q6vP40BIDf1qeUo8eCIaZ3yIbCzhacbav5FpzP52kfDZdESPB.jpg" width="200"/>
+    <p>
+     Stationery Cards 50% Off
+    </p>
+   </div>
+  </div>
+  <div class="christmas-special">
+   <h2>
+    CHRISTMAS SPECIAL
+   </h2>
+   <div class="special-item">
+    <img alt="Christmas Decorations" height="200" src="https://storage.googleapis.com/a1aa/image/3FabnfBplFWbUSwF71RXUCS8A64HqyJxXoKgmUcrWh8sjQ6JA.jpg" width="200"/>
+    <p>
+     Christmas Decorations
+    </p>
+   </div>
+   <div class="special-item">
+    <img alt="Christmas Keep Sakes" height="200" src="https://storage.googleapis.com/a1aa/image/YVemiuXmoOxfH0SkSwW7ltr9SUYdNHBL7joaXo0wiIFeOCpnA.jpg" width="200"/>
+    <p>
+     Christmas Keep Sakes
+    </p>
+   </div>
+   <div class="special-item">
+    <img alt="Christmas Kids &amp; Babies" height="200" src="https://storage.googleapis.com/a1aa/image/utJLjVOaA06IIF4ALm7AnG2zm2Ll2NibnEsKer5sSUqtjQ6JA.jpg" width="200"/>
+    <p>
+     Christmas Kids &amp; Babies
+    </p>
+   </div>
+   <div class="special-item">
+    <img alt="Christmas Home &amp; Decor" height="200" src="https://storage.googleapis.com/a1aa/image/dZc0ZbGhZJKuPdV8NzOZ2cEMC3NA4EcltxmjXLBa12w4RI9E.jpg" width="200"/>
+    <p>
+     Christmas Home &amp; Decor
+    </p>
+   </div>
+  </div>
+  <div class="discount">
+   <h2>
+    Get 25% Off Your First Order
+   </h2>
+   <p>
+    Place your first order to receive exclusive offers, decor tips and features about Calliope artists.
+   </p>
+   <input placeholder="Email address" type="email"/>
+   <button>
+    Send
+   </button>
   </div> -->
- <!-- </body>
-</html> -->
-<%  include ('../partials/footer.ejs')%>
+  
+
+
+<%-  include ('../partials/user/footer.ejs')%>
