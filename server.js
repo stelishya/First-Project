@@ -26,8 +26,8 @@ console.log('Email configured for:', process.env.NODEMAILER_EMAIL ? process.env.
 const port = config.PORT || 4000
 
 // Set up middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Set up session middleware
 app.use(session({
     secret: config.SECRET,  // Change this to a secure secret

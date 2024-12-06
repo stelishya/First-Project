@@ -1,12 +1,10 @@
-<html lang="en">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<%- include ('../partials/admin/sidebar')%>
+
   <title>
    Customer List
   </title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/> -->
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/> -->
   <style>
    body {
             font-family: 'Inter', sans-serif;
@@ -67,6 +65,8 @@
             margin-bottom: 10px;
         }
         .main-content {
+            margin-left: 250px;
+            width:100%;
             flex: 1;
             background-color: #d1cfcf;
             padding: 20px;
@@ -178,10 +178,10 @@
             text-decoration: none;
         }
   </style>
- </head>
- <body>
+ <!-- </head>
+ <body> -->
   <div class="container">
-   <div class="sidebar">
+   <!-- <div class="sidebar">
     <h1>
      CAlliope
     </h1>
@@ -247,7 +247,7 @@
       </li>
      </ul>
     </div>
-   </div>
+   </div> -->
    <div class="main-content">
     <div class="header">
     <form action="/admin/users">
@@ -275,27 +275,28 @@
      <table>
       <thead>
        <tr>
-        <th>
+        <!-- <th>
          <input type="checkbox"/>
-        </th>
+        </th> -->
         <th>
          Customer Name
         </th>
+        <th>Email</th>
         <th>
          Phone
         </th>
-        <th>
+        <!-- <th>
          Orders
         </th>
         <th>
          Balance
-        </th>
-        <th>
+        </th> -->
+        <!-- <th>
          Status
         </th>
         <th>
          Created
-        </th>
+        </th> -->
         <th>
          Action
         </th>
@@ -304,28 +305,24 @@
       <tbody>
         <% for(let i=0;i<data.length;i++){%>
        <tr>
-        <td>
+        <!-- <td>
          <input type="checkbox"/>
-        </td>
+        </td> -->
         <td>
-         <!-- John Bushmill -->
           <%=data[i].username%>
-         <br/>
-         <small>
-          <!-- johnb@mail.com -->
+         </td>
+         <td>
           <%=data[i].email%>
-         </small>
         </td>
         <td>
-         <!-- 078 5054 8877 -->
          <%=data[i].mobile%>
         </td>
-        <td>
+        <!-- <td>
          124
         </td>
         <td>
          $121.00
-        </td>
+        </td> -->
         <td>
             <% if(data[i].is_blocked===false){%>
                 <span class="status blocked">
@@ -337,374 +334,34 @@
                 </span>
             <%} %>
         </td>
-        <!-- <td>
-         29 Dec 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td> -->
+        
        </tr>
        <%}%>
-       <!-- <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Laura Prichet
-         <br/>
-         <small>
-          laura_prichet@mail.com
-         </small>
-        </td>
-        <td>
-         215 302 3376
-        </td>
-        <td>
-         45
-        </td>
-        <td>
-         $590.00
-        </td>
-        <td>
-         <span class="status active">
-          Active
-         </span>
-        </td>
-        <td>
-         24 Dec 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Mohammad Karim
-         <br/>
-         <small>
-          m_karim@mail.com
-         </small>
-        </td>
-        <td>
-         050 414 8778
-        </td>
-        <td>
-         984
-        </td>
-        <td>
-         $125.00
-        </td>
-        <td>
-         <span class="status blocked">
-          Blocked
-         </span>
-        </td>
-        <td>
-         12 Dec 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Josh Bill
-         <br/>
-         <small>
-          josh_bill@mail.com
-         </small>
-        </td>
-        <td>
-         216 75 612 706
-        </td>
-        <td>
-         99
-        </td>
-        <td>
-         $348.00
-        </td>
-        <td>
-         <span class="status blocked">
-          Blocked
-         </span>
-        </td>
-        <td>
-         21 Oct 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Josh Adam
-         <br/>
-         <small>
-          josh.adam@mail.com
-         </small>
-        </td>
-        <td>
-         02 75 150 655
-        </td>
-        <td>
-         1,540
-        </td>
-        <td>
-         $607.00
-        </td>
-        <td>
-         <span class="status active">
-          Active
-         </span>
-        </td>
-        <td>
-         21 Oct 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Sin Tae
-         <br/>
-         <small>
-          sin_tae@mail.com
-         </small>
-        </td>
-        <td>
-         078 6013 3854
-        </td>
-        <td>
-         431
-        </td>
-        <td>
-         $234.00
-        </td>
-        <td>
-         <span class="status active">
-          Active
-         </span>
-        </td>
-        <td>
-         21 Oct 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Rajesh Masvidal
-         <br/>
-         <small>
-          rajesh_m@mail.com
-         </small>
-        </td>
-        <td>
-         828 216 2190
-        </td>
-        <td>
-         36
-        </td>
-        <td>
-         $760.00
-        </td>
-        <td>
-         <span class="status blocked">
-          Blocked
-         </span>
-        </td>
-        <td>
-         19 Sep 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Fajar Surya
-         <br/>
-         <small>
-          fsurya@mail.com
-         </small>
-        </td>
-        <td>
-         078 7173 9261
-        </td>
-        <td>
-         77
-        </td>
-        <td>
-         $400.00
-        </td>
-        <td>
-         <span class="status active">
-          Active
-         </span>
-        </td>
-        <td>
-         19 Sep 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Lisa Greg
-         <br/>
-         <small>
-          lisa@mail.com
-         </small>
-        </td>
-        <td>
-         077 6157 4248
-        </td>
-        <td>
-         89
-        </td>
-        <td>
-         $812.00
-        </td>
-        <td>
-         <span class="status active">
-          Active
-         </span>
-        </td>
-        <td>
-         19 Sep 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <input type="checkbox"/>
-        </td>
-        <td>
-         Linda Blair
-         <br/>
-         <small>
-          lindablair@mail.com
-         </small>
-        </td>
-        <td>
-         050 414 8778
-        </td>
-        <td>
-         1,296
-        </td>
-        <td>
-         $723.00
-        </td>
-        <td>
-         <span class="status active">
-          Active
-         </span>
-        </td>
-        <td>
-         10 Aug 2022
-        </td>
-        <td class="actions">
-         <i class="fas fa-edit">
-         </i>
-         <i class="fas fa-trash">
-         </i>
-        </td>
-       </tr> -->
+       
       </tbody>
      </table>
-     <div class="pagination">
-      <div class="showing-info">
-        Showing <%= ((currentPage -1)*3) + 1 %> - <%= Math.min(currentPage * 3 , count) %> from <%= count %>
-       <!-- Showing 1-10 from 100 -->
-      </div>
-      <ul>
-        <% for (let i = 1;i <= totalPages; i++) { %>
-            <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>&search=<%= search %>">
-                    <%= i %>
-                </a>
-            </li>
-        <% } %>
-      </ul>
-      <!-- <a href="#">
-       <i class="fas fa-chevron-left">
-       </i>
-      </a>
-      <a class="active" href="#">
-       1
-      </a>
-      <a href="#">
-       2
-      </a>
-      <a href="#">
-       3
-      </a>
-      <a href="#">
-       4
-      </a>
-      <a href="#">
-       5
-      </a>
-      <a href="#">
-       <i class="fas fa-chevron-right">
-       </i>
-      </a> -->
-     <!-- </div> -->
+     <div class="mt-4 flex justify-between items-center">
+        <div class="text-sm text-gray-700">
+            <!-- Showing %= ((currentPage -1)*3) + 1 %> - %= Math.min(currentPage * 3 , count) %> from %= count %> -->
+        </div>
+        <div class="flex space-x-2">
+            <% if(currentPage > 1) {%>
+            <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
+            <% } %>
+            <% for(let i=1; i <= totalPages; i++) {%>
+                <% if(i === currentPage){ %>
+                <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"><%= i %></span>
+                <% } else { %>
+                <a href="?page=<%= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"><%= i %></a>
+                <% } %>
+            <% } %>
+            <% if (currentPage < totalPages){%>
+            <a href="?page=<%= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
+            <% } %>
+        </div>
     </div>
+     
    </div>
   </div>
- </body>
-</html>
+ <!-- </body>
+</html> -->

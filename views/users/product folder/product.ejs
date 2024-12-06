@@ -1,0 +1,460 @@
+<link rel="stylesheet" href="/css/user/product_details.css">
+<style>
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 100px;
+        right: 40px;
+        z-index: 100;
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+<!-- Header -->
+<%-  include ('../partials/user/header')%>
+<!-- Main Content -->
+<main class="p-8">
+    <div class="flex justify-center gap-x-10 sm:gap-x-20" style="padding:30px 150px">
+        <!-- Product Image -->
+        <div class="w-1/3">
+            <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
+                    <img id="zoomable-image" 
+                         alt="zoomable-image"
+                         class="rounded-lg"
+                         height="400" width="400"
+                         src="<%= product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : 'images/no_productImage.png' %>"/>
+            </div>
+            <!-- Thumbnail     -->
+            <div class="flex space-x-2 mt-4">
+                <% product.image.forEach((image,index)=>{%>
+                    <img alt="Thumbnail <% index %>" class="thumbnail w-20 h-20 rounded-lg" height="70" width="70"
+                        src="/uploads/product-images/<%= image %>"
+                        onclick="updateMainImage(this,'<%= image %>')"/>
+                <% }) %>
+            </div>
+        </div>
+        <!-- Product Details -->
+        <div class="w-2/3">
+            <div class="text-sm text-gray-500">
+                <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a> &gt; <a href="/user/categories/<%= product.category?.name %>"><%= product.category?.name %></a>
+            </div>
+            <h1 class="text-2xl font-bold mt-2"><%= product.name %></h1>
+            <div class="flex items-center mt-2">
+                <div class="bg-green-500 text-white px-2 py-1 rounded">Rating <%= product.rating %> <i class="fas fa-star"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-green-600 mt-4">
+                <b>₹</b> <%= product.discountedPrice %>
+                <% if (product.bestDiscount > 0) { %>
+                    <span class="line-through text-gray-500 text-[20px]">₹ <%= product.mrp %></span>
+                    <span class="text-sm text-red-500 font-normal">
+                        (<%= product.bestDiscount === Math.floor(product.mrp * (product.offer / 100)) 
+                            ? product.offer + '%' 
+                            : '₹' + product.bestDiscount %> off)
+                    </span>
+                <% } %>
+            </div>
+            <span class="inline-flex gap-1 flex-col">
+                <div class="text-sm text-gray-500 mt-2">Special Price</div>
+                <% if(product.inventory>=11){ %>
+                    <div class="bg-green-100 inline text-green-600 px-2 py-1 my-1 rounded-md">
+                        <%= product.isAvailable %>
+                    </div>
+                <% } else if(product.inventory<=0) { %>
+                        <div class="bg-red-100 inline text-red-600 px-2 py-1 my-1 rounded-md">
+                            Out of Stock
+                        </div>
+                <% } else { %>
+                        <div class="bg-yellow-100 inline text-yellow-600 px-2 py-1 my-1 rounded-md">
+                            Only <%= product.inventory %> Left
+                        </div>
+                <% } %>
+            </span>
+            <div class="mt-4">
+                <div class="text-sm text-gray-500">Delivery &amp; return policies</div>
+                <ul class="list-disc list-inside text-gray-700 mt-2">
+                    <li>
+                        Order today to get it by <b class="text-green-600"><%= deliveryDate %></b>
+                    </li>
+                    <li>
+                        Returns and exchanges are not accepted
+                    </li>
+                    <li>
+                        Delivery cost: free
+                    </li>
+                    <li>
+                        Dispatches from: Ernakulam
+                    </li>
+                </ul>
+            </div>
+            <div class="flex space-x-4 mt-6">
+                <!-- Quantity Selector -->
+                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden">
+                    <button onclick="updateQuantity(-1)" 
+                            class="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                        </svg>
+                    </button>
+                    <input type="number" id="quantity" value="1" min="1" max="<%= product.inventory < 6 ? product.inventory : 5 %>"
+                           class="w-12 text-center border-x border-gray-300 py-2 focus:outline-none"
+                           onchange="validateQuantity(this)">
+                    <button onclick="updateQuantity(1)"
+                            class="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                </div>
+                <button class="btn bg-orange-500 text-white px-4 py-2 rounded" 
+                        onclick="addToCart('<%= product._id %>')">
+                    Add to Cart
+                </button>
+                <button onclick="buyNow('<%= product._id %>')" 
+                    class="btn bg-green-100 text-green-600 px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200">
+                    Buy Now
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- User Ratings and Reviews -->
+    <section class="mt-8">
+        <h2 class="text-xl font-bold">
+            User ratings and reviews
+        </h2>
+        <div class="bg-orange-200 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1 text-yellow-500">
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                </div>
+            </div>
+            <p class="mt-2">
+                They are so beautiful and the packaging was so good. Will buy the product again.
+            </p>
+            <div class="flex items-center mt-2">
+                <i class="fas fa-user-circle text-gray-500">
+                </i>
+                <span class="ml-2 font-bold">
+                    Lindsey McNeese
+                </span>
+            </div>
+        </div>
+        <div class="bg-orange-200 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1 text-yellow-500">
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                </div>
+            </div>
+            <p class="mt-2">
+                They are so beautiful and the packaging was so good. Will buy the product again.
+            </p>
+            <div class="flex items-center mt-2">
+                <i class="fas fa-user-circle text-gray-500">
+                </i>
+                <span class="ml-2 font-bold">
+                    Lindsey McNeese
+                </span>
+            </div>
+        </div>
+        <div class="bg-orange-200 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1 text-yellow-500">
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                </div>
+            </div>
+            <p class="mt-2">
+                They are so beautiful and the packaging was so good. Will buy the product again.
+            </p>
+            <div class="flex items-center mt-2">
+                <i class="fas fa-user-circle text-gray-500">
+                </i>
+                <span class="ml-2 font-bold">
+                    Lindsey McNeese
+                </span>
+            </div>
+        </div>
+    </section>
+    <!-- You may also like -->
+    <section class="mt-8" style="padding:30px 150px">
+        <h2 class="text-xl font-bold">
+            You may also like...
+        </h2>
+        <div class="grid grid-cols-<%= Math.min(relatedProducts.length, 5) %> gap-4 mt-4">
+            <% relatedProducts.slice(0, 10).forEach((relProd, index) => { %>
+                <% if (index > 0 && index % 5 === 0) { %> 
+                    </div><div class="grid grid-cols-<%= Math.min(relatedProducts.length - index, 5) %> gap-4 mt-4">
+                <% } %>
+                <div>
+                    <a href="/user/product/<%= relProd._id %>">
+                        <img alt="Related product image" class="rounded-lg" width="200" height="200"
+                             src="<%= relProd.image && relProd.image.length ? '/uploads/product-images/' + relProd.image[0] : '/images/no_productImage.png' %>"/>
+                        <div class="mt-2"><%= relProd.name %></div>
+                    </a>
+                </div>
+            <% }) %>
+        </div>        
+    </section>
+</main>
+<%-include('../../partials/user/footer')%>
+<script>
+    function updateMainImage(selectedThumbnail,imageSrc) {
+        document.getElementById('zoomable-image').src = '/uploads/product-images/' + imageSrc;
+    
+        document.querySelectorAll('.thumbnail').forEach(thumbnail => {
+            thumbnail.classList.remove('active');
+        });
+        selectedThumbnail.classList.add('active');
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const firstThumbnail = document.querySelector('.thumbnail');
+        if (firstThumbnail) {
+            firstThumbnail.classList.add('active');
+        }
+    });
+    const zoomFactor = 2.5;
+
+    function zoomIn(event) {
+        const zoomableImage = document.getElementById('zoomable-image');
+        
+        // Get the bounding rectangle of the image
+        const rect = zoomableImage.getBoundingClientRect();
+        
+        // Calculate the mouse position relative to the image
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the transform origin to keep the zoom centered on the cursor
+        const originX = (x / rect.width) * 100;
+        const originY = (y / rect.height) * 100;
+
+        // Apply transform with scale and origin
+        zoomableImage.style.transformOrigin = `${originX}% ${originY}%`;
+        zoomableImage.style.transform = `scale(${zoomFactor})`;
+    }
+
+    function resetZoom() {
+        const zoomableImage = document.getElementById('zoomable-image');
+        zoomableImage.style.transform = 'scale(1)';
+    }
+
+    function showToast(message, isError = false) {
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        // Trigger reflow to ensure animation works
+        toast.offsetHeight;
+        
+        // Add show class to trigger animation
+        toast.classList.add('show');
+
+        // // Show toast with animation
+        // requestAnimationFrame(() => {
+        //     toast.style.opacity = '1';
+        //     toast.style.transform = 'translateY(0)';
+        // });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+        // // Hide and remove toast
+        // setTimeout(() => {
+        //     toast.style.opacity = '0';
+        //     toast.style.transform = 'translateY(20px)';
+        //     setTimeout(() => toast.remove(), 300);
+        // }, 3000);
+    }
+
+    async function addToCart(productId){
+        try {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const response = await axios.post('/user/addToCart', { productId, quantity });
+            if (response.status === 200) {
+                // Update cart count
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) {
+                    cartCount.textContent = (parseInt(cartCount.textContent) + 1).toString();
+                }
+
+                Toastify({
+                    text: response.data,
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(144, 238, 144, 0.9), rgba(50, 205, 50, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            Toastify({
+                text: error.response?.data || "Error adding to cart",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#F44336",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+        }
+    }
+
+    // Fetch and display available coupons
+    async function fetchProductCoupons() {
+        try {
+            const productId = '<%= product._id %>'; // Get product ID from EJS
+            const response = await fetch(`/user/product/${productId}/coupons`);
+            const data = await response.json();
+            
+            if (data.coupons && data.coupons.length > 0) {
+                const couponsHtml = data.coupons.map(coupon => `
+                    <div class="bg-orange-50 p-3 rounded-lg border border-orange-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-mono font-bold text-orange-600">${coupon.code}</span>
+                                ${coupon.type === 'FIRST_ORDER' ? 
+                                    '<span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">First Order</span>' : 
+                                    ''}
+                            </div>
+                            <p class="text-sm text-gray-600">${coupon.description}</p>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="text-sm">
+                                    <span class="font-semibold text-orange-700">${coupon.discount}</span>
+                                    ${coupon.minAmount ? `<span class="text-gray-500"> • Min. ₹${coupon.minAmount}</span>` : ''}
+                                </div>
+                                <button onclick="copyCouponCode('${coupon.code}')" 
+                                    class="px-3 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded transition duration-200">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('couponsList').innerHTML = couponsHtml;
+                document.getElementById('availableCoupons').classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error fetching coupons:', error);
+        }
+    }
+
+    // Copy coupon code to clipboard
+    function copyCouponCode(code) {
+        navigator.clipboard.writeText(code).then(() => {
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.className = 'fixed top-4 right-4 bg-green-100 text-green-700 px-4 py-2 rounded shadow-lg z-50';
+            successMsg.textContent = 'Coupon code copied!';
+            document.body.appendChild(successMsg);
+            setTimeout(() => successMsg.remove(), 2000);
+        }).catch(err => {
+            console.error('Failed to copy code:', err);
+        });
+    }
+
+    function updateQuantity(change) {
+        const input = document.getElementById('quantity');
+        const newValue = parseInt(input.value) + change;
+        const maxQuantity = parseInt(input.max);
+        
+        if (newValue >= 1 && newValue <= maxQuantity) {
+            input.value = newValue;
+        }
+    }
+
+    function validateQuantity(input) {
+        const value = parseInt(input.value);
+        const max = parseInt(input.max);
+
+        if (isNaN(value) || value < 1) {
+            input.value = 1;
+            showToast("Quantity cannot be less than 1", true);
+        } else if (value > max) {
+            input.value = max;
+            if (max === 5) {
+                showToast("Maximum 5 items allowed per order", true);
+            } else {
+                showToast(`Only ${max} items left in stock`, true);
+            }
+        }
+    }
+
+    async function buyNow(productId) {
+        try {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const maxQuantity = parseInt(document.getElementById('quantity').max);
+            
+            // Validate quantity before proceeding
+            if (quantity < 1 || quantity > maxQuantity) {
+                showToast(`Please select a quantity between 1 and ${maxQuantity}`, true);
+                return;
+            }
+            
+            // Redirect to checkout with product and quantity information
+            window.location.href = `/user/buyNow?productId=${productId}&quantity=${quantity}&buyNow=true`;
+        } catch (error) {
+            console.error('Error processing buy now:', error);
+            showToast("Failed to process buy now request", true);
+        }
+    }
+
+    // Fetch coupons when page loads
+    document.addEventListener('DOMContentLoaded', fetchProductCoupons);
+</script>

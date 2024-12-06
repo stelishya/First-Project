@@ -1,0 +1,373 @@
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+    aside{
+        background-color: #dabcbc;
+    }
+    .filters-sidebar {
+        background-color: #545556;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .filters-sidebar h2 {
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+    .filters-sidebar h3 {
+        color: #555;
+        margin: 1rem 0;
+    }
+    .filters-sidebar ul {
+        list-style: none;
+        padding: 0;
+    }
+    .filters-sidebar li {
+        padding: 0.5rem 0;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .filters-sidebar li:hover {
+        color: #666;
+    }
+    .price-range {
+        margin: 1rem 0;
+    }
+    .price-range input {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+    .price-label {
+        text-align: center;
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+
+<!-- Header -->
+<%-  include ('../../partials/user/header')%>
+
+<!-- Main Content -->
+<div class="flex flex-row-reverse">
+    <!-- Sidebar -->
+    <aside class="w-1/6 p-4">
+        <h2 class="text-xl font-bold mb-4">
+            Filters
+        </h2>
+        <div class="mb-4">
+            <h3 class="font-bold mb-2">
+                Categories
+            </h3>
+            <ul class="space-y-1">
+                <li>
+                    Halloween candles
+                </li>
+                <li>
+                    Autumn candles
+                </li>
+                <li>
+                    Mushroom candles
+                </li>
+                <li>
+                    Fig tree candles
+                </li>
+                <li>
+                    Pine cone candles
+                </li>
+                <li>
+                    Ghost candles
+                </li>
+                <li>
+                    Designed candles
+                </li>
+            </ul>
+        </div>
+        <div class="mb-4">
+            <h3 class="font-bold mb-2">
+                Price
+            </h3>
+            <input class="w-full" max="399" min="50" type="range" />
+            <div class="text-center">
+                $50 - $399+
+            </div>
+        </div>
+        <div class="mb-4">
+            <h3 class="font-bold mb-2">
+                Colours
+            </h3>
+            <ul class="space-y-1">
+                <li>
+                    Orange
+                </li>
+                <li>
+                    Green
+                </li>
+                <li>
+                    Blue
+                </li>
+                <li>
+                    Red
+                </li>
+                <li>
+                    White
+                </li>
+                <li>
+                    Pink
+                </li>
+                <li>
+                    Brown
+                </li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-bold mb-2">
+                Offers
+            </h3>
+            <ul class="space-y-1">
+                <li>
+                    10% and above
+                </li>
+                <li>
+                    20% and above
+                </li>
+                <li>
+                    30% and above
+                </li>
+                <li>
+                    40% and above
+                </li>
+                <li>
+                    50% and above
+                </li>
+                <li>
+                    60% and above
+                </li>
+                <li>
+                    70% and above
+                </li>
+                <li>
+                    80% and above
+                </li>
+            </ul>
+        </div>
+    </aside>
+    <div class="flex flex-col w-5/6">
+        <!-- Breadcrumb and Sort -->
+        <div class="bg-red-100 p-2 flex justify-between items-center">
+            <div class="text-gray-600">
+                <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
+            </div>
+            <div>
+                <select id="sortSelection" class="p-2 border border-gray-300 rounded">
+                    <option value="popularity">Popularity</option>
+                    <option value="price-low-high">Price: Low to High</option>
+                    <option value="price-high-low">Price: High to Low</option>
+                    <option value="ratings">Ratings</option>
+                    <option value="featured">Featured</option>
+                    <option value="new">New Arrivals</option>
+                    <option value="a-z">aA - zZ</option>
+                    <option value="z-a">zZ - aA</option>
+                </select>
+            </div>
+        </div>
+        <!-- Products -->
+        <div class="flex flex-col px-2 w-full justify-between">
+            <div id="productsContainer" class="grid grid-cols-2 gap-4 md:grid-cols-4 mt-4"></div>
+            <div class="flex justify-between items-center p-4">
+                <div id="rangeInfo" class="text-gray-500"></div>
+                <div id="paginationContainer" class="flex items-center space-x-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<%-  include ('../../partials/user/footer')%>
+
+<script>
+    // Event listener for sorting
+    document.getElementById('sortSelection').addEventListener('change', async (e) => {
+        const searchQuery = document.getElementById('searchInput').value;
+        const selectedSort = e.target.value;
+        currentPage = 1;
+        await fetchProducts(searchQuery, currentPage, selectedSort);
+    });
+
+    let currentPage = 1;
+    let totalPages = 1;
+
+    async function searchProducts() {
+        const searchQuery = document.getElementById('searchInput').value;
+        const selectedSort = document.getElementById('sortSelection').value;
+        currentPage = 1;
+        await fetchProducts(searchQuery, currentPage, selectedSort);
+    }
+
+    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new') {
+        try {
+            const response = await axios.get(`/user/api/products`, {
+                params: { search: searchQuery, page: page, sortBy: sortBy },
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (response.data.products) {
+                // Get wishlist items to check product status
+                const wishlistResponse = await axios.get('/user/wishlist/check');
+                const wishlistItems = wishlistResponse.data || [];
+                
+                displayProducts(response.data.products, wishlistItems);
+                updatePagination(response.data.totalPages, page, response.data.totalProducts, response.data.limit);
+                setSortSelection(response.data.sortOption);
+            }
+        } catch (error) {
+            console.error("Error fetching products:", error);
+        }
+    }
+
+    function displayProducts(products, wishlistItems) {
+        const productsContainer = document.getElementById('productsContainer');
+        productsContainer.innerHTML = ''; // Clear previous results
+
+        if (!products || products.length === 0) {
+            productsContainer.innerHTML = '<p>No products found.</p>';
+            return;
+        }
+
+        const isLoggedIn = '<%- session %>';
+
+        products.forEach(product => {
+            
+            let productHtml = `
+                <div class="relative">
+                    <a href="/user/product/${product._id}">
+                        <div class="bg-white p-4 rounded shadow">
+                            <img 
+                                alt="Product Image" 
+                                class="w-full h-48 object-cover rounded mb-2" 
+                                src="${product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png'}"
+                            />
+                            <div class="text-center">
+                                <h3 class="font-bold">${product.name}</h3>
+                                <div class="text-green-500">
+                                    <b>₹</b> ${product.sellingPrice}
+                                    <span class="line-through text-gray-500">₹ ${product.mrp}</span>
+                                    ${product.offer ? `<span class="text-red-500">(${product.offer}% off)</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+            `;
+            if (isLoggedIn) {
+                const isInWishlist = wishlistItems.some(item => item.productId === product._id);
+                const heartClass = isInWishlist ? 'text-red-500' : 'text-gray-400';
+
+                productHtml += `
+                    <!-- Heart Icon as Overlay -->
+                    <button 
+                        class="absolute top-2 right-2 hover:text-red-500 transition duration-300" 
+                        onclick="toggleWishlist('${product._id}', this)"
+                    >
+                        <i class="fas fa-heart ${heartClass}"></i>
+                    </button>
+                `;
+            }
+            productHtml += `</div>`;
+            productsContainer.insertAdjacentHTML('beforeend', productHtml);
+        });
+    }
+
+    function updatePagination(totalPages, currentPage, totalProducts, limit) {
+        const paginationContainer = document.getElementById('paginationContainer');
+        paginationContainer.innerHTML = ''; // Clear previous pagination buttons
+
+        // Display range information
+        const rangeInfo = document.getElementById('rangeInfo');
+        const start = (currentPage - 1) * limit + 1;
+        const end = Math.min(currentPage * limit, totalProducts);
+        rangeInfo.innerHTML = `Showing ${start}-${end} of ${totalProducts}`;
+
+        // Previous button
+        if (currentPage > 1) {
+            const prevButton = document.createElement('button');
+            prevButton.classList.add('bg-gray-200', 'text-gray-700', 'px-3', 'py-1', 'rounded-md');
+            prevButton.innerText = '<';
+            prevButton.addEventListener('click', () => {
+                currentPage -= 1;
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
+            });
+            paginationContainer.appendChild(prevButton);
+        }
+
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.classList.add('px-3', 'py-1', 'rounded-md', 'text-gray-700');
+
+            if (i === currentPage) {
+                pageButton.classList.add('bg-orange-500', 'text-white');
+            } else {
+                pageButton.classList.add('bg-gray-200');
+            }
+
+            pageButton.innerText = i;
+            pageButton.addEventListener('click', () => {
+                currentPage = i;
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
+            });
+            paginationContainer.appendChild(pageButton);
+        }
+
+        // Next button
+        if (currentPage < totalPages) {
+            const nextButton = document.createElement('button');
+            nextButton.classList.add('bg-gray-200', 'text-gray-700', 'px-3', 'py-1', 'rounded-md');
+            nextButton.innerText = '>';
+            nextButton.addEventListener('click', () => {
+                currentPage += 1;
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+    }
+
+    function setSortSelection(selectedSort) {
+        const sortDropdown = document.getElementById('sortSelection');
+        sortDropdown.value = selectedSort;
+    }
+
+    async function toggleWishlist(productId, button) {
+        const isLoggedIn = '<%- session %>';
+        if (!isLoggedIn) {
+            alert('Please log in to add items to your wishlist.');
+            return;
+        }
+        try {
+            const icon = button.querySelector('i');
+
+            // Toggle heart state (empty or filled)
+            if (icon.classList.contains('text-gray-400')) {
+                // Add to wishlist
+                const response = await axios.post('/user/wishlist/add', { productId });
+                if (response.status === 200) {
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-red-500');
+                    console.log('Product added to wishlist');
+                }
+            } else {
+                // Remove from wishlist
+                const response = await axios.delete(`/user/wishlist/remove?productId=${productId}`);
+                if (response.status === 200) {
+                    icon.classList.remove('text-red-500');
+                    icon.classList.add('text-gray-400');
+                    console.log('Product removed from wishlist');
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+        }
+    }
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => fetchProducts());
+</script>

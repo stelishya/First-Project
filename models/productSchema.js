@@ -10,20 +10,12 @@ const productSchema = new Schema({
         type: String,
         required: true,
     },
-    brand: {
-        type: String,
-        required: true,
-    },
     category: {
         type: Schema.Types.ObjectId,
         ref: "Category",
         required: true,
     },
-    regularPrice: {
-        type: Number,
-        required: true,
-    },
-    salePrice: {
+    mrp: {
         type: Number,
         required: true,
     },
@@ -33,19 +25,15 @@ const productSchema = new Schema({
     },
     quantity: {
         type: Number,
-        default: true,
-    },
-    color: {
-        type: String,
-        required: true,
+        default: 0,
     },
     productImage: {
         type: [String],
         required: true,
     },
-    isBlocked: {
+    isListed: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     status: {
         type: String,
@@ -53,11 +41,8 @@ const productSchema = new Schema({
         required: true,
         default: "Available",
     },
-    }, { timestamps: true }
-);
+}, { timestamps: true });
     
 const Product = mongoose.model("Product", productSchema);
 
 module.exports = Product;
-    
-

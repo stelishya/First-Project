@@ -1,19 +1,10 @@
 const express=require("express")
 const user_route =express.Router();
-const passport = require('passport')
 const userController =require("../controllers/users/userController");
+const productController = require('../controllers/admin/productController')
+const passport = require('passport')
 
-// user_route.use(session({
-//     secret:config.sessionSecret, 
-//     resave: false, 
-//     saveUninitialized: true,
-//     cookie: { secure: false }  // Set to true when using HTTPS
-// }));
-
-// user_route.set('views','./views/users');
-
-// user_route.use(bodyParser.json());
-// user_route.use(bodyParser.urlencoded({extended:true}));
+user_route.use('/',express.static('public'));
 
 
 // Sign up management
@@ -32,8 +23,11 @@ user_route.post('/login',userController.verifyLogin);
 
 //Home page and shopping page
 user_route.get('/home',userController.loadHome);
-
 user_route.get('/logout',userController.userLogout);
+
+user_route.get('/products',productController.showProductsPage)
+user_route.get('/api/products', productController.fetchProducts);
+user_route.get('/product/:productId',productController.productDetailsUser)
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 
