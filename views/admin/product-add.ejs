@@ -74,7 +74,7 @@
                             <div id="addedImagesContainer" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
                         </div>
                     </div>
-
+ 
                     <!-- Cropper Modal -->
                     <div id="cropperModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
                         <div class="bg-white p-4 rounded-lg" style="min-width: 500px; max-width: 90vw;">
@@ -235,7 +235,7 @@
         const imageInputs = document.querySelectorAll('input[name="images[]"]');
         
         if (imageInputs.length === 0) {
-            alert('Please add at least one product image');
+            alert('Please add at least one product image'); 
             return false;
         }
         

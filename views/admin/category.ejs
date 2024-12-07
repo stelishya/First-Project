@@ -86,8 +86,8 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         <% cat.reverse().forEach((category,index)=>{%>
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= category.name %></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= category.description %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= category.name.substring(0, 15) %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= category.description.substring(0, 15) %></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <% if(category.categoryOffer){ %>
                                   <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"> 

@@ -170,7 +170,7 @@ exports.editProduct = async (req, res) => {
             productOffer,
             category,
             removedImages,
-            images
+            newImages
         } = req.body;
 
         // Get the product
@@ -200,8 +200,8 @@ exports.editProduct = async (req, res) => {
         }
 
         // Handle new images
-        if (images && Array.isArray(images)) {
-            for (let [index, base64Image] of images.entries()) {
+        if (newImages && Array.isArray(newImages)) {
+            for (let [index, base64Image] of newImages.entries()) {
                 const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
                 const imageBuffer = Buffer.from(base64Data, 'base64');
 
@@ -213,6 +213,8 @@ exports.editProduct = async (req, res) => {
                     })
                     .webp({ quality: 80 })
                     .toBuffer();
+
+                    console.log("processedImageBuffer :",processedImageBuffer)
 
                 // Generate unique filename
                 const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '').split('.')[0];
