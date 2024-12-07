@@ -306,164 +306,130 @@ exports.deleteProduct = async (req, res) => {
     }
 };
 
-exports.productDetailsUser = async (req, res) => {
+exports.getProductDetails = async (req, res) => {
     try {
         const productId = req.params.productId;
         const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
-            .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            .toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        const productDetails = await Products.findById(productId).populate('category', 'name offer');
-        
-        // Calculate the best offer
-        const percentageDiscount = productDetails.offer ? Math.floor(productDetails.mrp * (productDetails.offer / 100)) : 0;
-        const fixedDiscount = productDetails.fixedAmount || 0;
-        const categoryOfferDiscount = productDetails.category.offer 
-            ? Math.floor(productDetails.mrp * (productDetails.category.offer / 100)) 
-            : 0;
+        const productDetails = await Products.findById(productId)
+            .populate('category', 'name categoryOffer')
+            .select('productName description mrp productImage productOffer category quantity status');
 
-        const bestDiscount = Math.max(percentageDiscount, fixedDiscount, categoryOfferDiscount);
+        if (!productDetails) {
+            return res.status(404).render('users/404', { message: 'Product not found' });
+        }
+
+        // Calculate discounted price and best discount
+        const productOffer = productDetails.productOffer || 0;
+        const categoryOffer = productDetails.category?.categoryOffer || 0;
+        const bestDiscount = Math.max(
+            Math.floor(productDetails.mrp * (productOffer / 100)),
+            Math.floor(productDetails.mrp * (categoryOffer / 100))
+        );
         const discountedPrice = productDetails.mrp - bestDiscount;
 
-        // Add calculated data to product object
-        productDetails.discountedPrice = discountedPrice;
-        productDetails.bestDiscount = bestDiscount;
+        // Get stock status
+        let stockStatus = {
+            status: 'IN_STOCK',
+            message: 'In Stock',
+            class: 'text-green-600 bg-green-100'
+        };
 
+        if (productDetails.quantity <= 0) {
+            stockStatus = {
+                status: 'OUT_OF_STOCK',
+                message: 'Out of Stock',
+                class: 'text-red-600 bg-red-100'
+            };
+        } else if (productDetails.quantity <= 5) {
+            stockStatus = {
+                status: 'LOW_STOCK',
+                message: `Only ${productDetails.quantity} left`,
+                class: 'text-yellow-600 bg-yellow-100'
+            };
+        }
+
+        // Get related products
         const relatedProducts = await Products.find({
             category: productDetails.category._id,
-            _id: { $ne: productId }
-        }).sort({ createdAt: -1 }).limit(10);
+            _id: { $ne: productId },
+            status: 'Available',
+            isListed: true
+        })
+        .select('productName productImage mrp productOffer')
+        .limit(4);
 
-        const title = productDetails.name;
-        const session = req.session.user || null;
+        // Format product data
+        const formattedProduct = {
+            _id: productDetails._id,
+            name: productDetails.productName,
+            description: productDetails.description,
+            mrp: productDetails.mrp,
+            discountedPrice,
+            bestDiscount,
+            offer: productOffer,
+            category: productDetails.category,
+            image: productDetails.productImage,
+            inventory: productDetails.quantity,
+            stockStatus,
+            rating: 4.5 // Default rating for now
+        };
 
         res.render('users/product folder/product', {
-            title, session, product: productDetails, deliveryDate, relatedProducts
+            product: formattedProduct,
+            relatedProducts: relatedProducts.map(p => ({
+                _id: p._id,
+                name: p.productName,
+                image: p.productImage[0],
+                mrp: p.mrp,
+                offer: p.productOffer
+            })),
+            deliveryDate
         });
+
     } catch (error) {
-        console.error(error);
+        console.error('Error in getProductDetails:', error);
+        res.status(500).render('users/page-404', { error: 'Internal Server Error' });
     }
 };
 
 // Product page
-exports.showProductsPage = (req, res) => {
+exports.showProductsPage = async (req, res) => {
     const session = req.session.user || {}; // Check if a user is logged in
     const title = "All Products";
+    const products = await Products.find({});
 
     res.render('users/product folder/products', {
         title,
-        session: session ? session.username || session.fullname : null, // Use null if session or username is undefined
+        session: session ? session.username || session.fullname : null,// Use null if session or username is undefined
+        products 
     });
 };
 
 // Dynamic product update
 exports.fetchProducts = async (req, res) => {
     try {
-        const sortOption = req.query.sortBy || 'new';
-        let sortCriteria;
-        switch (sortOption) {
-            case 'popularity':
-                break;
-            case 'price-low-high':
-                sortCriteria = { sellingPrice: 1 };
-                break;
-            case 'price-high-low':
-                sortCriteria = { sellingPrice: -1 };
-                break;
-            case 'ratings':
-                sortCriteria = { rating: -1 }
-                break;
-            case 'featured':
-                sortCriteria = { isFeatured: 1 }
-                break;
-            case 'new':
-                sortCriteria = { createdAt: -1 };
-                break;
-            case 'a-z':
-                sortCriteria = { name: 1 };
-                break;
-            case 'z-a':
-                sortCriteria = { name: -1 };
-                break;
-            default:
-                sortCriteria = { createdAt: -1 };
-        }      
-
-        let search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
         
-        let products;
-        let totalProducts;
+        const products = await Products.find({ isListed: true })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('category', 'name');
 
-        if (sortOption === 'popularity') {
-
-            
-            products = await Orders.aggregate([
-                { $unwind: '$products' },
-                { 
-                    $group: { 
-                        _id: '$products.productId', 
-                        totalOrdered: { $sum: '$products.quantity' } 
-                    } 
-                },
-                { $sort: { totalOrdered: -1 } },
-                { $skip: skip },
-                { $limit: limit },
-                {
-                    $lookup: {
-                        from: 'products', // The collection name
-                        localField: '_id',
-                        foreignField: '_id',
-                        as: 'productDetails'
-                    }
-                },
-                { $unwind: '$productDetails' }, // Flatten the product details array
-                { $match: { 'productDetails.isListed': true } }, // Apply filter to ensure only listed products
-                {
-                    $lookup: {
-                        from: 'categories', // The collection name for categories
-                        localField: 'productDetails.category', // Field in the products collection
-                        foreignField: '_id', // Field in the categories collection
-                        as: 'categoryDetails'
-                    }
-                },
-                { $unwind: { path: '$categoryDetails', preserveNullAndEmptyArrays: true } }, // Handle missing categories
-                {
-                    $project: {
-                        _id: 1,
-                        totalOrdered: 1,
-                        name: '$productDetails.name',
-                        category: '$categoryDetails.name',
-                        sellingPrice: '$productDetails.sellingPrice',
-                        mrp: '$productDetails.mrp',
-                        image: '$productDetails.image'
-                    }
-                }
-            ]);
-            totalProducts = products.length;         
-        } else {
-            products = await Products.find({ name: { $regex: search, $options: 'i' }, isListed: true })
-                .sort(sortCriteria)
-                .skip(skip)
-                .limit(limit)
-                .populate('category', 'name');
-            totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' }, isListed: true });
-            // totalProducts = products.length;
-        }
-        
-        // const totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' } });
+        const totalProducts = await Products.countDocuments({ isListed: true });
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // res.json({
-        //     products: products,
-        //     totalProducts: totalProducts,
-        //     totalPages: totalPages,
-        //     page: page,
-        //     limit: limit,
-        //     sortOption,
-        //     isLoggedIn: !!req.session.user
-        // });
+        res.json({
+            products,
+            totalProducts,
+            totalPages,
+            page,
+            limit
+        });
     } catch (error) {
         console.log("Error in fetchProducts:", error);
         res.status(500).json({ message: "An error occurred while loading the products." });

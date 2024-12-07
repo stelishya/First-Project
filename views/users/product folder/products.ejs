@@ -1,373 +1,448 @@
 <style>
+    :root {
+        --primary-color: #333;
+        --secondary-color: #666;
+        --accent-color: #4a90e2;
+        --background-color: #f5f5f7;
+        --white: #ffffff;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Arial', sans-serif;
+    }
+
     body {
-        font-family: 'Roboto', sans-serif;
+        background-color: var(--background-color);
     }
-    aside{
-        background-color: #dabcbc;
+
+    .main-container {
+        padding: 2rem 5%;
     }
-    .filters-sidebar {
-        background-color: #545556;
+
+    .breadcrumb {
+        margin-bottom: 2rem;
+        color: var(--secondary-color);
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .breadcrumb a {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+
+    .main-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+    }
+
+    .filters {
+        background: var(--white);
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        height: fit-content;
     }
-    .filters-sidebar h2 {
-        color: #333;
+
+    .filter-section {
         margin-bottom: 1.5rem;
     }
-    .filters-sidebar h3 {
-        color: #555;
-        margin: 1rem 0;
+
+    .filter-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
     }
-    .filters-sidebar ul {
-        list-style: none;
-        padding: 0;
+
+    .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
-    .filters-sidebar li {
-        padding: 0.5rem 0;
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--secondary-color);
         cursor: pointer;
-        transition: color 0.2s;
+        transition: color 0.3s;
     }
-    .filters-sidebar li:hover {
-        color: #666;
+
+    .filter-option:hover {
+        color: var(--primary-color);
     }
+
+    .color-option {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+        border: 1px solid #ddd;
+    }
+
     .price-range {
+        width: 100%;
         margin: 1rem 0;
     }
-    .price-range input {
-        width: 100%;
-        margin: 0.5rem 0;
+
+    .products-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
     }
-    .price-label {
-        text-align: center;
-        color: #666;
+
+    .sort-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sort-dropdown {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 200px;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .product-card {
+        background: var(--white);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .zoom-container {
+        position: relative;
+        overflow: hidden;
+        cursor: zoom-in;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease-out;
+    }
+
+    .product-info {
+        padding: 1rem;
+    }
+
+    .product-title {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .product-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: var(--secondary-color);
         font-size: 0.9rem;
+    }
+
+    .discount {
+        color: #e44d26;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+
+    .wishlist-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255,255,255,0.9);
+        border: none;
+        padding: 0.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+    .wishlist-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .pagination button {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ddd;
+        background: var(--white);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .pagination button.active {
+        background: var(--accent-color);
+        color: var(--white);
+        border-color: var(--accent-color);
+    }
+
+    .pagination button:hover:not(.active) {
+        background: #f0f0f0;
+    }
+
+    @media (max-width: 968px) {
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+
+        .filters {
+            order: -1;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .main-container {
+            padding: 1rem;
+        }
     }
 </style>
 
-<!-- Header -->
-<%-  include ('../../partials/user/header')%>
+<%- include ('../../partials/user/header')%>
 
-<!-- Main Content -->
-<div class="flex flex-row-reverse">
-    <!-- Sidebar -->
-    <aside class="w-1/6 p-4">
-        <h2 class="text-xl font-bold mb-4">
-            Filters
-        </h2>
-        <div class="mb-4">
-            <h3 class="font-bold mb-2">
-                Categories
-            </h3>
-            <ul class="space-y-1">
-                <li>
-                    Halloween candles
-                </li>
-                <li>
-                    Autumn candles
-                </li>
-                <li>
-                    Mushroom candles
-                </li>
-                <li>
-                    Fig tree candles
-                </li>
-                <li>
-                    Pine cone candles
-                </li>
-                <li>
-                    Ghost candles
-                </li>
-                <li>
-                    Designed candles
-                </li>
-            </ul>
+<div class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <div class="breadcrumb">
+            <ol class="flex items-center space-x-2">
+                <li><a href="/user/home" class="hover:text-green-600">Home</a></li>
+                <li><span class="mx-2">/</span></li>
+                <li><a href="/user/products" class="hover:text-green-600">Products</a></li>
+            </ol>
         </div>
-        <div class="mb-4">
-            <h3 class="font-bold mb-2">
-                Price
-            </h3>
-            <input class="w-full" max="399" min="50" type="range" />
-            <div class="text-center">
-                $50 - $399+
-            </div>
-        </div>
-        <div class="mb-4">
-            <h3 class="font-bold mb-2">
-                Colours
-            </h3>
-            <ul class="space-y-1">
-                <li>
-                    Orange
-                </li>
-                <li>
-                    Green
-                </li>
-                <li>
-                    Blue
-                </li>
-                <li>
-                    Red
-                </li>
-                <li>
-                    White
-                </li>
-                <li>
-                    Pink
-                </li>
-                <li>
-                    Brown
-                </li>
-            </ul>
-        </div>
-        <div>
-            <h3 class="font-bold mb-2">
-                Offers
-            </h3>
-            <ul class="space-y-1">
-                <li>
-                    10% and above
-                </li>
-                <li>
-                    20% and above
-                </li>
-                <li>
-                    30% and above
-                </li>
-                <li>
-                    40% and above
-                </li>
-                <li>
-                    50% and above
-                </li>
-                <li>
-                    60% and above
-                </li>
-                <li>
-                    70% and above
-                </li>
-                <li>
-                    80% and above
-                </li>
-            </ul>
-        </div>
-    </aside>
-    <div class="flex flex-col w-5/6">
-        <!-- Breadcrumb and Sort -->
-        <div class="bg-red-100 p-2 flex justify-between items-center">
-            <div class="text-gray-600">
-                <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
-            </div>
-            <div>
-                <select id="sortSelection" class="p-2 border border-gray-300 rounded">
-                    <option value="popularity">Popularity</option>
-                    <option value="price-low-high">Price: Low to High</option>
-                    <option value="price-high-low">Price: High to Low</option>
-                    <option value="ratings">Ratings</option>
-                    <option value="featured">Featured</option>
-                    <option value="new">New Arrivals</option>
-                    <option value="a-z">aA - zZ</option>
-                    <option value="z-a">zZ - aA</option>
-                </select>
-            </div>
-        </div>
-        <!-- Products -->
-        <div class="flex flex-col px-2 w-full justify-between">
-            <div id="productsContainer" class="grid grid-cols-2 gap-4 md:grid-cols-4 mt-4"></div>
-            <div class="flex justify-between items-center p-4">
-                <div id="rangeInfo" class="text-gray-500"></div>
-                <div id="paginationContainer" class="flex items-center space-x-2"></div>
-            </div>
+
+        <div class="main-content">
+            <aside class="filters">
+                <div class="filter-section">
+                    <h3 class="filter-title">Categories</h3>
+                    <div class="filter-options">
+                        <label class="filter-option">
+                            <input type="checkbox"> Framed Art Prints
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> Canvas Prints
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> Metal Prints
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> Wall Hangings
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> Wall Murals
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3 class="filter-title">Price Range</h3>
+                    <input type="range" class="price-range" min="0" max="1000" step="10">
+                    <div class="price-labels">
+                        <span>$50</span>
+                        <span>$399+</span>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3 class="filter-title">Colors</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <span class="color-option" style="background: orange;"></span>
+                            Orange
+                        </div>
+                        <div class="filter-option">
+                            <span class="color-option" style="background: green;"></span>
+                            Green
+                        </div>
+                        <div class="filter-option">
+                            <span class="color-option" style="background: blue;"></span>
+                            Blue
+                        </div>
+                        <div class="filter-option">
+                            <span class="color-option" style="background: red;"></span>
+                            Red
+                        </div>
+                        <div class="filter-option">
+                            <span class="color-option" style="background: white;"></span>
+                            White
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3 class="filter-title">Offers</h3>
+                    <div class="filter-options">
+                        <label class="filter-option">
+                            <input type="checkbox"> 10% and above
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> 20% and above
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> 30% and above
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox"> 40% and above
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="products-section">
+                <div class="sort-controls">
+                    <div>Showing <%= products.length %> products</div>
+                    <select class="sort-dropdown">
+                        <option value="recommended">Sort by: Recommended</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="newest">Newest First</option>
+                    </select>
+                </div>
+
+                <div class="products-grid">
+                    <% products.forEach(product => { %>
+                        <div class="product-card">
+                            <a href="/user/product/details/<%= product._id %>" class="block">
+                                <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
+                                    <img src="/uploads/product-images/<%= product.productImage[0] %>" 
+                                         alt="<%= product.productName %>" 
+                                         class="product-image">
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-title"><%= product.productName %></h3>
+                                    <div class="product-price">
+                                        <div>
+                                            <span class="price">₹<%= product.mrp %></span>
+                                            <% if(product.productOffer) { %>
+                                                <span class="original-price">₹<%= product.mrp %></span>
+                                                <span class="discount"><%= product.productOffer %>% OFF</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            <button class="wishlist-btn">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <div class="pagination">
+                    <button>&lt;</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>&gt;</button>
+                </div>
+            </section>
         </div>
     </div>
 </div>
 
-<!-- Footer -->
-<%-  include ('../../partials/user/footer')%>
+<%- include ('../../partials/user/footer')%>
 
 <script>
-    // Event listener for sorting
-    document.getElementById('sortSelection').addEventListener('change', async (e) => {
-        const searchQuery = document.getElementById('searchInput').value;
-        const selectedSort = e.target.value;
-        currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort);
+    // Add event listeners for filters and sorting
+    document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Add filter functionality here
+            console.log('Filter changed:', this.checked);
+        });
     });
 
-    let currentPage = 1;
-    let totalPages = 1;
+    document.querySelector('.sort-dropdown').addEventListener('change', function() {
+        // Add sorting functionality here
+        console.log('Sort changed:', this.value);
+    });
 
-    async function searchProducts() {
-        const searchQuery = document.getElementById('searchInput').value;
-        const selectedSort = document.getElementById('sortSelection').value;
-        currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort);
+    // Add wishlist functionality
+    document.querySelectorAll('.wishlist-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            icon.classList.toggle('far');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('text-red-500');
+        });
+    });
+
+    // Add price range functionality
+    const priceRange = document.querySelector('.price-range');
+    priceRange.addEventListener('input', function() {
+        // Add price filter functionality here
+        console.log('Price range:', this.value);
+    });
+
+    const zoomFactor = 1.5;
+
+    function zoomIn(event) {
+        const container = event.currentTarget;
+        const image = container.querySelector('.product-image');
+        
+        // Get the bounding rectangle of the container
+        const rect = container.getBoundingClientRect();
+        
+        // Calculate the mouse position relative to the container
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the transform origin to keep the zoom centered on the cursor
+        const originX = (x / rect.width) * 100;
+        const originY = (y / rect.height) * 100;
+
+        // Apply transform with scale and origin
+        image.style.transformOrigin = `${originX}% ${originY}%`;
+        image.style.transform = `scale(${zoomFactor})`;
     }
 
-    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new') {
-        try {
-            const response = await axios.get(`/user/api/products`, {
-                params: { search: searchQuery, page: page, sortBy: sortBy },
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-
-            if (response.data.products) {
-                // Get wishlist items to check product status
-                const wishlistResponse = await axios.get('/user/wishlist/check');
-                const wishlistItems = wishlistResponse.data || [];
-                
-                displayProducts(response.data.products, wishlistItems);
-                updatePagination(response.data.totalPages, page, response.data.totalProducts, response.data.limit);
-                setSortSelection(response.data.sortOption);
-            }
-        } catch (error) {
-            console.error("Error fetching products:", error);
-        }
-    }
-
-    function displayProducts(products, wishlistItems) {
-        const productsContainer = document.getElementById('productsContainer');
-        productsContainer.innerHTML = ''; // Clear previous results
-
-        if (!products || products.length === 0) {
-            productsContainer.innerHTML = '<p>No products found.</p>';
-            return;
-        }
-
-        const isLoggedIn = '<%- session %>';
-
-        products.forEach(product => {
-            
-            let productHtml = `
-                <div class="relative">
-                    <a href="/user/product/${product._id}">
-                        <div class="bg-white p-4 rounded shadow">
-                            <img 
-                                alt="Product Image" 
-                                class="w-full h-48 object-cover rounded mb-2" 
-                                src="${product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png'}"
-                            />
-                            <div class="text-center">
-                                <h3 class="font-bold">${product.name}</h3>
-                                <div class="text-green-500">
-                                    <b>₹</b> ${product.sellingPrice}
-                                    <span class="line-through text-gray-500">₹ ${product.mrp}</span>
-                                    ${product.offer ? `<span class="text-red-500">(${product.offer}% off)</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-            `;
-            if (isLoggedIn) {
-                const isInWishlist = wishlistItems.some(item => item.productId === product._id);
-                const heartClass = isInWishlist ? 'text-red-500' : 'text-gray-400';
-
-                productHtml += `
-                    <!-- Heart Icon as Overlay -->
-                    <button 
-                        class="absolute top-2 right-2 hover:text-red-500 transition duration-300" 
-                        onclick="toggleWishlist('${product._id}', this)"
-                    >
-                        <i class="fas fa-heart ${heartClass}"></i>
-                    </button>
-                `;
-            }
-            productHtml += `</div>`;
-            productsContainer.insertAdjacentHTML('beforeend', productHtml);
+    function resetZoom() {
+        const images = document.querySelectorAll('.product-image');
+        images.forEach(image => {
+            image.style.transform = 'scale(1)';
         });
     }
-
-    function updatePagination(totalPages, currentPage, totalProducts, limit) {
-        const paginationContainer = document.getElementById('paginationContainer');
-        paginationContainer.innerHTML = ''; // Clear previous pagination buttons
-
-        // Display range information
-        const rangeInfo = document.getElementById('rangeInfo');
-        const start = (currentPage - 1) * limit + 1;
-        const end = Math.min(currentPage * limit, totalProducts);
-        rangeInfo.innerHTML = `Showing ${start}-${end} of ${totalProducts}`;
-
-        // Previous button
-        if (currentPage > 1) {
-            const prevButton = document.createElement('button');
-            prevButton.classList.add('bg-gray-200', 'text-gray-700', 'px-3', 'py-1', 'rounded-md');
-            prevButton.innerText = '<';
-            prevButton.addEventListener('click', () => {
-                currentPage -= 1;
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
-            });
-            paginationContainer.appendChild(prevButton);
-        }
-
-        // Page buttons
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.classList.add('px-3', 'py-1', 'rounded-md', 'text-gray-700');
-
-            if (i === currentPage) {
-                pageButton.classList.add('bg-orange-500', 'text-white');
-            } else {
-                pageButton.classList.add('bg-gray-200');
-            }
-
-            pageButton.innerText = i;
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
-            });
-            paginationContainer.appendChild(pageButton);
-        }
-
-        // Next button
-        if (currentPage < totalPages) {
-            const nextButton = document.createElement('button');
-            nextButton.classList.add('bg-gray-200', 'text-gray-700', 'px-3', 'py-1', 'rounded-md');
-            nextButton.innerText = '>';
-            nextButton.addEventListener('click', () => {
-                currentPage += 1;
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
-            });
-            paginationContainer.appendChild(nextButton);
-        }
-    }
-
-    function setSortSelection(selectedSort) {
-        const sortDropdown = document.getElementById('sortSelection');
-        sortDropdown.value = selectedSort;
-    }
-
-    async function toggleWishlist(productId, button) {
-        const isLoggedIn = '<%- session %>';
-        if (!isLoggedIn) {
-            alert('Please log in to add items to your wishlist.');
-            return;
-        }
-        try {
-            const icon = button.querySelector('i');
-
-            // Toggle heart state (empty or filled)
-            if (icon.classList.contains('text-gray-400')) {
-                // Add to wishlist
-                const response = await axios.post('/user/wishlist/add', { productId });
-                if (response.status === 200) {
-                    icon.classList.remove('text-gray-400');
-                    icon.classList.add('text-red-500');
-                    console.log('Product added to wishlist');
-                }
-            } else {
-                // Remove from wishlist
-                const response = await axios.delete(`/user/wishlist/remove?productId=${productId}`);
-                if (response.status === 200) {
-                    icon.classList.remove('text-red-500');
-                    icon.classList.add('text-gray-400');
-                    console.log('Product removed from wishlist');
-                }
-            }
-        } catch (error) {
-            console.error('Error toggling wishlist:', error);
-        }
-    }
-
-    // Initial load
-    document.addEventListener('DOMContentLoaded', () => fetchProducts());
 </script>

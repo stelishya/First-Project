@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
       function validateUsername(){
       let isValid = true;
       
-        let username = document.getElementById('name');
+        let username = document.getElementById('username');
         let usernameError = document.getElementById('usernameError');
         usernameError.textContent = "";
         //Username validation
@@ -130,24 +130,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return isValid;
       }
 
-      function showConfirmDialog(userId) {
-          // Show the confirmation dialog
-          const confirmDialog = document.getElementById('confirmDialog');
-          confirmDialog.style.display = 'block';
+      // function showConfirmDialog(userId) {
+      //     // Show the confirmation dialog
+      //     const confirmDialog = document.getElementById('confirmDialog');
+      //     confirmDialog.style.display = 'block';
       
-          // Get the "Confirm" button and set the delete link dynamically
-          const confirmBtn = document.getElementById('confirmBtn');
-          confirmBtn.onclick = function() {
-              // Redirect to the delete route if confirmed
-              window.location.href = '/admin/delete-user?id=' + userId;
-          };
+      //     // Get the "Confirm" button and set the delete link dynamically
+      //     const confirmBtn = document.getElementById('confirmBtn');
+      //     confirmBtn.onclick = function() {
+      //         // Redirect to the delete route if confirmed
+      //         window.location.href = '/admin/delete-user?id=' + userId;
+      //     };
         
-          // Get the "Cancel" button and hide the dialog when clicked
-          const cancelBtn = document.getElementById('cancelBtn');
-          cancelBtn.onclick = function() {
-              confirmDialog.style.display = 'none'; // Hide the dialog
-          };
-      }
+      //     // Get the "Cancel" button and hide the dialog when clicked
+      //     const cancelBtn = document.getElementById('cancelBtn');
+      //     cancelBtn.onclick = function() {
+      //         confirmDialog.style.display = 'none'; // Hide the dialog
+      //     };
+      // }
 
 
 

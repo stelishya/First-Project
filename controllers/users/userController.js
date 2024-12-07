@@ -129,6 +129,7 @@ const insertUser = async (req, res) => {
                 req.session.otp= parseInt(otp);
                 req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-min expiration
                 console.log(`generated OTP : ${otp}`);
+                console.log("req.session.otp:",req.session.otp)
                 console.log('OTP sent successfully')
             } catch (error) {
                 console.error('Error sending OTP email',error)
@@ -172,9 +173,12 @@ const insertUser = async (req, res) => {
 
 const verifyOTP = async (req, res) => {
     try {
-        console.log('req.body.otp : ',req.body.otp)
         const submittedOTP = parseInt(req.body.otp.join(''));
         console.log('submittedOTP',submittedOTP)
+        console.log('req.session.otp : ',req.session.otp)
+        console.log("isOTPmatched",Number(req.session.otp) === submittedOTP)
+        console.log('req.body.otp : ',req.body.otp)
+
         if(req.session.otp === submittedOTP && req.session.otpExpires > Date.now()){
             // const user=req.session.
             req.session.otp=null;
@@ -183,7 +187,7 @@ const verifyOTP = async (req, res) => {
             await User.findOneAndUpdate({email:req.session.otp_cred}, {is_verified:true})
         // console.log()
         console.log('hai hello')
-            return res.redirect('/user/login');
+            res.redirect('/user/login');
         }else if(req.session.otpExpires < Date.now()){
             res.status(400).json({"success":false,message:'OTP Expired'})
         }else{
@@ -244,7 +248,7 @@ const resendOTP = async (req, res) => {
 //Login user methods started
 const loginLoad = async (req, res) => {
     try {
-        if(req.session.user){
+        if(!req.session.user){
             return res.render('users/login', { message: null });
         }
     } catch (error) {

@@ -16,7 +16,7 @@
         <!-- <div class="form-group">    -->
             <label for="name"><b>Username</b></label>
             <input 
-                id="name" 
+                id="username" 
                 type="text" 
                 placeholder="Enter Username" 
                 name="username"
@@ -79,14 +79,14 @@
         <div class="form-row">
             <label for="password"><b>Confirm Password</b></label>
             <input 
-                id="password"  
+                id="cpassword"  
                 type="password" 
                 placeholder="Confirm Password" 
-                name="confirm_password"
-                
+                name="confirm_password" 
                 >
-            <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
+            <!-- <span id="cpasswordError" class="error" style="color:rgb(193, 6, 6)"></span> -->
         </div>
+
         <% if(locals.message && message.length>0){ %>
             <div class="alert alert-danger text-center">
                 <%= message %>
