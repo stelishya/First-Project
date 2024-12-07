@@ -18,6 +18,9 @@ exports.products = async (req, res) => {
         const errorMessage = req.session.errorMessage;
         const successMessage = req.session.successMessage;
         
+        console.log("products",products);
+
+        
         req.session.errorMessage = null;
         req.session.successMessage = null;
         totalPages=0;
@@ -125,8 +128,10 @@ exports.addProduct = async (req, res) => {
 
 exports.editPage = async (req, res) => {
     try {
+        console.log("edit page vann")
         const productId = req.params.id;
         const product = await Products.findById(productId).populate('category');
+        console.log("product:",product)
         
         if (!product) {
             req.session.errorMessage = 'Product not found';
@@ -269,130 +274,131 @@ exports.list_unlist = async (req, res) => {
 
 exports.productDetails = async (req, res) => {
     try {
-        const productId = req.params.id;
+        const productId = req.params.productId;
         const product = await Products.findById(productId).populate('category');
         
         if (!product) {
             req.session.errorMessage = 'Product not found';
-            return res.redirect('/admin/products');
+            return res.redirect('/user/products');
         }
 
-        res.render('admin/product-view', {
-            product,
+        res.render('users/product folder/product', {
+            product, 
+            relatedProducts:[],
             activeTab: "products"
         });
     } catch (error) {
         console.error('Error in productDetails:', error);
         req.session.errorMessage = 'Error loading product details';
-        res.redirect('/admin/products');
+        res.redirect('/user/products');
     }
 };
 
-exports.deleteProduct = async (req, res) => {
-    const catId = req.query.id
-    try {
-        const result = await Products.findByIdAndDelete(catId);
-        if (result) {
-            req.session.successMessage = "Product deleted succesfully"
-            res.redirect('/admin/products')
-        } else {
-            req.session.errorMessage = "Couldn't delete the product"
-            res.redirect('/admin/products')
-        }
-    } catch (err) {
-        console.error(err);
-        req.session.errorMessage = "Couldn't delete the product"
-        res.redirect('/admin/products')
-    }
-};
+// exports.deleteProduct = async (req, res) => {
+//     const catId = req.query.id
+//     try {
+//         const result = await Products.findByIdAndDelete(catId);
+//         if (result) {
+//             req.session.successMessage = "Product deleted succesfully"
+//             res.redirect('/admin/products')
+//         } else {
+//             req.session.errorMessage = "Couldn't delete the product"
+//             res.redirect('/admin/products')
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         req.session.errorMessage = "Couldn't delete the product"
+//         res.redirect('/admin/products')
+//     }
+// };
 
-exports.getProductDetails = async (req, res) => {
-    try {
-        const productId = req.params.productId;
-        const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
-            .toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+// exports.getProductDetails = async (req, res) => {
+//     try {
+//         const productId = req.params.productId;
+//         const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
+//             .toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        const productDetails = await Products.findById(productId)
-            .populate('category', 'name categoryOffer')
-            .select('productName description mrp productImage productOffer category quantity status');
+//         const productDetails = await Products.findById(productId)
+//             .populate('category', 'name categoryOffer')
+//             .select('productName description mrp productImage productOffer category quantity status');
 
-        if (!productDetails) {
-            return res.status(404).render('users/404', { message: 'Product not found' });
-        }
+//         if (!productDetails) {
+//             return res.status(404).render('users/404', { message: 'Product not found' });
+//         }
 
-        // Calculate discounted price and best discount
-        const productOffer = productDetails.productOffer || 0;
-        const categoryOffer = productDetails.category?.categoryOffer || 0;
-        const bestDiscount = Math.max(
-            Math.floor(productDetails.mrp * (productOffer / 100)),
-            Math.floor(productDetails.mrp * (categoryOffer / 100))
-        );
-        const discountedPrice = productDetails.mrp - bestDiscount;
+//         // Calculate discounted price and best discount
+//         const productOffer = productDetails.productOffer || 0;
+//         const categoryOffer = productDetails.category?.categoryOffer || 0;
+//         const bestDiscount = Math.max(
+//             Math.floor(productDetails.mrp * (productOffer / 100)),
+//             Math.floor(productDetails.mrp * (categoryOffer / 100))
+//         );
+//         const discountedPrice = productDetails.mrp - bestDiscount;
 
-        // Get stock status
-        let stockStatus = {
-            status: 'IN_STOCK',
-            message: 'In Stock',
-            class: 'text-green-600 bg-green-100'
-        };
+//         // Get stock status
+//         let stockStatus = {
+//             status: 'IN_STOCK',
+//             message: 'In Stock',
+//             class: 'text-green-600 bg-green-100'
+//         };
 
-        if (productDetails.quantity <= 0) {
-            stockStatus = {
-                status: 'OUT_OF_STOCK',
-                message: 'Out of Stock',
-                class: 'text-red-600 bg-red-100'
-            };
-        } else if (productDetails.quantity <= 5) {
-            stockStatus = {
-                status: 'LOW_STOCK',
-                message: `Only ${productDetails.quantity} left`,
-                class: 'text-yellow-600 bg-yellow-100'
-            };
-        }
+//         if (productDetails.quantity <= 0) {
+//             stockStatus = {
+//                 status: 'OUT_OF_STOCK',
+//                 message: 'Out of Stock',
+//                 class: 'text-red-600 bg-red-100'
+//             };
+//         } else if (productDetails.quantity <= 5) {
+//             stockStatus = {
+//                 status: 'LOW_STOCK',
+//                 message: `Only ${productDetails.quantity} left`,
+//                 class: 'text-yellow-600 bg-yellow-100'
+//             };
+//         }
 
-        // Get related products
-        const relatedProducts = await Products.find({
-            category: productDetails.category._id,
-            _id: { $ne: productId },
-            status: 'Available',
-            isListed: true
-        })
-        .select('productName productImage mrp productOffer')
-        .limit(4);
+//         // Get related products
+//         const relatedProducts = await Products.find({
+//             category: productDetails.category._id,
+//             _id: { $ne: productId },
+//             status: 'Available',
+//             isListed: true
+//         })
+//         .select('productName productImage mrp productOffer')
+//         .limit(4);
 
-        // Format product data
-        const formattedProduct = {
-            _id: productDetails._id,
-            name: productDetails.productName,
-            description: productDetails.description,
-            mrp: productDetails.mrp,
-            discountedPrice,
-            bestDiscount,
-            offer: productOffer,
-            category: productDetails.category,
-            image: productDetails.productImage,
-            inventory: productDetails.quantity,
-            stockStatus,
-            rating: 4.5 // Default rating for now
-        };
+//         // Format product data
+//         const formattedProduct = {
+//             _id: productDetails._id,
+//             name: productDetails.productName,
+//             description: productDetails.description,
+//             mrp: productDetails.mrp,
+//             discountedPrice,
+//             bestDiscount,
+//             offer: productOffer,
+//             category: productDetails.category,
+//             image: productDetails.productImage,
+//             inventory: productDetails.quantity,
+//             stockStatus,
+//             rating: 4.5 // Default rating for now
+//         };
 
-        res.render('users/product folder/product', {
-            product: formattedProduct,
-            relatedProducts: relatedProducts.map(p => ({
-                _id: p._id,
-                name: p.productName,
-                image: p.productImage[0],
-                mrp: p.mrp,
-                offer: p.productOffer
-            })),
-            deliveryDate
-        });
+//         res.render('users/product folder/product', {
+//             product: formattedProduct,
+//             relatedProducts: relatedProducts.map(p => ({
+//                 _id: p._id,
+//                 name: p.productName,
+//                 image: p.productImage[0],
+//                 mrp: p.mrp,
+//                 offer: p.productOffer
+//             })),
+//             deliveryDate
+//         });
 
-    } catch (error) {
-        console.error('Error in getProductDetails:', error);
-        res.status(500).render('users/page-404', { error: 'Internal Server Error' });
-    }
-};
+//     } catch (error) {
+//         console.error('Error in getProductDetails:', error);
+//         res.status(500).render('users/page-404', { error: 'Internal Server Error' });
+//     }
+// };
 
 // Product page
 exports.showProductsPage = async (req, res) => {

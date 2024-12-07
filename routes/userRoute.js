@@ -26,8 +26,7 @@ user_route.get('/home',userController.loadHome);
 user_route.get('/logout',userController.userLogout);
 
 user_route.get('/products',productController.showProductsPage)
-user_route.get('/api/products', productController.fetchProducts);
-user_route.get('/product/details/:productId', productController.getProductDetails)
+user_route.get('/product/details/:productId', productController.productDetails)
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 

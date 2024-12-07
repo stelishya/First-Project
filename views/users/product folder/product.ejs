@@ -18,7 +18,7 @@
             <!-- Thumbnails Column -->
             <div class="col-span-1">
                 <div class="flex flex-col space-y-3">
-                    <% product.image.forEach((image, index) => { %>
+                    <% product.productImage.forEach((image, index) => { %>
                         <img alt="<%= product.name %> thumbnail <%= index + 1 %>" 
                              class="thumbnail w-16 h-16 rounded-lg cursor-pointer hover:opacity-75 transition-opacity object-cover" 
                              src="/uploads/product-images/<%= image %>"
@@ -33,14 +33,14 @@
                     <img id="zoomable-image" 
                          alt="<%= product.name %>"
                          class="w-full h-full object-cover"
-                         src="<%= product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png' %>"/>
+                         src="<%= product.productImage && product.productImage.length ? '/uploads/product-images/' + product.productImage[0] : '/images/no_productImage.png' %>"/>
                 </div>
             </div>
 
             <!-- Product Details -->
             <div class="col-span-6" style="border-color: rgb(201, 194, 194);border-width: 2px;border-radius: 5px; padding:30px;">
                 <div class="flex justify-between items-start">
-                    <h1 class="text-3xl font-bold text-gray-900"><%= product.name %></h1>
+                    <h1 class="text-3xl font-bold text-gray-900"><%= product.productName %></h1>
                     <div class="flex items-center bg-green-500 text-white px-3 py-1.5 rounded-full">
                         <span class="mr-1"><%= product.rating %></span>
                         <i class="fas fa-star"></i>
@@ -50,20 +50,12 @@
                 <!-- Price Section -->
                 <div class="mt-6">
                     <div class="flex items-baseline space-x-3">
-                        <span class="text-4xl font-bold text-green-600">₹<%= product.discountedPrice.toLocaleString('en-IN') %></span>
-                        <% if (product.bestDiscount > 0) { %>
-                            <span class="text-xl text-gray-500 line-through">₹<%= product.mrp.toLocaleString('en-IN') %></span>
-                            <span class="text-lg text-red-500">(<%= product.offer %>% off)</span>
-                        <% } %>
+                        <span class="text-4xl font-bold text-green-600">₹<%= product.discountedPrice %></span>
+                            <span class="text-xl text-green-500">₹<%= product.mrp %></span>
+                            <span class="text-lg text-red-500">(<%= product.productOffer %>% off)</span>
                     </div>
                 </div>
 
-                <!-- Stock Status -->
-                <div class="mt-4">
-                    <span class="<%= product.stockStatus.class %> inline-block px-4 py-2 rounded-full text-sm font-medium">
-                        <%= product.stockStatus.message %>
-                    </span>
-                </div>
 
                 <!-- Description -->
                 <div class="mt-6">
@@ -84,7 +76,7 @@
                                 <i class="fas fa-minus text-gray-600"></i>
                             </button>
                             <input type="number" id="quantity" value="1" min="1" 
-                                   max="<%= product.inventory < 6 ? product.inventory : 5 %>"
+                                   max="<%= product.quantity < 6 ? product.quantity : 5 %>"
                                    class="w-16 text-center border-x border-gray-300 py-2 focus:outline-none"
                                    onchange="validateQuantity(this)">
                             <button onclick="updateQuantity(1)"
@@ -98,12 +90,12 @@
                     <div class="flex space-x-4">
                         <button onclick="addToCart('<%= product._id %>')"
                                 class="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                                <%= product.inventory <= 0 ? 'disabled' : '' %>>
+                                <%= product.quantity <= 0 ? 'disabled' : '' %>>
                             <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
                         </button>
                         <button onclick="buyNow('<%= product._id %>')"
                                 class="flex-1 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                                <%= product.inventory <= 0 ? 'disabled' : '' %>>
+                                <%= product.quantity <= 0 ? 'disabled' : '' %>>
                             <i class="fas fa-bolt mr-2"></i>Buy Now
                         </button>
                     </div>
@@ -115,7 +107,7 @@
                     <ul class="space-y-3 text-gray-700">
                         <li class="flex items-center">
                             <i class="fas fa-truck text-green-600 mr-3"></i>
-                            Order today to get it by <b class="text-green-600 ml-1"><%= deliveryDate %></b>
+                            Order today to get it by <b class="text-green-600 ml-1">22 Dec 2024</b>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-coins text-green-600 mr-3"></i>

@@ -345,8 +345,8 @@
 
                 <div class="products-grid">
                     <% products.forEach(product => { %>
+                        <a href="/user/product/details/<%= product._id %>">
                         <div class="product-card">
-                            <a href="/user/product/details/<%= product._id %>" class="block">
                                 <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
                                     <img src="/uploads/product-images/<%= product.productImage[0] %>" 
                                          alt="<%= product.productName %>" 
@@ -364,11 +364,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            </a>
-                            <button class="wishlist-btn">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
+                                <button class="wishlist-btn">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </a>
                     <% }); %>
                 </div>
 
