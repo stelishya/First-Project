@@ -27,10 +27,12 @@ exports.loadLogin = (req, res) => {
 }
 
 exports.login =async (req,res)=>{
-    console.log('login req vann')
+    console.log('admin login req vann')
     try{
         const {email,password}= req.body;
     const admin=await User.findOne({email,is_admin:true});
+    console.log("email : ", email)
+    console.log(admin)
     if(admin){
         const passwordMatch= await bcrypt.compare(password,admin.password);
         if(passwordMatch){

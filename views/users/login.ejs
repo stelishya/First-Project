@@ -7,10 +7,10 @@
     
 <!-- </head>
 <body> -->
-    <div class="header">
+    <div class="header" style="margin-bottom: 100px;">
         <h1>CAlliope</h1>
     </div>
-    <h2 class="text-center mb-4">Log In</h2>
+    <h2 class="text-center mb-4" style="font-size:30px; ">Log In</h2>
 
     <form action="/user/login" method="post" id="userloginForm">
     <div class="login-container">
@@ -19,7 +19,7 @@
         <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
 
         <label for="password"><b>Password</b></label>
-        <input  type="password" placeholder="Password" name="password" oninput="validatePassword()">
+        <input id="password" type="password" placeholder="Password" name="password" oninput="validatePassword()">
         <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
 
 
@@ -40,7 +40,7 @@
         <div class="social-login">
             <p>- or you can log in with -</p>
             <!-- <a href="#" class="facebook">Facebook</a> -->
-            <a href="/user/auth/google" class="google">Google</a>
+            <a href="/user/auth/google" class="google" style="border-radius: 25px;" >Google</a>
         </div>
     </div>
     <script src="/validation.js"></script>
