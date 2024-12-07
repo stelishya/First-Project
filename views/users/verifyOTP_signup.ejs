@@ -95,7 +95,7 @@
         <h1>OTP Verification</h1>
         <p>Enter the 6-digit code sent to your email: <strong><%= email %></strong></p>
         <div id="timer">Time remaining: 0:30</div>
-        <form action="/user/verifyOTP" method="post">
+        <form method="post" onsubmit="verifyOTP(event)">
             <div class="otp-input">
                 <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1">
                 <input type="number" min="0" max="9" class="otp-digit" name="otp[]" required maxlength="1">
@@ -116,6 +116,31 @@
     </div>
 
     <script>
+       async function verifyOTP(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        try {
+            // Collect OTP values
+            const otpInputs = document.querySelectorAll('.otp-digit');
+            const otpArray = Array.from(otpInputs).map(input => input.value);
+
+            // Send POST request using Axios
+            const response = await axios.post('/user/verifyOTP', { otp: otpArray });
+
+            // Handle response
+            if (response.data.success) {
+                alert('OTP verified successfully!');
+                window.location.reload('/user/login')
+                // Redirect or perform other actions
+            } else {
+                alert('OTP verification failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error verifying OTP:', error);
+            alert('An error occurred while verifying OTP.');
+        }
+    }
+
         const inputs = document.querySelectorAll('.otp-digit');
         const timerDisplay = document.getElementById('timer');
         const resendButton = document.getElementById('resendButton');

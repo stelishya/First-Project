@@ -187,9 +187,9 @@ const verifyOTP = async (req, res) => {
             await User.findOneAndUpdate({email:req.session.otp_cred}, {is_verified:true})
         // console.log()
         console.log('hai hello')
-            res.redirect('/user/login');
+            res.status(200).json({success:true, message: "successfully verified"})
         }else if(req.session.otpExpires < Date.now()){
-            res.status(400).json({"success":false,message:'OTP Expired'})
+            res.status(400).json({success:false,message:'OTP Expired'})
         }else{
             res.status(400).json({message:'Invalid OTP'})
         }

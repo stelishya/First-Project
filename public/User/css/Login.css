@@ -10,6 +10,8 @@ body {
     flex-direction: column;
 }
 .header {
+    margin:0;
+    height: 100px;
     width: 100%;
     background-color: #c7bdbd;
     text-align: center;

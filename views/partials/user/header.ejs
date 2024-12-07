@@ -82,19 +82,21 @@
      </i>
     </a>
    </div>
-   <!-- %if(locals.user){%> -->
-    <div class="dropdown">
+   <%if(locals.user){%>
+    <a href="/user/logout">Logout</a>
+
+    <!-- <div class="dropdown">
       <a href="#"class="btn btn-secondary dropdown-toggle">
         selu
-        <!-- %=locals.user.username%> -->
+        <%=locals.user.username%>
       </a>
       <div class="dropdown-content">
         <a href="/userProfile">Profile</a>
         <a href="/user/logout">Logout</a>
       </div>
-    </div>
-   <!-- %}else{%> -->
+    </div> -->
+   <%}else{%>
     <a href="/user/signup" class="sign-in-link">Sign Up</a>
     <a href="/user/login"  class="sign-in-link">Log In</a>
-   <!-- %}%> -->
+   <%}%>
   </header>
