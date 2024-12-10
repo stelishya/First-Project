@@ -14,13 +14,17 @@ user_route.post("/signup",userController.insertUser);
 user_route.post('/verifyOTP',userController.verifyOTP);// OTP Verification routes
 user_route.post('/resendOTP',userController.resendOTP);
 user_route.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
-user_route.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),userController.verifyGoogleLogin);
+user_route.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
+    res.redirect('/user/home')
+});
 
 // user_route.get("/",userController.loginLoad);
 user_route.get('/login',userController.loginLoad);
 user_route.post('/login',userController.verifyLogin);
+user_route.get('/forgotPassword',userController.forgotPasswordPage)
+user_route.post('/sendOtp',userController.sendOtp)
 
-//Home page and shopping page
+//Home page 
 user_route.get('/home',userController.loadHome);
 user_route.get('/logout',userController.userLogout);
 

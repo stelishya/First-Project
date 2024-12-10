@@ -293,38 +293,56 @@ exports.verifyLogin = async (req, res) => {
     }
 }
 
-exports.verifyGoogleLogin = async (req, res) => {
+exports.forgotPasswordPage= async(req,res)=>{
     try {
-        console.log("verifyGoogleLogin")
-        const { email, googleId } = req.body;
-
-        // Wait for the database query to resolve
-        const userData = await User.findOne({ email: email, googleId: googleId });
-        console.log("Request Body:", req.body);
-        console.log("User Data:", userData);
-
-        if (!userData) {
-            return res.render('users/login', { message: "User Not Found" });
-        }
-        if (userData.is_blocked) {
-            return res.render('login', { message: 'User is blocked by admin' })
-        }
-        // Set session after successful login
-        req.session.user = {
-            _id: userData._id,
-            email: userData.email,
-            googleId: userData.googleId,
-        }
-        req.session.user_id = userData._id;
-
-        console.log('Login successful!');
-        res.render('users/home', { user: userData });// Render home page after login
-
+        
     } catch (error) {
-        console.error("Error in verifyGooglrLogin : ", error);
-        res.status(500).send("Internal server error");
+        console.log('Error in forgotPasswordPage: ', error);
+
     }
-};
+}
+
+exports.sendOtp=async (req,res)=>{
+    try {
+        
+    } catch (error) {
+        console.log('Error in sendOtp: ', error);
+
+    }
+}
+
+// exports.verifyGoogleLogin = async (req, res) => {
+//     try {
+//         console.log("verifyGoogleLogin")
+//         const { email, googleId } = req.body;
+
+//         // Wait for the database query to resolve
+//         const userData = await User.findOne({ email: email, googleId: googleId });
+//         console.log("Request Body:", req.body);
+//         console.log("User Data:", userData);
+
+//         if (!userData) {
+//             return res.render('users/login', { message: "User Not Found" });
+//         }
+//         if (userData.is_blocked) {
+//             return res.render('login', { message: 'User is blocked by admin' })
+//         }
+//         // Set session after successful login
+//         req.session.user = {
+//             _id: userData._id,
+//             email: userData.email,
+//             googleId: userData.googleId,
+//         }
+//         req.session.user_id = userData._id;
+
+//         console.log('Login successful!');
+//         res.render('users/home', { user: userData });// Render home page after login
+
+//     } catch (error) {
+//         console.error("Error in verifyGooglrLogin : ", error);
+//         res.status(500).send("Internal server error");
+//     }
+// };
 
 exports.pageNotFound = async (req, res) => {
     try {
