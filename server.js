@@ -15,13 +15,13 @@ db()    // Connect to database
 
 const app = express()
 
-console.log('Environment Check:', {
-    email: process.env.NODEMAILER_EMAIL ? 'Set' : 'Not Set',
-    password: process.env.NODEMAILER_PASSWORD ? 'Set' : 'Not Set',
-    port: process.env.PORT
-});
+// console.log('Environment Check:', {
+//     email: process.env.NODEMAILER_EMAIL ? 'Set' : 'Not Set',
+//     password: process.env.NODEMAILER_PASSWORD ? 'Set' : 'Not Set',
+//     port: process.env.PORT
+// });
 // Check if email credentials are loaded
-console.log('Email configured for:', process.env.NODEMAILER_EMAIL ? process.env.NODEMAILER_EMAIL : 'NOT SET');
+// console.log('Email configured for:', process.env.NODEMAILER_EMAIL ? process.env.NODEMAILER_EMAIL : 'NOT SET');
 
 const port = config.PORT || 4000
 

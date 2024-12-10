@@ -14,23 +14,55 @@ if (!fsSync.existsSync(productImagesDir)) {
 
 exports.products = async (req, res) => {
     try {
+        let search='';
+        if(req.query.search){
+            search = req.query.search
+        }
+        let page=1;
+        if(req.query.page){
+            page=req.query.page 
+        }
+        const limit=3;
+
+        const userData = await User.find({
+            is_admin:false,
+            $or:[
+                {name:{$regex:".*"+search+".*"}},
+                {email:{$regex:".*"+search+".*"}}
+            ],
+        })
+        .limit(limit*1)
+        .skip((page-1)*limit)
+        .exec();
+        const count = await User.find({
+            is_admin:false,
+            $or:[
+                {name:{$regex:".*"+search+".*"}},
+                {email:{$regex:".*"+search+".*"}}
+            ],
+        }).countDocuments()
+        const totalPages = Math.ceil(count /limit);
+        const currentPage = page;
+
         const products = await Products.find().populate('category');
         const errorMessage = req.session.errorMessage;
         const successMessage = req.session.successMessage;
         
         console.log("products",products);
 
-        
         req.session.errorMessage = null;
         req.session.successMessage = null;
-        totalPages=0;
+        // totalPages=0;
 
         res.render('admin/product-list', {
             products,
             errorMessage,
             successMessage,
             activeTab: "products",
-            totalPages:0
+            userData,
+            count,
+            totalPages,
+            currentPage
         });
     } catch (error) {
         console.error('Error in products:', error);
@@ -407,11 +439,31 @@ exports.showProductsPage = async (req, res) => {
     const session = req.session.user || {}; // Check if a user is logged in
     const title = "All Products";
     const products = await Products.find({});
+    let search='';
+        if(req.query.search){
+            search = req.query.search
+        }
+        let page=1;
+        if(req.query.page){
+            page=req.query.page 
+        }
+    const limit =3;
+    const count = await User.find({
+        is_admin:false,
+        $or:[
+            {name:{$regex:".*"+search+".*"}},
+            {email:{$regex:".*"+search+".*"}}
+        ],
+    }).countDocuments()
+    const totalPages = Math.ceil(count /limit);
+    const currentPage=page;
 
     res.render('users/product folder/products', {
         title,
         session: session ? session.username || session.fullname : null,// Use null if session or username is undefined
-        products 
+        products ,
+        totalPages,
+        currentPage
     });
 };
 

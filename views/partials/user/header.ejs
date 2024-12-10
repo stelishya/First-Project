@@ -10,9 +10,12 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
+    h1{
+      font-family: 'Playfair Display', serif;
+    }
     header h1{
-      padding-left: 160px;
-
+      padding-left: 60px;
+      font-family: 'Playfair Display', serif;
     }
     header .sign-in-link{
       font-size:16px;
@@ -58,13 +61,19 @@
 </head>
  <body>
   <header>
-    <div class="search-bar">
+    <div class="search-container">
+      <input type="text" placeholder="Search for anything">
+      <button>
+          <i class="fas fa-search"></i>
+      </button>
+  </div>
+    <!-- <div class="search-bar">
       <input placeholder="Search..." type="text"/>
       <button>
        <i class="fas fa-search">
        </i>
       </button>
-     </div>
+     </div> -->
    <h1>
     CAlliope
    </h1>
@@ -83,20 +92,22 @@
     </a>
    </div>
    <%if(locals.user){%>
-    <a href="/user/logout">Logout</a>
+    <!-- <a href="/user/logout">Logout</a> -->
 
-    <!-- <div class="dropdown">
+    <div class="dropdown">
       <a href="#"class="btn btn-secondary dropdown-toggle">
-        selu
-        <%=locals.user.username%>
+        <i class="fas fa-user text-xl "></i>
+        <!-- selu
+        %=locals.user.username%> -->
       </a>
       <div class="dropdown-content">
-        <a href="/userProfile">Profile</a>
+        <a href="/user/dashboard">Profile</a>
         <a href="/user/logout">Logout</a>
       </div>
-    </div> -->
+    </div>
    <%}else{%>
     <a href="/user/signup" class="sign-in-link">Sign Up</a>
     <a href="/user/login"  class="sign-in-link">Log In</a>
    <%}%>
+   
   </header>

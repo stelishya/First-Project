@@ -18,9 +18,11 @@
         margin: 0;
         background-color: #fbf8f8;
     }
+    
     .header{
         text-align: center;
         width: 100%;
+        height:100px;
         color: black;
         background-color: #d3c7c7;
         font-size: 30px;
@@ -29,7 +31,7 @@
         left: 0;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    .container {
+    .container_ {
         background-color: #d3c7c7;
         padding: 2rem;
         border-radius: 8px;
@@ -38,8 +40,13 @@
         margin-top: 100px;
     }
     h1 {
-        margin-bottom: 1rem;
-        color: #645858;
+        font-family: 'Playfair Display', serif;
+        font-size:60px;
+        /* margin-bottom: 1rem; */
+        color: #121111;
+    }
+    h2{
+        font-size:30px;
     }
     .otp-input {
         display: flex;
@@ -91,8 +98,8 @@
     <div class="header">
         <h1>CAlliope</h1>
     </div>
-    <div class="container">
-        <h1>OTP Verification</h1>
+    <div class="container_">
+        <h2>OTP Verification</h2>
         <p>Enter the 6-digit code sent to your email: <strong><%= email %></strong></p>
         <div id="timer">Time remaining: 0:30</div>
         <form method="post" onsubmit="verifyOTP(event)">
@@ -131,7 +138,6 @@
             if (response.data.success) {
                 alert('OTP verified successfully!');
                 window.location.reload('/user/login')
-                // Redirect or perform other actions
             } else {
                 alert('OTP verification failed. Please try again.');
             }

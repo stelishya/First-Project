@@ -1,6 +1,6 @@
 // require('dotenv').config();
 const User = require('../../models/userSchema')
-const nodemailer=require('nodemailer')
+const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt');
 
 // const securePassword = async (password) => {
@@ -12,21 +12,21 @@ const bcrypt = require('bcrypt');
 //     }
 // } 
 
-const loadRegister = async (req, res) => {
+exports.loadRegister = async (req, res) => {
     try {
         return res.render('users/signup');
 
     } catch (error) {
-        console.log('Home page not loading',error.message);
+        console.log('Home page not loading', error.message);
         res.status(500).send('Server error')
     }
 }
 
-function generateOtp(){
-    return Math.floor(100000 + Math.random()*900000).toString()
+function generateOtp() {
+    return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
-async function sendVerificationEmail(email,otp){
+async function sendVerificationEmail(email, otp) {
     try {
         // Debug logging
         console.log('Email Config:', {
@@ -38,11 +38,11 @@ async function sendVerificationEmail(email,otp){
             console.error('Missing email configuration in environment variables');
             return false;
         }
-          // Configure Nodemailer for Gmail
+        // Configure Nodemailer for Gmail
         const transporter = nodemailer.createTransport({
             port: 587,
-            secure: false, 
-            service:'gmail',
+            secure: false,
+            service: 'gmail',
             requireTLS: true,
             auth: {
                 user: process.env.NODEMAILER_EMAIL,
@@ -94,54 +94,54 @@ async function sendVerificationEmail(email,otp){
     }
 }
 
-const insertUser = async (req, res) => {
+exports.insertUser = async (req, res) => {
     try {
         console.log('Request Body:', req.body);
-        const {username,email,language, mobile,password, confirm_password} = req.body;
-        
-        if(password !== confirm_password) {
-            return res.status(400).render('users/signup', {message: 'Passwords do not match'});
+        const { username, email, language, mobile, password, confirm_password } = req.body;
+
+        if (password !== confirm_password) {
+            return res.status(400).render('users/signup', { message: 'Passwords do not match' });
         }
-        
-        const user = await User.findOne({email});
-        if(!user){
+
+        const user = await User.findOne({ email });
+        if (!user) {
             const newuser = new User({
-                username:username,
-                password:await bcrypt.hash(req.body.password,10),// Hashing password for security
-                email:email,
-                mobile:mobile,
-                language:language,
-                createdAt: new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})
+                username: username,
+                password: await bcrypt.hash(req.body.password, 10),// Hashing password for security
+                email: email,
+                mobile: mobile,
+                language: language,
+                createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
             });
             // save the new user
             await newuser.save();
             console.log("User saved successfully");
 
-        
-        // if(findUser) {
-        //     return res.render('users/signup', {message: 'User with this email already exists'});
-        // }
-        const otp = generateOtp();
-       
+
+            // if(findUser) {
+            //     return res.render('users/signup', {message: 'User with this email already exists'});
+            // }
+            const otp = generateOtp();
+
             try {
                 await sendVerificationEmail(email, otp)
                 req.session.otp_cred = email;
-                req.session.otp= parseInt(otp);
+                req.session.otp = parseInt(otp);
                 req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-min expiration
                 console.log(`generated OTP : ${otp}`);
-                console.log("req.session.otp:",req.session.otp)
+                console.log("req.session.otp:", req.session.otp)
                 console.log('OTP sent successfully')
             } catch (error) {
-                console.error('Error sending OTP email',error)
+                console.error('Error sending OTP email', error)
             }
-        console.log("Email:", email);
-        // Redirect to OTP page
-        return res.render('users/verifyOTP_signup',{email})
-    }else{
-        req.session.signUp_msg = "User already exists"
+            console.log("Email:", email);
+            // Redirect to OTP page
+            return res.render('users/verifyOTP_signup', { email })
+        } else {
+            req.session.signUp_msg = "User already exists"
             console.error('user already exists');
             res.redirect('/user/login'); // User already exists
-    }
+        }
         // console.log('emailsent: ', emailSent);
 
         // if(!emailSent) {
@@ -151,14 +151,14 @@ const insertUser = async (req, res) => {
         // Store data in session
         // req.session.otp = otp;
         // req.session.tempUserData = {username,email,password,mobile,address};
-        
+
         // console.log('OTP sent:', otp);
         // return res.render('users/signup_verifyOTP', { email: email });
-        
-    } catch(error) {
-        
+
+    } catch (error) {
+
         console.error('signup error', error);
-        return res.status(500).render('users/signup', {message: 'An error occurred during signup'});
+        return res.status(500).render('users/signup', { message: 'An error occurred during signup' });
     }
 };
 
@@ -171,49 +171,47 @@ const insertUser = async (req, res) => {
 //     }
 // }
 
-const verifyOTP = async (req, res) => {
+exports.verifyOTP = async (req, res) => {
     try {
         const submittedOTP = parseInt(req.body.otp.join(''));
-        console.log('submittedOTP',submittedOTP)
-        console.log('req.session.otp : ',req.session.otp)
-        console.log("isOTPmatched",Number(req.session.otp) === submittedOTP)
-        console.log('req.body.otp : ',req.body.otp)
+        console.log('submittedOTP', submittedOTP)
+        console.log("isOTPmatched", Number(req.session.otp) === submittedOTP)
 
-        if(req.session.otp === submittedOTP && req.session.otpExpires > Date.now()){
+        if (req.session.otp === submittedOTP && req.session.otpExpires > Date.now()) {
             // const user=req.session.
-            req.session.otp=null;
-            req.session.otpExpires=null;
-        console.log('hai hello')
-            await User.findOneAndUpdate({email:req.session.otp_cred}, {is_verified:true})
-        // console.log()
-        console.log('hai hello')
-            res.status(200).json({success:true, message: "successfully verified"})
-        }else if(req.session.otpExpires < Date.now()){
-            res.status(400).json({success:false,message:'OTP Expired'})
-        }else{
-            res.status(400).json({message:'Invalid OTP'})
+            req.session.otp = null;
+            req.session.otpExpires = null;
+            console.log('hai hello')
+            await User.findOneAndUpdate({ email: req.session.otp_cred }, { is_verified: true })
+            // console.log()
+            console.log('hai hello')
+            res.status(200).json({ success: true, message: "successfully verified" })
+        } else if (req.session.otpExpires < Date.now()) {
+            res.status(400).json({ success: false, message: 'OTP Expired' })
+        } else {
+            res.status(400).json({ message: 'Invalid OTP' })
         }
-        
+
     } catch (error) {
-        console.error('Error in verifying OTP: ',error)
+        console.error('Error in verifying OTP: ', error)
         res.status(500).send('Server error');
     }
 };
 
-const resendOTP = async (req, res) => {
-    console.log("resend otp hai parann")
+exports.resendOTP = async (req, res) => {
+    // console.log("resend otp hai parann")
     try {
         const email = req.session.otp_cred;
-        console.log('email',email)
-        if(!email) {
-        return res.status(400).json({
-            success: false,
-            message: "Session expired. Please try signing up again."
-        });
+        console.log('email', email)
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Session expired. Please try signing up again."
+            });
         }
         // Generate new OTP
-       const newOTP = generateOtp();
-       
+        const newOTP = generateOtp();
+
         try {
             // Send new OTP via email
             await sendVerificationEmail(email, newOTP);
@@ -221,14 +219,14 @@ const resendOTP = async (req, res) => {
             // Update session with new OTP
             req.session.otp = parseInt(newOTP);
             req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-min expiration
-            console.log('newotp',parseInt(newOTP))
-            
+            console.log('newotp', parseInt(newOTP))
+
             console.log('New OTP generated and saved:', {
                 email: email,
                 otp: newOTP,
                 expires: req.session.otpExpires
             });
-            res.render('users/verifyOTP_signup',{email})
+            res.render('users/verifyOTP_signup', { email })
         } catch (error) {
             console.error("Error sending new OTP:", error);
             return res.status(500).json({
@@ -246,9 +244,9 @@ const resendOTP = async (req, res) => {
 };
 
 //Login user methods started
-const loginLoad = async (req, res) => {
+exports.loginLoad = async (req, res) => {
     try {
-        if(!req.session.user){
+        if (!req.session.user) {
             return res.render('users/login', { message: null });
         }
     } catch (error) {
@@ -256,27 +254,28 @@ const loginLoad = async (req, res) => {
     }
 }
 
-const verifyLogin = async (req, res) => { 
+exports.verifyLogin = async (req, res) => {
     try {
-        const {email,password}=req.body;
+        const { email, password } = req.body;
         // const email = req.body.email;
         // const password = req.body.password;
 
-        const userData = await User.findOne({ is_admin:0,email: email });
-        if(!userData){
+        const userData = await User.findOne({ is_admin: 0, email: email });
+        if (!userData) {
             return res.render('users/login', { message: "User Not Found" });
         }
-        if(userData.is_blocked){
-            return res.render('login',{message:'User is blocked by admin'})
+        if (userData.is_blocked) {
+            return res.render('login', { message: 'User is blocked by admin' })
         }
-        if(userData) {
+        if (userData) {
             const passwordMatch = await bcrypt.compare(password, userData.password);
             if (passwordMatch) {
+                req.session.user = userData;
                 req.session.user_id = userData._id; // Set session after successful login
-                req.session.username= userData.username;
+                req.session.username = userData.username;
                 console.log('Login successful!');
-                return res.redirect('/user/home');// Redirect to home page after login
-                
+                return res.render('users/home', { user: userData });// Redirect to home page after login
+
             } else {
                 return res.render('users/login', { message: "Incorrect password" });
             }
@@ -288,23 +287,57 @@ const verifyLogin = async (req, res) => {
 
     }
     catch (error) {
-        console.log('Login Error: ',error.message);
+        console.log('Login Error: ', error.message);
         res.status(500).send('Internal server error');
         return res.render('users/login', { message: "Login failed. Please try again." });
     }
 }
-const pageNotFound= async (req,res)=>{
-    try{
+
+exports.verifyGoogleLogin = async (req, res) => {
+    try {
+        console.log("verifyGoogleLogin")
+        const { email, googleId } = req.body;
+
+        // Wait for the database query to resolve
+        const userData = await User.findOne({ email: email, googleId: googleId });
+        console.log("Request Body:", req.body);
+        console.log("User Data:", userData);
+
+        if (!userData) {
+            return res.render('users/login', { message: "User Not Found" });
+        }
+        if (userData.is_blocked) {
+            return res.render('login', { message: 'User is blocked by admin' })
+        }
+        // Set session after successful login
+        req.session.user = {
+            _id: userData._id,
+            email: userData.email,
+            googleId: userData.googleId,
+        }
+        req.session.user_id = userData._id;
+
+        console.log('Login successful!');
+        res.render('users/home', { user: userData });// Render home page after login
+
+    } catch (error) {
+        console.error("Error in verifyGooglrLogin : ", error);
+        res.status(500).send("Internal server error");
+    }
+};
+
+exports.pageNotFound = async (req, res) => {
+    try {
         // res.status(404).render('layouts/404');
         res.render('page-404')
     }
-    catch(error){
+    catch (error) {
         console.error(error)
-        res.redirect('user/pageNotFound')
+        res.redirect('/user/pageNotFound')
     }
 }
 
-const loadHome = async (req, res) => {
+exports.loadHome = async (req, res) => {
     try {
         // const session=req.session.user;
         // if(userData){
@@ -313,38 +346,93 @@ const loadHome = async (req, res) => {
         // }else{
         //     return res.render('users/home')
         // }
-        
-        const title='CAlliope';
+
+        const title = 'CAlliope';
         // const userGreet=req.session.user ? session.username || session.
         // console.log('welcome to home page!')
-        const userData = await User.findOne({ _id:req.session.user_id })
+        const userData = await User.findOne({ _id: req.session.user_id })
         // console.log(userData)
-        return res.render('users/home',{ user:userData });
+        return res.render('users/home', { user: userData });
     } catch (error) {
-        console.log('Home Page Not Found',error.message);
+        console.log('Home Page Not Found', error.message);
         res.status(500).send('Server Error')
     }
 }
 
-const userLogout = async(req,res)=>{
+exports.dashboard = async (req, res) => {
     try {
-        req.session.user_id=null;
-        return res.redirect('/user/login');
+        const session = req.session.user;
+        const errorMessage = req.session.user.errorMess;
+        const successMessage = req.session.user.successMess;
+        const user = await User.findOne({ email: session.email })
+        res.render('users/dashboard/profile', {
+            session: session.email, user, errorMessage, successMessage, activeTab: 'profile'
+        })
+    } catch (error) {
+        console.error(error)
+        res.redirect("/user/pageNotFound")
+    }
+}
 
-    }catch(error){
-        console.error('Logout error',error.message);
+exports.saveUserDetails = async (req, res) => {
+    const userData = req.body;
+    const session = req.session.user;
+    console.log("saveUserDetails session: ",session)
+    try {
+        const usernameChk = await User.findOne({ username: userData.username, email: { $ne: session.email } })
+        if (!usernameChk) {
+            await User.findOneAndUpdate({ email: session.email }, {
+                username: userData.username,
+                fullname: userData.fullname,
+                phone: userData.phone
+            })
+            res.status(200).json('Successfully updated');
+        } else {
+            req.session.user.errorMess = 'Username already exists'
+            res.redirect(`/user/profile`)
+        }
+    } catch (error) {
+        console.error("Error in saveUserDetails: ", error)
+    }
+}
+
+exports.changePassword = async (req, res) => {
+    const session = req.session.user;
+    console.log("changePassword session : ",session)
+
+    if (session) {
+        try {
+            const user = await User.findOne({ email: session.email });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            await Users.findOneAndUpdate({ email: session.email }, { password: await bcrypt.hash(req.body.password, 10) })
+            res.status(200).json('Password edited succesfully')
+        } catch (error) {
+            console.log(error)
+        }
+    } else {
+        const { email, newPass } = req.body;
+        try {
+            await User.findOneAndUpdate({ email }, { password: await bcrypt.hash(newPass, 10) })
+            res.status(200).json("Password changed successfully")
+        } catch (error) {
+            console.error("Error in changePassword",error)
+            res.status(500).json("Couldn't change the password")
+        }
+    }
+}
+
+exports.userLogout = (req, res) => {
+    try {
+        req.session.user_id = null;
+        console.log("userLogout - try")
+
+        return res.render('users/login');
+
+    } catch (error) {
+        console.error('Logout error', error.message);
         req.redirect('/user/pageNotFound')
     }
 }
 
-module.exports = {
-    loadRegister,
-    verifyOTP,
-    insertUser,
-    resendOTP,
-    loginLoad,
-    verifyLogin,
-    pageNotFound,
-    loadHome,
-    userLogout
-}

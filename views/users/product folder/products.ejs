@@ -372,13 +372,31 @@
                     <% }); %>
                 </div>
 
-                <div class="pagination">
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="flex space-x-2">
+                        <% if(currentPage > 1) {%>
+                        <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
+                        <% } %>
+                        <% for(let i=1; i <= totalPages; i++) {%>
+                            <% if(i === currentPage){ %>
+                            <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"><%= i %></span>
+                            <% } else { %>
+                            <a href="?page=<%= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"><%= i %></a>
+                            <% } %>
+                        <% } %>
+                        <% if (currentPage < totalPages){%>
+                        <a href="?page=<%= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- <div class="pagination">
                     <button>&lt;</button>
                     <button class="active">1</button>
                     <button>2</button>
                     <button>3</button>
                     <button>&gt;</button>
-                </div>
+                </div> -->
             </section>
         </div>
     </div>
