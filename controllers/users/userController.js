@@ -1,4 +1,3 @@
-// require('dotenv').config();
 const User = require('../../models/userSchema')
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt');
@@ -294,13 +293,109 @@ exports.verifyLogin = async (req, res) => {
 }
 
 exports.forgotPasswordPage= async(req,res)=>{
+
     try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Generate a password reset token (simplified here)
+        const resetToken = Math.random().toString(36).substr(2);
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = Date.now() + 3600000; // 1-hour expiry
+        await user.save();
+
+        // Send reset link via email (mocked here)
+        console.log(`Send reset link to: ${email} with token: ${resetToken}`);
+        // res.status(200).json({ message: "Reset link sent to your email" });
+
+         // Configure the email transport
+         const transporter = nodemailer.createTransport({
+            port: 587,
+            secure: false,
+            service: 'gmail',
+            requireTLS: true,
+            auth: {
+                user: process.env.NODEMAILER_EMAIL, //email address
+                pass: process.env.NODEMAILER_PASSWORD, // App password
+            },
+            tls: {
+                rejectUnauthorized: false  // Accept self-signed certificates
+            }
+        });
+
+         // Email content
+         const mailOptions = {
+            from:{
+                name: 'Calliope',
+                address: process.env.NODEMAILER_EMAIL 
+            },
+            to: email,
+            subject: 'Password Reset',
+            html: `
+                <h1>Password Reset</h1>
+                <p>You requested a password reset. Click the link below to reset your password:</p>
+                <a href="http://localhost:4000/user/reset-password?token=${resetToken}">Reset Password</a>
+                <p>If you did not request this, please ignore this email.</p>
+            `,
+        };
+        // Verify connection configuration
+        await transporter.verify();
+        console.log('Transporter verified successfully');
+
+         // Send the email
+        const info =  await transporter.sendMail(mailOptions);
+        if(info&& info.response){
+            console.log("Email sent: ", info.response); // Logs the email sending status
+            console.log(`Reset email sent to: ${email}`);
+            res.status(200).json({ message: 'Reset link sent to your email' });
+            return true;  // Email sent successfully
+        } else {
+            console.error("Error: No response from email transporter");
+            return false; // Failure in sending email
+        }
         
+ 
     } catch (error) {
         console.log('Error in forgotPasswordPage: ', error);
-
+        res.status(500).json({ message: "Server error. Please try again." });
     }
 }
+
+exports.resetPassword = async (req, res) => {
+    console.log('Incoming Reset Password Request:', req.body);
+
+    const { resetToken, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({
+            resetToken,
+            resetTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired reset token' });
+        }
+
+        // Update the user's password
+        user.password = newPassword; // Hash the password if required
+        user.resetToken = undefined;
+        user.resetTokenExpiry = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successful' });
+    } catch (error) {
+        console.error('Error in resetPassword:', error);
+        res.status(500).json({ message: 'Server error. Please try again.' });
+    }
+};
+
 
 exports.sendOtp=async (req,res)=>{
     try {
@@ -380,14 +475,16 @@ exports.loadHome = async (req, res) => {
 exports.dashboard = async (req, res) => {
     try {
         const session = req.session.user;
-        const errorMessage = req.session.user.errorMess;
-        const successMessage = req.session.user.successMess;
+        // const errorMessage = req.session.user.errorMess;
+        // const successMessage = req.session.user.successMess;
         const user = await User.findOne({ email: session.email })
         res.render('users/dashboard/profile', {
-            session: session.email, user, errorMessage, successMessage, activeTab: 'profile'
+            session: session.email, user,
+            //  errorMessage, successMessage, 
+             activeTab: 'profile'
         })
     } catch (error) {
-        console.error(error)
+        console.error("Error in user Dashboard",error)
         res.redirect("/user/pageNotFound")
     }
 }
@@ -401,8 +498,8 @@ exports.saveUserDetails = async (req, res) => {
         if (!usernameChk) {
             await User.findOneAndUpdate({ email: session.email }, {
                 username: userData.username,
-                fullname: userData.fullname,
-                phone: userData.phone
+                // fullname: userData.fullname,
+                mobile: userData.mobile
             })
             res.status(200).json('Successfully updated');
         } else {
@@ -424,7 +521,7 @@ exports.changePassword = async (req, res) => {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
-            await Users.findOneAndUpdate({ email: session.email }, { password: await bcrypt.hash(req.body.password, 10) })
+            await User.findOneAndUpdate({ email: session.email }, { password: await bcrypt.hash(req.body.password, 10) })
             res.status(200).json('Password edited succesfully')
         } catch (error) {
             console.log(error)
@@ -449,7 +546,7 @@ exports.userLogout = (req, res) => {
         return res.render('users/login');
 
     } catch (error) {
-        console.error('Logout error', error.message);
+        console.error('userLogout error', error);
         req.redirect('/user/pageNotFound')
     }
 }

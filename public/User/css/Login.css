@@ -46,7 +46,8 @@ body {
     color: #000000;
     text-decoration: none;
 }
-.login-container button {
+/* .login-container button  */
+.login{
     width: 100%;
     padding: 15px;
     background-color: #8c8c8c;
@@ -86,4 +87,15 @@ body {
 .signup a {
     color: #000000;
     text-decoration: none;
+}
+
+.forgot-password-link{
+    padding-left: 350px;
+    font-size: 0.875rem;
+    color:#007bff;
+    text-decoration: none;
+}
+.forgot-password-link:hover{
+    color:#0056b3;
+    text-decoration: underline;
 }

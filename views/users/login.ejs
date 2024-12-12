@@ -1,18 +1,12 @@
-<!-- <html>
-<head> -->
-    <title>User Login</title>
-    <link rel="stylesheet" href="/User/css/Login.css">
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> -->
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"> -->
-    
-<!-- </head>
-<body> -->
-    <div class="header" style="margin-bottom: 100px;">
-        <h1>CAlliope</h1>
-    </div>
-    <h2 class="text-center mb-4" style="font-size:30px; ">Log In</h2>
+<title>User Login</title>
+<link rel="stylesheet" href="/User/css/Login.css">
+<script src="/validation.js"></script>
+<div class="header" style="margin-bottom: 100px;">
+    <h1>CAlliope</h1>
+</div>
+<h2 class="text-center mb-4" style="font-size:30px; ">Log In</h2>
 
-    <form action="/user/login" method="post" id="userloginForm">
+<form action="/user/login" method="post" id="userloginForm">
     <div class="login-container">
         <label for="email"><b>Email</b></label>
         <input id="email" type="text" placeholder="E-mail" name="email" oninput="validateEmail()">
@@ -27,22 +21,199 @@
             <div class="alert alert-danger text-center">
                 <%= message %>
             </div>
-        <% } %>
-        <!-- <div class="forgot-password">
-            <a href="#">Forgot Password</a>
+            <% } %>
+                <button id="forgotPasswordBtn"
+                    class="pl-80  hover:text-gray-600 ">
+                    Forgot Password
+                </button>
+
+                <!-- <div class="form-group d-flex justify-content-end">
+            <a href="/forgot-password" class="forgot-password-link ms-auto">
+                Forgot Password  
+            </a>
         </div> -->
-        <button type="submit">Log In</button>
-    </form>
-        <div class="signup">
-            <a href="#">Don’t have an account?</a>
-            <a href="/user/signup">Sign Up..</a>
+
+                <button class="login hover:text-gray-600" type="submit">Log In</button>
+</form>
+<div class="signup">
+    <a href="#">Don’t have an account?</a>
+    <a class="hover:text-gray-600" href="/user/signup">Sign Up..</a>
+</div>
+<div class="social-login">
+    <p>- or you can log in with -</p>
+    <a href="/user/auth/google" class="google" style="border-radius: 25px;">Google</a>
+</div>
+</div>
+
+<!-- Trigger Button -->
+<!-- <button id="forgotPasswordBtn" class="bg-blue-500 text-white py-2 px-4 rounded">Forgot Password</button> -->
+
+<!-- Modal -->
+<div id="forgotPasswordModal"
+    class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Forgot Password</h2>
+            <button id="closeModalBtn" class="text-gray-600 hover:text-gray-900">
+                ✕
+            </button>
         </div>
-        <div class="social-login">
-            <p>- or you can log in with -</p>
-            <!-- <a href="#" class="facebook">Facebook</a> -->
-            <a href="/user/auth/google" class="google" style="border-radius: 25px;" >Google</a>
-        </div>
+        <form id="forgotPasswordForm">
+            <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+            <input type="email" id="FPemail" name="email"
+                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300"
+                placeholder="Enter your email" required />
+            <button id="forgotPasswordButton" type="submit"
+                class="bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
+                Submit
+            </button>
+        </form>
     </div>
-    <script src="/validation.js"></script>
-<!-- </body>
-</html> -->
+</div>
+
+<div id="resetPasswordModal" 
+    class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Reset Password</h2>
+            <button id="closeResetModalBtn" class="text-gray-600 hover:text-gray-900">✕</button>
+        </div>
+        <form id="resetPasswordForm">
+            <input type="hidden" id="resetToken" name="resetToken" />
+            <label for="newPassword" class="block text-gray-700 font-medium mb-2">New Password</label>
+            <input type="password" id="newPassword" name="newPassword" 
+                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300" 
+                placeholder="Enter new password" required />
+            
+            <label for="confirmPassword" class="block text-gray-700 font-medium mb-2">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" 
+                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300" 
+                placeholder="Confirm new password" required />
+            
+            <button type="submit" 
+                class="bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
+                Reset Password
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    //FORGOT PASSWORD...................
+
+    // Get elements
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    // Show modal
+    forgotPasswordBtn.addEventListener('click', () => {
+        forgotPasswordModal.classList.remove('hidden');
+    });
+
+    // Hide modal
+    closeModalBtn.addEventListener('click', () => {
+        forgotPasswordModal.classList.add('hidden');
+    });
+
+    // Close modal when clicking outside the modal content
+    forgotPasswordModal.addEventListener('click', (event) => {
+        if (event.target === forgotPasswordModal) {
+            forgotPasswordModal.classList.add('hidden');
+        }
+    });
+
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    console.log("vannallo")
+    forgotPasswordForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission
+        console.log("forgotPasswordForm: ",forgotPasswordForm)
+        const email = document.getElementById('FPemail').value.trim();
+            
+        if (!email) {
+            alert('Please enter your email!');
+            return;
+        }
+        try {
+            const response = await fetch('/user/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('Password reset link sent to your email!');
+                document.getElementById('forgotPasswordModal').classList.add('hidden');
+                // forgotPasswordModal.classList.add('hidden');
+            } else {
+                alert(data.message || 'An error occurred');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to send password reset link');
+        }
+    });
+    //RESET PASSWORD***************
+    document.addEventListener('DOMContentLoaded', () => {
+        // Parse the query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const resetToken = urlParams.get('token');
+
+        // const resetToken = "<%= typeof token !== 'undefined' ? token : '' %>";
+        console.log("resetToken",resetToken)
+        if (resetToken) {
+            // Show the reset password modal
+            const resetPasswordModal = document.getElementById('resetPasswordModal');
+            const resetTokenInput = document.getElementById('resetToken');
+            resetTokenInput.value = resetToken; // Set the token in the hidden input
+            resetPasswordModal.classList.remove('hidden');
+        }
+
+        // Close modal functionality
+        const closeResetModalBtn = document.getElementById('closeResetModalBtn');
+        closeResetModalBtn.addEventListener('click', () => {
+            const resetPasswordModal = document.getElementById('resetPasswordModal');
+            resetPasswordModal.classList.add('hidden');
+        });
+    // Form submission logic
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    resetPasswordForm.addEventListener('submit', async (event) => {
+    event.preventDefault(); // Prevent default form submission
+
+    const resetToken = document.getElementById('resetToken').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
+    console.log("resetToken",resetToken)
+    try {
+        const response = await fetch('/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resetToken, newPassword }),
+        });
+        console.log("response",response)
+        const data = await response.json();
+        console.log("data",data);
+        console.log("hlo")
+        if (response.ok) {
+            alert('Password reset successful!');
+            window.location.href = '/user/login'; // Redirect to login page
+            // document.getElementById('resetPasswordModal').classList.add('hidden');
+        } else {
+            alert(data.message || 'An error occurred');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        console.log(error)
+        alert('Failed to reset password');
+    }
+});
+});
+
+</script>

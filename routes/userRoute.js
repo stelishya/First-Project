@@ -3,6 +3,8 @@ const user_route =express.Router();
 const  { userAuth,adminAuth}=require('../middlewares/auth')
 const userController =require("../controllers/users/userController");
 const productController = require('../controllers/admin/productController')
+const addressController = require('../controllers/users/addressController')
+
 const passport = require('passport')
 
 user_route.use('/',express.static('public'));
@@ -29,13 +31,26 @@ user_route.get('/home',userController.loadHome);
 user_route.get('/logout',userController.userLogout);
 
 //Products
-user_route.get('/products',productController.showProductsPage)
+user_route.get('/products',userAuth,productController.showProductsPage)
 user_route.get('/product/details/:productId', productController.productDetails)
 
+
 // Profile
+user_route.post('/forgot-password',userController.forgotPasswordPage)
+user_route.get('/reset-password', (req, res) => {
+    const token  = req.query.token; // Extract the reset token from the query string
+    res.render('users/login', { token }); // Render a page with the token
+});
+user_route.post('/reset-password', userController.resetPassword);
 user_route.get('/dashboard',userAuth,userController.dashboard)
 user_route.post('/dash/saveUserDetails',userController.saveUserDetails)
 user_route.post('/changePassword',userController.changePassword)
+
+user_route.get('/showUserAddresses',addressController.showUserAddresses)
+user_route.get('/addAddress',addressController.addAddress)
+user_route.get('/deleteAddress',addressController.deleteAddress)
+user_route.get('/editAddress/:addressId',addressController.editAddress)
+
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 

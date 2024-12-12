@@ -26,8 +26,9 @@ const app = express()
 const port = config.PORT || 4000
 
 // Set up middleware
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// app.use(express.json({limit: '50mb'}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true}));
 // Set up session middleware
 app.use(session({
     secret: config.SECRET,  // Change this to a secure secret
@@ -53,9 +54,12 @@ app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/user', userRoute);
 app.use('/admin',adminAuth,adminRoute)
+
+// app.use("/api", forgotPasswordRoute);
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)

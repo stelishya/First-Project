@@ -8,7 +8,7 @@ const addressSchema = new Schema({
         required:true
     },
     address:[{
-        addressType:{
+        typeOfAddress:{
             type:String,
             required:true
         },
@@ -16,14 +16,18 @@ const addressSchema = new Schema({
             type:String,
             required:true
         },
+        streetAddress:{
+            type:String,
+            required:true
+        },
         city:{
             type:String,
             required:true
         },
-        landMark:{
-            type:String,
-            required:true
-        },
+        // landMark:{
+        //     type:String,
+        //     required:true
+        // },
         state:{
             type:String,
             required:true
@@ -32,11 +36,11 @@ const addressSchema = new Schema({
             type:String,
             required:true
         },
-        phone:{
+        mobile:{
             type:String,
             required:true
         },
-        altPhone:{
+        country:{
             type:String,
             required:true
         }
