@@ -47,7 +47,7 @@ user_route.post('/dash/saveUserDetails',userController.saveUserDetails)
 user_route.post('/changePassword',userController.changePassword)
 
 user_route.get('/showUserAddresses',addressController.showUserAddresses)
-user_route.get('/addAddress',addressController.addAddress)
+user_route.post('/addAddress',addressController.addAddress)
 user_route.get('/deleteAddress',addressController.deleteAddress)
 user_route.get('/editAddress/:addressId',addressController.editAddress)
 

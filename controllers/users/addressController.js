@@ -31,17 +31,39 @@ exports.showUserAddresses = async (req,res)=>{
 exports.addAddress = async (req,res)=>{
     try {
         const address = req.body;
-        const newAddress = new Addresses({
-            name:address.name, streetAddress:address.streetAddress, city:address.city,
-            state:address.state, country:address.country, pincode:address.pincode, phone:address.phone,
-            userId:req.session.user._id
-        })
-        await newAddress.save()
+        const userId = req.session.user._id;
+
+        // Find existing address document or create new one
+        let addressDoc = await Addresses.findOne({ userId: userId });
+        
+        if (!addressDoc) {
+            addressDoc = new Addresses({
+                userId: userId,
+                address: [] // Initialize empty array
+            });
+        }
+
+        // Create new address object
+        const newAddress = {
+            typeOfAddress: address.typeOfAddress || 'Home', // Default to 'Home' if not provided
+            name: address.name,
+            streetAddress: address.streetAddress,
+            city: address.city,
+            state: address.state,
+            country: address.country,
+            pincode: address.pincode,
+            mobile: address.mobile
+        };
+
+        // Push new address to array
+        addressDoc.address.push(newAddress);
+        await addressDoc.save();
+
         console.log("Address saved successfully");
-        res.status(201).json("Address successfully created")
+        res.status(201).json({ success: true, message: "Address successfully added" });
     } catch (error) {
-        console.error(error)
-        res.status(500).json("Error saving address")
+        console.error("Error saving address:", error);
+        res.status(500).json({ success: false, message: "Error saving address", error: error.message });
     }
 }
 
@@ -69,7 +91,7 @@ exports.editAddress = async (req,res)=>{
         console.log("address:",address,"id:",id)
         await Addresses.findByIdAndUpdate(id,{
             name:address.name, streetAddress:address.streetAddress, city:address.city,
-            state:address.state, country:address.country, pincode:address.pincode, phone:address.phone,
+            state:address.state, country:address.country, pincode:address.pincode, mobile:address.mobile,
         })
         console.log("Address edited successfully");
         res.status(200).json('Address edited successfully')

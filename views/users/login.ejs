@@ -100,7 +100,7 @@
 
 <script>
 
-    //FORGOT PASSWORD...................
+    //FORGOT PASSWORD
 
     // Get elements
     const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
@@ -128,9 +128,9 @@
     console.log("vannallo")
     forgotPasswordForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission
-        console.log("forgotPasswordForm: ",forgotPasswordForm)
+        console.log("forgotPasswordForm: ", forgotPasswordForm)
         const email = document.getElementById('FPemail').value.trim();
-            
+
         if (!email) {
             alert('Please enter your email!');
             return;
@@ -162,7 +162,7 @@
         const resetToken = urlParams.get('token');
 
         // const resetToken = "<%= typeof token !== 'undefined' ? token : '' %>";
-        console.log("resetToken",resetToken)
+        console.log("resetToken", resetToken)
         if (resetToken) {
             // Show the reset password modal
             const resetPasswordModal = document.getElementById('resetPasswordModal');
@@ -177,43 +177,43 @@
             const resetPasswordModal = document.getElementById('resetPasswordModal');
             resetPasswordModal.classList.add('hidden');
         });
-    // Form submission logic
-    const resetPasswordForm = document.getElementById('resetPasswordForm');
-    resetPasswordForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); // Prevent default form submission
+        // Form submission logic
+        const resetPasswordForm = document.getElementById('resetPasswordForm');
+        resetPasswordForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
 
-    const resetToken = document.getElementById('resetToken').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+            const resetToken = document.getElementById('resetToken').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-    if (newPassword !== confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-    }
-    console.log("resetToken",resetToken)
-    try {
-        const response = await fetch('/reset-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ resetToken, newPassword }),
+            if (newPassword !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+            console.log("resetToken", resetToken)
+            try {
+                const response = await fetch('/user/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resetToken, newPassword }),
+                });
+                console.log("response", response)
+                const data = await response.json();
+                console.log("data", data);
+                console.log("hlo")
+                if (response.ok) {
+                    alert('Password reset successful!');
+                    window.location.href = '/user/login'; // Redirect to login page
+                    // document.getElementById('resetPasswordModal').classList.add('hidden');
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                console.log(error)
+                alert('Failed to reset password');
+            }
         });
-        console.log("response",response)
-        const data = await response.json();
-        console.log("data",data);
-        console.log("hlo")
-        if (response.ok) {
-            alert('Password reset successful!');
-            window.location.href = '/user/login'; // Redirect to login page
-            // document.getElementById('resetPasswordModal').classList.add('hidden');
-        } else {
-            alert(data.message || 'An error occurred');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        console.log(error)
-        alert('Failed to reset password');
-    }
-});
-});
+    });
 
 </script>

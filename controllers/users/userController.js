@@ -264,7 +264,7 @@ exports.verifyLogin = async (req, res) => {
             return res.render('users/login', { message: "User Not Found" });
         }
         if (userData.is_blocked) {
-            return res.render('login', { message: 'User is blocked by admin' })
+            return res.render('users/login', { message: 'User is blocked by admin' })
         }
         if (userData) {
             const passwordMatch = await bcrypt.compare(password, userData.password);
@@ -279,10 +279,7 @@ exports.verifyLogin = async (req, res) => {
                 return res.render('users/login', { message: "Incorrect password" });
             }
         }
-        // else {
-        //     console.log('User not found');
-        //     return res.render('users/login', { message: "User Not Found" });
-        // }
+        
 
     }
     catch (error) {
@@ -296,6 +293,7 @@ exports.forgotPasswordPage= async(req,res)=>{
 
     try {
         const { email } = req.body;
+        req.session.forgotCred = email;
         if (!email) {
             return res.status(400).json({ message: 'Email is required' });
         }
@@ -370,24 +368,11 @@ exports.forgotPasswordPage= async(req,res)=>{
 
 exports.resetPassword = async (req, res) => {
     console.log('Incoming Reset Password Request:', req.body);
-
-    const { resetToken, newPassword } = req.body;
+    const { newPassword } = req.body;
+    const email = req.session.forgotCred;
 
     try {
-        const user = await User.findOne({
-            resetToken,
-            resetTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired reset token' });
-        }
-
-        // Update the user's password
-        user.password = newPassword; // Hash the password if required
-        user.resetToken = undefined;
-        user.resetTokenExpiry = undefined;
-        await user.save();
+        await User.findOneAndUpdate({email},{password:newPassword});
 
         res.status(200).json({ message: 'Password reset successful' });
     } catch (error) {
@@ -501,13 +486,15 @@ exports.saveUserDetails = async (req, res) => {
                 // fullname: userData.fullname,
                 mobile: userData.mobile
             })
-            res.status(200).json('Successfully updated');
+            res.status(200).json({success:true, message:'Successfully updated'});
         } else {
             req.session.user.errorMess = 'Username already exists'
             res.redirect(`/user/profile`)
         }
     } catch (error) {
         console.error("Error in saveUserDetails: ", error)
+        res.status(500).json({ success: false, message: 'Server error' });
+
     }
 }
 
@@ -530,10 +517,10 @@ exports.changePassword = async (req, res) => {
         const { email, newPass } = req.body;
         try {
             await User.findOneAndUpdate({ email }, { password: await bcrypt.hash(newPass, 10) })
-            res.status(200).json("Password changed successfully")
+            res.status(200).json({success:true,message:"Password changed successfully"})
         } catch (error) {
             console.error("Error in changePassword",error)
-            res.status(500).json("Couldn't change the password")
+            res.status(500).json({success:false,message:"Couldn't change the password"})
         }
     }
 }

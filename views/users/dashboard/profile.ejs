@@ -6,8 +6,9 @@
             background-color: #cdcbca;
             /* Add additional styling as needed */
         }
+
         .modal {
-            display: none; /* Initially hidden */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -17,15 +18,10 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            visibility: hidden; /* Hidden until modal is shown */
         }
 
         .modal.show {
             display: flex;
-            opacity: 1;
-            visibility: visible;
         }
 
         .modal-content {
@@ -41,257 +37,275 @@
         .modal.show .modal-content {
             transform: translateY(0);
         }
+
         .profile-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
 
-    .profile-header {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
 
-    .profile-image-container {
-        position: relative;
-        width: 200px;
-        height: 200px;
-        margin: 0 auto 2rem;
-        transition: transform 0.3s ease;
-    }
+        .profile-image-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            transition: transform 0.3s ease;
+        }
 
-    .profile-image-container:hover {
-        transform: scale(1.05);
-    }
+        .profile-image-container:hover {
+            transform: scale(1.05);
+        }
 
-    .profile-image {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid #ff9f43;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ff9f43;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
 
-    .profile-details {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
-        margin-top: 2rem;
-    }
-
-    .detail-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .detail-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    .edit-button {
-        background: #ff9f43;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        aspect-ratio: 1;
-        height: 100%;
-        min-height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        position: absolute;
-        right: -40px;
-        top: 50%;
-        transform: translateY(-50%);
-        box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
-    }
-
-    .edit-button:hover {
-        background: #ff9f43;
-        box-shadow: 0 4px 12px rgba(255, 159, 67, 0.5);
-        filter: brightness(1.1);
-    }
-
-    .input-group {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .form-input {
-        background-color: #fff5e6;
-        border: 2px solid #ffd9b3;
-        border-radius: 8px;
-        padding: 0.75rem;
-        width: 100%;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .form-input:focus {
-        border-color: #ff9f43;
-        box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.2);
-        outline: none;
-    }
-
-    @media (max-width: 768px) {
         .profile-details {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
         }
-    }
 
-    /* Animation for cards */
-    @keyframes fadeInUp {
-        from {
+        .detail-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .edit-button {
+            background: #ff9f43;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            height: 100%;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
+        }
+
+        .edit-button:hover {
+            background: #ff9f43;
+            box-shadow: 0 4px 12px rgba(255, 159, 67, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-input {
+            background-color: #fff5e6;
+            border: 2px solid #ffd9b3;
+            border-radius: 8px;
+            padding: 0.75rem;
+            width: 100%;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #ff9f43;
+            box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.2);
+            outline: none;
+        }
+
+        @media (max-width: 768px) {
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .detail-card {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .detail-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .detail-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .detail-card:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .edit-button {
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .password-input-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: #ff9f43;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: #ff9f43;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+            padding-right: 45px;
+            /* Add padding to accommodate the edit button */
+        }
+
+        .validation-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .validation-item i {
+            width: 1rem;
+        }
+
+        .validation-item.valid {
+            color: #22c55e;
+        }
+
+        .validation-item.invalid {
+            color: #ef4444;
+        }
+
+        .toastify {
+            width: fit-content !important;
+            min-width: 300px !important;
+            max-width: 400px !important;
+            padding: 12px 24px !important;
+            border-radius: 8px !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 16px !important;
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            z-index: 9999 !important;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(-20px);
+            animation: toast-in 0.3s ease-in-out forwards;
         }
-        to {
-            opacity: 1;
-            transform: translateY(0);
+
+        @keyframes toast-in {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-    }
 
-    .detail-card {
-        animation: fadeInUp 0.5s ease forwards;
-    }
+        .toastify-progress {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5)) !important;
+            height: 4px !important;
+            bottom: 0 !important;
+            border-radius: 0 0 8px 8px !important;
+        }
 
-    .detail-card:nth-child(2) {
-        animation-delay: 0.1s;
-    }
+        .toastify-close {
+            opacity: 0.7 !important;
+            padding: 0 8px !important;
+            font-size: 18px !important;
+            transition: opacity 0.2s ease !important;
+        }
 
-    .detail-card:nth-child(3) {
-        animation-delay: 0.2s;
-    }
+        .toastify-close:hover {
+            opacity: 1 !important;
+        }
 
-    .detail-card:nth-child(4) {
-        animation-delay: 0.3s;
-    }
+        .error-feedback {
+            color: red;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
 
-    .input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    position: relative;
-}
-
-.edit-button {
-    position: absolute;
-    right: -40px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.password-input-group {
-    position: relative;
-    margin-bottom: 1rem;
-}
-
-.password-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #666;
-    padding: 5px;
-}
-
-.password-toggle:hover {
-    color: #ff9f43;
-}
-
-.modal-close {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s ease;
-}
-
-.modal-close:hover {
-    color: #ff9f43;
-}
-
-.mb-4 {
-    margin-bottom: 1rem;
-    padding-right: 45px;  /* Add padding to accommodate the edit button */
-}
-
-.validation-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.validation-item i {
-    width: 1rem;
-}
-.validation-item.valid {
-    color: #22c55e;
-}
-.validation-item.invalid {
-    color: #ef4444;
-}
-
-.toastify {
-    width: fit-content !important;
-    min-width: 300px !important;
-    max-width: 400px !important;
-    padding: 12px 24px !important;
-    border-radius: 8px !important;
-    font-family: Arial, sans-serif !important;
-    font-size: 16px !important;
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    z-index: 9999 !important;
-    opacity: 0;
-    transform: translateY(-20px);
-    animation: toast-in 0.3s ease-in-out forwards;
-}
-
-@keyframes toast-in {
-    0% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.toastify-progress {
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5)) !important;
-    height: 4px !important;
-    bottom: 0 !important;
-    border-radius: 0 0 8px 8px !important;
-}
-
-.toastify-close {
-    opacity: 0.7 !important;
-    padding: 0 8px !important;
-    font-size: 18px !important;
-    transition: opacity 0.2s ease !important;
-}
-
-.toastify-close:hover {
-    opacity: 1 !important;
-}
+        .invalid-input {
+            border-color: red !important;
+        }
     </style>
     <div class="flex p-5 bg-gray-300" style="background-color: rgb(216, 210, 205);">
         <%-include('../../partials/user/dashboard_sideBar') %>
 
-        <!-- <div class="w-1/4 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
+            <!-- <div class="w-1/4 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
             <div class="breadcrumb pb-5">
                 <ol class="flex items-center space-x-2">
                     <li><a href="/user/home" class="hover:text-green-600">Home</a></li>
@@ -306,8 +320,8 @@
             <h2 class="text-xl mt-5"><a href="#">Payments</a></h2>
             <h2 class="text-xl mt-5"><a href="/user/logout">Log Out?</a></h2>
         </div> -->
-        <div class="w-1/12 border-r border-gray-400"></div>
-        <!-- <div id="editProfileForm" style="display: none;">
+            <div class="w-1/12 border-r border-gray-400"></div>
+            <!-- <div id="editProfileForm" style="display: none;">
             <form id="profileEditForm">
                 <label for="username">Name:</label>
                 <input type="text" id="username" name="username" value="<%= user.username %>">
@@ -320,88 +334,100 @@
                 <button type="submit">Save</button>
             </form>
         </div> -->
-        <div class="w-2/3 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
-            <div class="w-24 h-24 bg-gray-400 rounded-full mb-5"></div>
-            <h2 class="text-2xl mb-5">User Profile</h2>
-            <div class="mb-5">
-                <p data-field="username">Name: <%= user.username %></p>
-            </div>
-            <div class="mb-5">
-                <p data-field="email">Email: <%= user.email %></p>
-            </div>
-            <div class="mb-5">
-                <p data-field="mobile">Phone: <%= user.mobile %></p>
-            </div>
-            <button id="editButton" class="bg-gray-500 text-white p-2 flex items-center">
-                <i class="fas fa-edit mr-2"></i>Edit Profile
-            </button>
-        </div>
-        <div id="editProfileForm" class="hidden w-full p-6 bg-white rounded-lg shadow-lg">
-            <form id="profileEditForm" class="space-y-4" action="/user/dash/saveUserDetails" method="post"
-                onsubmit="handleProfileSubmit(event)">
-                <!-- Name Field -->
-                <div>
-                    <label for="username" class="block text-medium font-medium text-gray-700">Name</label>
-                    <input type="text" id="username" name="username" value="<%= user.username %>"
-                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700" />
+            <div class="w-2/3 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
+                <div class="w-24 h-24 bg-gray-400 rounded-full mb-5"></div>
+                <h2 class="text-2xl mb-5">User Profile</h2>
+                <div class="mb-5">
+                    <p data-field="username">Name: <%= user.username %>
+                    </p>
                 </div>
+                <div class="mb-5">
+                    <p data-field="email">Email: <%= user.email %>
+                    </p>
+                </div>
+                <div class="mb-5">
+                    <p data-field="mobile">Phone: <%= user.mobile %>
+                    </p>
+                </div>
+                <button id="editButton" class="bg-gray-500 text-white p-2 flex items-center">
+                    <i class="fas fa-edit mr-2"></i>Edit Profile
+                </button>
+            </div>
+            <div id="editProfileForm" class="hidden w-full p-6 bg-white rounded-lg shadow-lg">
+                <form id="profileEditForm" class="space-y-4" action="/user/dash/saveUserDetails" method="post"
+                    onsubmit="handleProfileSubmit(event)">
+                    <!-- Name Field -->
+                    <div class="mb-4">
+                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <input type="text" id="username" name="username" value="<%= user.username %>"
+                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                            oninput="validateUsername(this)" />
+                        <div id="username-feedback" class="error-feedback"></div>
+                    </div>
 
-                <!-- Email Field -->
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <!-- <div class="form-input flex items-center">
+                    <!-- Email Field -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <!-- <div class="form-input flex items-center">
                         <%= user.email %>
                             <% if(user.isGoogleUser){ %>
                                 <img src="/images/user/google_logo.png" class="w-6 h-6 ml-2">
                                 <% } %>
                     </div> -->
-                    <input
-                        type="text"
-                        id="email"
-                        name="email"
-                        value="<%= user.email %>"
-                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
-                    />
-                </div>
+                    <p class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700" >
+                        <%= user.email %>
+                    </p>
+                        <!-- <input type="text" id="email" name="email" value="<%= user.email %>" -->
+                            <!-- class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700" /> -->
+                    </div>
 
-                <!-- Phone Field -->
-                <div>
-                    <label id="phone_label" for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                    <input type="text" id="phone_input" name="mobile" value="<%= user.mobile %>"
-                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700" />
-                    <button type="button" id="phone_edit" class="edit -button" onclick="phoneEditing()">
-                        <i class="fas fa-pen"></i>
-                    </button>
-                </div>
+                    <!-- Phone Field -->
+                    <div class="mb-4">
+                        <label for="phone_input" class="block text-sm font-medium text-gray-700">Phone</label>
+                        <input type="text" id="phone_input" name="mobile" value="<%= user.mobile %>"
+                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                            oninput="validatePhone(this)" maxlength="15" />
+                        <div id="phone-feedback" class="error-feedback"></div>
+                    </div>
 
-                <div class="flex justify-center gap-4 mt-8">
-                    <button type="submit"
-                        class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">
-                        Save Changes
-                    </button>
-                    <button type="button" onclick="openModal()"
-                        class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                        Change Password
-                    </button>
-                    <button type="button"
-                        class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                        Delete Account
-                    </button>
-                </div>
+                    <div class="mb-4">
+                        <label for="typeOfAddress" class="block text-sm font-medium text-gray-700">Address Type</label>
+                        <select id="typeOfAddress" name="typeOfAddress" required
+                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700">
+                            <option value="Home">Home</option>
+                            <option value="Work">Work</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-center gap-4 mt-8">
+                        <button type="submit"
+                            class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">
+                            Save Changes
+                        </button>
+                        <button type="button" onclick="openModal()"
+                            class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            Change Password
+                        </button>
+                        <button type="button"
+                            class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            Delete Account
+                        </button>
+                    </div>
 
 
-                <!-- Submit Button -->
-                <!-- <div class="text-right">
+                    <!-- Submit Button -->
+                    <!-- <div class="text-right">
                     <button type="submit"
                         class="px-6 py-2 bg-blue-500 text-white font-medium text-sm rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         Save
                     </button>
                 </div> -->
-            </form>
-        </div>
+                </form>
+            </div>
 
     </div>
-    <div id="passwordModal" class="modal">
+    <div id="passwordModal" class="modal hidden z-100">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <h2 class="text-2xl font-bold mb-4">Change Password</h2>
@@ -432,7 +458,7 @@
         </div>
     </div>
 
- 
+
 
     <!-- Footer -->
     <div class="text-center p-5 bg-white">
@@ -440,296 +466,368 @@
         <h2 class="text-2xl">Inc</h2>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('editButton').addEventListener('click', function () {
                 var form = document.getElementById('editProfileForm');
                 form.style.display = form.style.display === 'none' ? 'block' : 'none';
             });
 
-            document.getElementById('profileEditForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                const formData = new FormData(this);
-                const data = {
-                    username: formData.get('username'),
-                    email: formData.get('email'),
-                    mobile: formData.get('mobile')
-                };
-
-                console.log('Updating profile with:', data);
-
-                axios.post('/user/dash/saveUserDetails', data)
-                    .then(response => {
-                        if (response.data.success) {
-                            const usernameElement = document.querySelector('p[data-field="username"]');
-                            const emailElement = document.querySelector('p[data-field="email"]');
-                            const mobileElement = document.querySelector('p[data-field="mobile"]');
-
-                            console.log('Elements found:', {
-                                usernameElement,
-                                emailElement,
-                                mobileElement
-                            });
-
-                            if (usernameElement) {
-                                usernameElement.textContent = `Name: ${data.username}`;
-                            }
-                            if (emailElement) {
-                                emailElement.textContent = `Email: ${data.email}`;
-                            }
-                            if (mobileElement) {
-                                mobileElement.textContent = `Phone: ${data.mobile}`;
-                            }
-
-                            alert('Profile updated successfully!');
-                        } else {
-                            alert('Error updating profile.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error updating profile:', error);
-                        alert('An error occurred while updating profile');
-                    });
-            });
-
-            function openModal() {
-                const modal = document.getElementById('passwordModal');
-                modal.classList.add('show');
+            // Add password validation function
+            function validatePasswordOnInput(input) {
+                const password = input.value;
+                const minLength = 8;
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumbers = /\d/.test(password);
+                const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+                
+                const feedback = document.getElementById('password-feedback');
+                if (password.length < minLength) {
+                    feedback.textContent = 'Password must be at least 8 characters long';
+                    feedback.style.color = 'red';
+                    return false;
+                } else if (!(hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar)) {
+                    feedback.textContent = 'Password must contain uppercase, lowercase, numbers, and special characters';
+                    feedback.style.color = 'red';
+                    return false;
+                } else {
+                    feedback.textContent = 'Password is strong!';
+                    feedback.style.color = 'green';
+                    return true;
+                }
             }
 
-            function closeModal() {
-                const modal = document.getElementById('passwordModal');
-                modal.classList.remove('show');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300);
-            }
-
+            // Add toggle password visibility function
             function togglePassword(inputId) {
                 const input = document.getElementById(inputId);
-                const icon = event.currentTarget.querySelector('i');
-
+                const icon = input.nextElementSibling.querySelector('i');
+                
                 if (input.type === 'password') {
                     input.type = 'text';
                     icon.classList.remove('fa-eye-slash');
                     icon.classList.add('fa-eye');
-                    
                 } else {
                     input.type = 'password';
                     icon.classList.remove('fa-eye');
                     icon.classList.add('fa-eye-slash');
                 }
             }
-            function validatePassword(password) {
-            // Password requirements
-            const minLength = 8;
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumbers = /\d/.test(password);
-            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-            const errors = [];
-            if (password.length < minLength) {
-                errors.push(`Password must be at least ${minLength} characters long`);
-            }
-            if (!hasUpperCase) {
-                errors.push("Password must contain at least one uppercase letter");
-            }
-            if (!hasLowerCase) {
-                errors.push("Password must contain at least one lowercase letter");
-            }
-            if (!hasNumbers) {
-                errors.push("Password must contain at least one number");
-            }
-            if (!hasSpecialChar) {
-                errors.push("Password must contain at least one special character");
+            // Add check password match function
+            function checkPasswordMatch() {
+                const newPassword = document.getElementById('newPassword').value;
+                const cfmPassword = document.getElementById('cfmPassword').value;
+                const matchFeedback = document.getElementById('match-feedback');
+
+                if (cfmPassword === '') {
+                    matchFeedback.textContent = '';
+                    return false;
+                } else if (newPassword !== cfmPassword) {
+                    matchFeedback.textContent = 'Passwords do not match';
+                    matchFeedback.style.color = 'red';
+                    return false;
+                } else {
+                    matchFeedback.textContent = 'Passwords match!';
+                    matchFeedback.style.color = 'green';
+                    return true;
+                }
             }
 
-            return errors;
-        }
+            // Add change password function
+            async function changePassword() {
+                const newPassword = document.getElementById('newPassword').value;
+                const cfmPassword = document.getElementById('cfmPassword').value;
+                const messageElement = document.getElementById('message');
 
-        // Function to change the password
-        async function changePassword() {
-            const newPassword = document.getElementById('newPassword').value;
-            const cfmPassword = document.getElementById('cfmPassword').value;
-            const messageElement = document.getElementById('message');
-            
-            // First validate password requirements
-            const passwordErrors = validatePassword(newPassword);
-            if (passwordErrors.length > 0) {
-                messageElement.innerHTML = passwordErrors.join('<br>');
-                messageElement.classList.remove('hidden');
-                messageElement.style.color = 'red';
-                return;
+                if (!validatePasswordOnInput(document.getElementById('newPassword'))) {
+                    messageElement.textContent = 'Please ensure your password meets all requirements';
+                    messageElement.classList.remove('hidden');
+                    messageElement.style.color = 'red';
+                    setTimeout(() => {
+                        messageElement.textContent = '';
+                        messageElement.classList.add('hidden');
+                    }, 3000);
+                    return;
+                }
+
+                if (newPassword !== cfmPassword) {
+                    messageElement.textContent = 'Passwords do not match';
+                    messageElement.classList.remove('hidden');
+                    messageElement.style.color = 'red';
+                    setTimeout(() => {
+                        messageElement.textContent = '';
+                        messageElement.classList.add('hidden');
+                    }, 3000);
+                    return;
+                }
+
+                try {
+                    const response = await axios.post('/user/changePassword', { password: newPassword });
+                    if (response.data.success) {
+                        Toastify({
+                            text: response.data.message || "Password updated successfully!",
+                            duration: 2000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                            stopOnFocus: true,
+                            className: "toast_style"
+                        }).showToast();
+                        closeModal();
+                    } else {
+                        throw new Error(response.data.message || 'Failed to update password');
+                    }
+                } catch (error) {
+                    messageElement.textContent = error.message || 'An error occurred while updating password';
+                    messageElement.classList.remove('hidden');
+                    messageElement.style.color = 'red';
+                    setTimeout(() => {
+                        messageElement.textContent = '';
+                        messageElement.classList.add('hidden');
+                    }, 3000);
+                }
             }
 
-            // Then check if passwords match
-            if (newPassword !== cfmPassword) {
-                messageElement.textContent = "Passwords don't match";
-                messageElement.classList.remove('hidden');
-                messageElement.style.color = 'red';
-                setTimeout(() => {
-                    messageElement.textContent = '';
-                    messageElement.classList.add('hidden')
-                }, 3000);
-                return;
-            }
+            // Make functions globally available
+            window.validatePasswordOnInput = validatePasswordOnInput;
+            window.togglePassword = togglePassword;
+            window.checkPasswordMatch = checkPasswordMatch;
+            window.changePassword = changePassword;
 
-            try {
-                // Make the POST request to update password
-                const response = await axios.post('/user/changePassword', { password: newPassword });
-                console.log(response.data)
-                if(response.data === 200){
+            document.getElementById('profileEditForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const data = {
+                    username: document.getElementById('username').value,
+                    mobile: document.getElementById('phone_input').value,
+                    typeOfAddress: document.getElementById('typeOfAddress').value,
+                };
+
+                axios.post('/user/dash/saveUserDetails', data)
+                    .then(response => {
+                        console.log("response.data.success")
+                        if (response.data.success) {
+                            const usernameElement = document.querySelector('p[data-field="username"]');
+                            const emailElement = document.querySelector('p[data-field="email"]');
+                            const mobileElement = document.querySelector('p[data-field="mobile"]');
+
+                            if (usernameElement) usernameElement.textContent = `Username: ${data.username}`;
+                            if (mobileElement) mobileElement.textContent = `Mobile: ${data.mobile}`;
+
+                            // Close the edit form
+                            document.getElementById('editProfileForm').style.display = 'none';
+
+                            // Show success message
+                            Toastify({
+                                text: response.data.message || "Profile updated successfully!",
+                                duration: 2000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                                stopOnFocus: true,
+                                className: "toast_style"
+                            }).showToast();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Toastify({
+                            text: error.response?.data?.message || "Error updating profile",
+                            duration: 2000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#ff6b6b",
+                            stopOnFocus: true,
+                            className: "toast_style"
+                        }).showToast();
+                    });
+            });
+
+            async function submitAddress(event) {
+                event.preventDefault();
+                const form = event.target;
+                const formData = new FormData(form);
+                const addressData = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await axios.post('/user/addAddress', addressData);
+                    if (response.data.success) {
+                        Toastify({
+                            text: response.data.message || "Address added successfully!",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                            stopOnFocus: true,
+                            className: "toast_style"
+                        }).showToast();
+                        
+                        // Close the modal and reset form
+                        form.reset();
+                        const modal = document.querySelector('.modal');
+                        if (modal) modal.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
                     Toastify({
-                        text: "Password updated successfully!",
-                        duration: 2000,
+                        text: error.response?.data?.message || "An error occurred while adding the address.",
+                        duration: 3000,
                         gravity: "top",
                         position: "right",
-                        backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                        backgroundColor: "#ff6b6b",
                         stopOnFocus: true,
                         className: "toast_style"
                     }).showToast();
                 }
-                // Display success message
-                messageElement.textContent = 'Password updated successfully!';
-                messageElement.classList.remove('hidden');
-                messageElement.style.color = 'green';
-                setTimeout(() => closeModal(), 1000);
-            } catch (error) {
-                Toastify({
-                    text: error.response?.data || "Error updating password",
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                    stopOnFocus: true,
-                    className: "toast_style"
-                }).showToast();
-                messageElement.textContent = 'Error updating password. Please try again.';
-                messageElement.classList.remove('hidden');
-                messageElement.style.color = 'red';
             }
-        }
 
-        function validatePasswordOnInput(password) {
-            const validationDiv = document.querySelector('.validation-feedback');
-            const requirements = [
-                { test: p => p.length >= 8, text: "At least 8 characters" },
-                { test: p => /[A-Z]/.test(p), text: "One uppercase letter" },
-                { test: p => /[a-z]/.test(p), text: "One lowercase letter" },
-                { test: p => /\d/.test(p), text: "One number" },
-                { test: p => /[!@#$%^&*(),.?":{}|<>]/.test(p), text: "One special character" }
-            ];
+            const addressForm = document.getElementById('addressForm');
+            if (addressForm) {
+                addressForm.addEventListener('submit', submitAddress);
+            }
 
-            // Clear previous feedback
-            validationDiv.innerHTML = '';
+            function validateUsername(input) {
+                const username = input.value.trim();
+                const feedback = document.getElementById('username-feedback');
+                const nameRegex = /^[a-zA-Z\s]{3,30}$/;
+                
+                if (username === '') {
+                    showError(input, feedback, 'Username is required');
+                    return false;
+                } else if (!nameRegex.test(username)) {
+                    showError(input, feedback, 'Username should be 3-30 characters long and contain only letters and spaces');
+                    return false;
+                } else {
+                    hideError(input, feedback);
+                    return true;
+                }
+            }
 
-            // Add validation items
-            requirements.forEach(req => {
-                const isValid = req.test(password);
-                const item = document.createElement('div');
-                item.className = `validation-item ${isValid ? 'valid' : 'invalid'}`;
-                item.innerHTML = `
-                    <i class="fas ${isValid ? 'fa-check' : 'fa-times'}"></i>
-                    <span>${req.text}</span>
-                `;
-                validationDiv.appendChild(item);
+            function validatePhone(input) {
+                const phone = input.value.trim();
+                const feedback = document.getElementById('phone-feedback');
+                const phoneRegex = /^[6-9]\d{9}$/;
+                
+                if (phone === '') {
+                    showError(input, feedback, 'Phone number is required');
+                    return false;
+                } else if (!phoneRegex.test(phone)) {
+                    showError(input, feedback, 'Please enter a valid 10-digit Indian mobile number');
+                    return false;
+                } else {
+                    hideError(input, feedback);
+                    return true;
+                }
+            }
+
+            function showError(input, feedback, message) {
+                input.classList.add('invalid-input');
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+            }
+
+            function hideError(input, feedback) {
+                input.classList.remove('invalid-input');
+                feedback.style.display = 'none';
+            }
+
+            // Make validation functions globally available
+            window.validateUsername = validateUsername;
+            window.validatePhone = validatePhone;
+
+            // Update form submission to include validation
+            document.getElementById('profileEditForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const usernameInput = document.getElementById('username');
+                const phoneInput = document.getElementById('phone_input');
+
+                // Validate both fields
+                const isUsernameValid = validateUsername(usernameInput);
+                const isPhoneValid = validatePhone(phoneInput);
+
+                // Only proceed if both validations pass
+                if (!isUsernameValid || !isPhoneValid) {
+                    return;
+                }
+
+                const data = {
+                    username: usernameInput.value.trim(),
+                    mobile: phoneInput.value.trim(),
+                    typeOfAddress: document.getElementById('typeOfAddress').value,
+                };
+
+                axios.post('/user/dash/saveUserDetails', data)
+                    .then(response => {
+                        if (response.data.success) {
+                            const usernameElement = document.querySelector('p[data-field="username"]');
+                            const mobileElement = document.querySelector('p[data-field="mobile"]');
+
+                            if (usernameElement) usernameElement.textContent = `Username: ${data.username}`;
+                            if (mobileElement) mobileElement.textContent = `Mobile: ${data.mobile}`;
+
+                            // Close the edit form
+                            document.getElementById('editProfileForm').style.display = 'none';
+
+                            // Show success message
+                            Toastify({
+                                text: response.data.message || "Profile updated successfully!",
+                                duration: 2000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                                stopOnFocus: true,
+                                className: "toast_style"
+                            }).showToast();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Toastify({
+                            text: error.response?.data?.message || "Error updating profile",
+                            duration: 2000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#ff6b6b",
+                            stopOnFocus: true,
+                            className: "toast_style"
+                        }).showToast();
+                    });
             });
 
-            // Also check password match if confirm password has value
-            checkPasswordMatch();
-        }
+            setTimeout(() => {
+                const successDiv = document.getElementById('success_div');
+                const errorDiv = document.getElementById('error_div');
+                const successMessage = document.getElementById("success_message");
+                const errorMessage = document.getElementById("error_message")
 
-        function checkPasswordMatch() {
-            const newPassword = document.getElementById('newPassword').value;
-            const cfmPassword = document.getElementById('cfmPassword').value;
-            const matchFeedback = document.getElementById('match-feedback');
-
-            if (cfmPassword) {
-                const matches = newPassword === cfmPassword;
-                matchFeedback.className = matches ? 'text-green-500' : 'text-red-500';
-                matchFeedback.innerHTML = `
-                    <div class="validation-item ${matches ? 'valid' : 'invalid'}">
-                        <i class="fas ${matches ? 'fa-check' : 'fa-times'}"></i>
-                        <span>Passwords ${matches ? 'match' : 'do not match'}</span>
-                    </div>
-                `;
-            } else {
-                matchFeedback.innerHTML = '';
-            }
-        }
-
-        async function handleProfileSubmit(event) {
-            event.preventDefault();
-            const form = event.target;
-            
-            try {
-                const formData = new FormData(form);
-                const data = {};
-                formData.forEach((value, key) => {
-                    if (value !== '') {  // Only include non-empty values
-                        data[key] = value;
-                    }
-                });
-
-                const response = await axios.post('/user/dash/saveUserDetails', data);
-                
-                if (response.status === 200) {
-                    Toastify({
-                        text: "Profile updated successfully!",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        style: {
-                            background:"green",
-                            border: "1px solid rgba(0, 176, 155, 0.3)"
-                        },
-                        progressBar: true,
-                        stopOnFocus: false,
-                        destination: false
-                    }).showToast();
-
-                    // Wait for toast to show then reload
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
+                if (successMessage.textContent !== '') {
+                    successDiv.style.opacity = "0";
+                    successMessage.textContent = ''
+                    setTimeout(() => successDiv.style.display = "none", 300); // Remove from view
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                Toastify({
-                    text: error.response?.data || "An error occurred while updating profile",
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    style: {
-                        background: "linear-gradient(to right, #ff5f6d, #ffc371)",
-                        border: "1px solid rgba(255, 95, 109, 0.3)"
-                    },
-                    progressBar: true,
-                    stopOnFocus: false
-                }).showToast();
+
+                if (errorMessage.textContent !== '') {
+                    errorDiv.style.opacity = "0";
+                    errorMessage.textContent = ''
+                    setTimeout(() => errorDiv.style.display = "none", 300); // Remove from view
+                }
+            }, 3000);
+        });
+        function openModal() {
+            const modal = document.getElementById('passwordModal');
+            if (modal) {
+                console.log('modal shown')
+                modal.classList.add('show');
+            } else {
+                console.error('Modal element not found');
             }
         }
-
-        setTimeout(() => {
-            const successDiv = document.getElementById('success_div');
-            const errorDiv = document.getElementById('error_div');
-            const successMessage = document.getElementById("success_message");
-            const errorMessage = document.getElementById("error_message")
-
-            if (successMessage.textContent !== '') {
-                successDiv.style.opacity = "0";
-                successMessage.textContent = ''
-                setTimeout(() => successDiv.style.display = "none", 300); // Remove from view
+        function closeModal() {
+            const modal = document.getElementById('passwordModal');
+            if (modal) {
+                modal.classList.remove('show');
             }
-
-            if (errorMessage.textContent !== '') {
-                errorDiv.style.opacity = "0";
-                errorMessage.textContent = ''
-                setTimeout(() => errorDiv.style.display = "none", 300); // Remove from view
-            }
-        }, 3000);
-        });
-
+        }
 
     </script>
