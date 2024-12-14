@@ -10,8 +10,8 @@
         .modal {
             display: none;
             position: fixed;
-            top: 0;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
@@ -25,6 +25,7 @@
         }
 
         .modal-content {
+            position: relative;
             background-color: #fff;
             padding: 30px 20px;
             border-radius: 8px;
@@ -36,6 +37,48 @@
 
         .modal.show .modal-content {
             transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .password-input-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .password-input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .validation-feedback {
+            color: #ef4444;
+            margin-bottom: 1rem;
         }
 
         .profile-container {
@@ -305,35 +348,7 @@
     <div class="flex p-5 bg-gray-300" style="background-color: rgb(216, 210, 205);">
         <%-include('../../partials/user/dashboard_sideBar') %>
 
-            <!-- <div class="w-1/4 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
-            <div class="breadcrumb pb-5">
-                <ol class="flex items-center space-x-2">
-                    <li><a href="/user/home" class="hover:text-green-600">Home</a></li>
-                    <li><span class="mx-2">/</span></li>
-                    <li><a href="/user/dashboard" class="hover:text-green-600">Profile</a></li>
-                </ol>
-            </div>
-            <h2 class="text-xl mb-5">Account</h2>
-            <button class="w-full p-2 mb-2 bg-gray-500 text-white text-left">Information</button>
-            <button class="w-full p-2 mb-2 bg-gray-500 text-white text-left">Manage address</button>
-            <button class="w-full p-2 mb-2 bg-gray-500 text-white text-left">Order History</button>
-            <h2 class="text-xl mt-5"><a href="#">Payments</a></h2>
-            <h2 class="text-xl mt-5"><a href="/user/logout">Log Out?</a></h2>
-        </div> -->
             <div class="w-1/12 border-r border-gray-400"></div>
-            <!-- <div id="editProfileForm" style="display: none;">
-            <form id="profileEditForm">
-                <label for="username">Name:</label>
-                <input type="text" id="username" name="username" value="<%= user.username %>">
-                <label for="username">Email:</label>
-                <input type="text" id="username" name="username" value="<%= user.email %>">
-                <label for="username">Phone:</label>
-                <input type="text" id="username" name="username" value="<%= user.mobile %>">
-                <label for="username">Password:</label>
-                <input type="text" id="username" name="username" value="<%= user.password %>">
-                <button type="submit">Save</button>
-            </form>
-        </div> -->
             <div class="w-2/3 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
                 <div class="w-24 h-24 bg-gray-400 rounded-full mb-5"></div>
                 <h2 class="text-2xl mb-5">User Profile</h2>
@@ -356,7 +371,6 @@
             <div id="editProfileForm" class="hidden w-full p-6 bg-white rounded-lg shadow-lg">
                 <form id="profileEditForm" class="space-y-4" action="/user/dash/saveUserDetails" method="post"
                     onsubmit="handleProfileSubmit(event)">
-                    <!-- Name Field -->
                     <div class="mb-4">
                         <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
                         <input type="text" id="username" name="username" value="<%= user.username %>"
@@ -365,23 +379,14 @@
                         <div id="username-feedback" class="error-feedback"></div>
                     </div>
 
-                    <!-- Email Field -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <!-- <div class="form-input flex items-center">
-                        <%= user.email %>
-                            <% if(user.isGoogleUser){ %>
-                                <img src="/images/user/google_logo.png" class="w-6 h-6 ml-2">
-                                <% } %>
-                    </div> -->
-                    <p class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700" >
-                        <%= user.email %>
-                    </p>
-                        <!-- <input type="text" id="email" name="email" value="<%= user.email %>" -->
-                            <!-- class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700" /> -->
+                        <p
+                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700">
+                            <%= user.email %>
+                        </p>
                     </div>
 
-                    <!-- Phone Field -->
                     <div class="mb-4">
                         <label for="phone_input" class="block text-sm font-medium text-gray-700">Phone</label>
                         <input type="text" id="phone_input" name="mobile" value="<%= user.mobile %>"
@@ -390,42 +395,22 @@
                         <div id="phone-feedback" class="error-feedback"></div>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="typeOfAddress" class="block text-sm font-medium text-gray-700">Address Type</label>
-                        <select id="typeOfAddress" name="typeOfAddress" required
-                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700">
-                            <option value="Home">Home</option>
-                            <option value="Work">Work</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="flex justify-center gap-4 mt-8">
+                    <div class="flex justify-center gap-4 mt-10">
                         <button type="submit"
-                            class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">
+                            class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors">
                             Save Changes
                         </button>
                         <button type="button" onclick="openModal()"
-                            class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-600 transition-colors">
                             Change Password
                         </button>
-                        <button type="button"
-                            class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                        <button type="button" onclick="deleteAccount('<%= user._id %>')"
+                            class="px-6 py-2 bg-red-400 text-white rounded-lg hover:bg-red-600 transition-colors">
                             Delete Account
                         </button>
                     </div>
-
-
-                    <!-- Submit Button -->
-                    <!-- <div class="text-right">
-                    <button type="submit"
-                        class="px-6 py-2 bg-blue-500 text-white font-medium text-sm rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Save
-                    </button>
-                </div> -->
                 </form>
             </div>
-
     </div>
     <div id="passwordModal" class="modal hidden z-100">
         <div class="modal-content">
@@ -458,30 +443,60 @@
         </div>
     </div>
 
-
-
     <!-- Footer -->
     <div class="text-center p-5 bg-white">
         <h1 class="text-4xl">CAlliope</h1>
         <h2 class="text-2xl">Inc</h2>
     </div>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('editButton').addEventListener('click', function () {
-                var form = document.getElementById('editProfileForm');
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            });
+            // Validation functions
+            function validateUsername(input) {
+                const username = input.value.trim();
+                const feedback = document.getElementById('username-feedback');
+                const nameRegex = /^[a-zA-Z\s]{3,30}$/;
 
-            // Add password validation function
+                if (username === '') {
+                    showError(input, feedback, 'Username is required');
+                    return false;
+                } else if (!nameRegex.test(username)) {
+                    showError(input, feedback, 'Username should be 3-30 characters long and contain only letters and spaces');
+                    return false;
+                } else {
+                    hideError(input, feedback);
+                    return true;
+                }
+            }
+
+            function validatePhone(input) {
+                const phone = input.value.trim();
+                const feedback = document.getElementById('phone-feedback');
+                const phoneRegex = /^[6-9]\d{9}$/;
+
+                if (phone === '') {
+                    showError(input, feedback, 'Phone number is required');
+                    return false;
+                } else if (!phoneRegex.test(phone)) {
+                    showError(input, feedback, 'Please enter a valid 10-digit Indian mobile number');
+                    return false;
+                } else {
+                    hideError(input, feedback);
+                    return true;
+                }
+            }
+
             function validatePasswordOnInput(input) {
-                const password = input.value;
+                const password = input;
                 const minLength = 8;
                 const hasUpperCase = /[A-Z]/.test(password);
                 const hasLowerCase = /[a-z]/.test(password);
                 const hasNumbers = /\d/.test(password);
                 const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-                
-                const feedback = document.getElementById('password-feedback');
+
+                const feedback = document.querySelector('.validation-feedback');
                 if (password.length < minLength) {
                     feedback.textContent = 'Password must be at least 8 characters long';
                     feedback.style.color = 'red';
@@ -497,23 +512,6 @@
                 }
             }
 
-            // Add toggle password visibility function
-            function togglePassword(inputId) {
-                const input = document.getElementById(inputId);
-                const icon = input.nextElementSibling.querySelector('i');
-                
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                } else {
-                    input.type = 'password';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                }
-            }
-
-            // Add check password match function
             function checkPasswordMatch() {
                 const newPassword = document.getElementById('newPassword').value;
                 const cfmPassword = document.getElementById('cfmPassword').value;
@@ -533,13 +531,135 @@
                 }
             }
 
-            // Add change password function
+            function togglePassword(inputId) {
+                const input = document.getElementById(inputId);
+                const icon = input.nextElementSibling.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            }
+
+            function showError(input, feedback, message) {
+                input.classList.add('invalid-input');
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+            }
+
+            function hideError(input, feedback) {
+                input.classList.remove('invalid-input');
+                feedback.style.display = 'none';
+            }
+
+            // Make validation functions globally available
+            window.validateUsername = validateUsername;
+            window.validatePhone = validatePhone;
+            window.validatePasswordOnInput = validatePasswordOnInput;
+
+            // Toggle edit form
+            document.getElementById('editButton').addEventListener('click', function () {
+                var form = document.getElementById('editProfileForm');
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Handle profile form submission
+            document.getElementById('profileEditForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const usernameInput = document.getElementById('username');
+                const phoneInput = document.getElementById('phone_input');
+
+                // Validate both fields
+                const isUsernameValid = validateUsername(usernameInput);
+                const isPhoneValid = validatePhone(phoneInput);
+
+                // Only proceed if both validations pass
+                if (!isUsernameValid || !isPhoneValid) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/user/dash/saveUserDetails', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: usernameInput.value.trim(),
+                            mobile: phoneInput.value.trim()
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById('editProfileForm').style.display = 'none';
+
+                        // Update displayed information
+                        const usernameElement = document.querySelector('p[data-field="username"]');
+                        const mobileElement = document.querySelector('p[data-field="mobile"]');
+
+                        if (usernameElement) usernameElement.textContent = `Name: ${usernameInput.value.trim()}`;
+                        if (mobileElement) mobileElement.textContent = `Phone: ${phoneInput.value.trim()}`;
+
+                        Toastify({
+                            text: "Profile updated successfully!",
+                            duration: 2000,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))"
+                            }
+                        }).showToast();
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                } catch (error) {
+                    Toastify({
+                        text: "Error updating profile",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#ff6b6b"
+                        }
+                    }).showToast();
+                }
+            });
+
+            // Modal functions
+            function openModal() {
+                const modal = document.getElementById('passwordModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('passwordModal');
+                modal.classList.remove('show');
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                document.getElementById('passwordForm').reset();
+                document.querySelector('.validation-feedback').textContent = '';
+                document.getElementById('match-feedback').textContent = '';
+            }
+
+            // Change password function
             async function changePassword() {
                 const newPassword = document.getElementById('newPassword').value;
                 const cfmPassword = document.getElementById('cfmPassword').value;
                 const messageElement = document.getElementById('message');
 
-                if (!validatePasswordOnInput(document.getElementById('newPassword'))) {
+                if (!validatePasswordOnInput(newPassword)) {
                     messageElement.textContent = 'Please ensure your password meets all requirements';
                     messageElement.classList.remove('hidden');
                     messageElement.style.color = 'red';
@@ -563,22 +683,26 @@
 
                 try {
                     const response = await axios.post('/user/changePassword', { password: newPassword });
-                    if (response.data.success) {
+                    if (response.data === 'Password edited succesfully') {
                         Toastify({
-                            text: response.data.message || "Password updated successfully!",
+                            text: "Password updated successfully!",
                             duration: 2000,
                             gravity: "top",
                             position: "right",
-                            backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
-                            stopOnFocus: true,
+                            style: {
+                                background: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))"
+                            },
                             className: "toast_style"
                         }).showToast();
                         closeModal();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
                     } else {
-                        throw new Error(response.data.message || 'Failed to update password');
+                        throw new Error('Failed to update password');
                     }
                 } catch (error) {
-                    messageElement.textContent = error.message || 'An error occurred while updating password';
+                    messageElement.textContent = error.response?.data?.message || 'An error occurred while updating password';
                     messageElement.classList.remove('hidden');
                     messageElement.style.color = 'red';
                     setTimeout(() => {
@@ -588,246 +712,79 @@
                 }
             }
 
-            // Make functions globally available
-            window.validatePasswordOnInput = validatePasswordOnInput;
-            window.togglePassword = togglePassword;
-            window.checkPasswordMatch = checkPasswordMatch;
-            window.changePassword = changePassword;
-
-            document.getElementById('profileEditForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-
-                const data = {
-                    username: document.getElementById('username').value,
-                    mobile: document.getElementById('phone_input').value,
-                    typeOfAddress: document.getElementById('typeOfAddress').value,
-                };
-
-                axios.post('/user/dash/saveUserDetails', data)
-                    .then(response => {
-                        console.log("response.data.success")
-                        if (response.data.success) {
-                            const usernameElement = document.querySelector('p[data-field="username"]');
-                            const emailElement = document.querySelector('p[data-field="email"]');
-                            const mobileElement = document.querySelector('p[data-field="mobile"]');
-
-                            if (usernameElement) usernameElement.textContent = `Username: ${data.username}`;
-                            if (mobileElement) mobileElement.textContent = `Mobile: ${data.mobile}`;
-
-                            // Close the edit form
-                            document.getElementById('editProfileForm').style.display = 'none';
-
-                            // Show success message
-                            Toastify({
-                                text: response.data.message || "Profile updated successfully!",
-                                duration: 2000,
-                                gravity: "top",
-                                position: "right",
-                                backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
-                                stopOnFocus: true,
-                                className: "toast_style"
-                            }).showToast();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Toastify({
-                            text: error.response?.data?.message || "Error updating profile",
-                            duration: 2000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#ff6b6b",
-                            stopOnFocus: true,
-                            className: "toast_style"
-                        }).showToast();
-                    });
-            });
-
-            async function submitAddress(event) {
-                event.preventDefault();
-                const form = event.target;
-                const formData = new FormData(form);
-                const addressData = Object.fromEntries(formData.entries());
-
+            // Delete account function
+            window.deleteAccount = async function(userId) {
                 try {
-                    const response = await axios.post('/user/addAddress', addressData);
-                    if (response.data.success) {
+                    const { isConfirmed } = await Swal.fire({
+                        title: 'Delete Account',
+                        text: 'Are you sure you want to delete this address?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'No',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6'
+                    });
+
+                    if (!isConfirmed) {
+                        return;
+                    }
+
+                    const response = await fetch(`/user/deleteAccount/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    console.log("Delete response:", data);
+
+                    if (data.success) {
                         Toastify({
-                            text: response.data.message || "Address added successfully!",
+                            text: "Account deleted successfully",
                             duration: 3000,
                             gravity: "top",
                             position: "right",
-                            backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
-                            stopOnFocus: true,
+                            style: {
+                                background: "#ff6b6b"
+                            },
                             className: "toast_style"
                         }).showToast();
-                        
-                        // Close the modal and reset form
-                        form.reset();
-                        const modal = document.querySelector('.modal');
-                        if (modal) modal.style.display = 'none';
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    } else {
+                        throw new Error(data.message || "Failed to delete account");
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error("Error:", error);
                     Toastify({
-                        text: error.response?.data?.message || "An error occurred while adding the address.",
+                        text: error.message || "An error occurred while deleting the account",
                         duration: 3000,
                         gravity: "top",
                         position: "right",
-                        backgroundColor: "#ff6b6b",
-                        stopOnFocus: true,
+                        style: {
+                            background: "#ff6b6b"
+                        },
                         className: "toast_style"
                     }).showToast();
                 }
-            }
+            };
 
-            const addressForm = document.getElementById('addressForm');
-            if (addressForm) {
-                addressForm.addEventListener('submit', submitAddress);
-            }
+            // Make functions globally available
+            window.openModal = openModal;
+            window.closeModal = closeModal;
+            window.togglePassword = togglePassword;
+            window.changePassword = changePassword;
 
-            function validateUsername(input) {
-                const username = input.value.trim();
-                const feedback = document.getElementById('username-feedback');
-                const nameRegex = /^[a-zA-Z\s]{3,30}$/;
-                
-                if (username === '') {
-                    showError(input, feedback, 'Username is required');
-                    return false;
-                } else if (!nameRegex.test(username)) {
-                    showError(input, feedback, 'Username should be 3-30 characters long and contain only letters and spaces');
-                    return false;
-                } else {
-                    hideError(input, feedback);
-                    return true;
+            // Close modal when clicking outside
+            window.onclick = function (event) {
+                const modal = document.getElementById('passwordModal');
+                if (event.target === modal) {
+                    closeModal();
                 }
-            }
-
-            function validatePhone(input) {
-                const phone = input.value.trim();
-                const feedback = document.getElementById('phone-feedback');
-                const phoneRegex = /^[6-9]\d{9}$/;
-                
-                if (phone === '') {
-                    showError(input, feedback, 'Phone number is required');
-                    return false;
-                } else if (!phoneRegex.test(phone)) {
-                    showError(input, feedback, 'Please enter a valid 10-digit Indian mobile number');
-                    return false;
-                } else {
-                    hideError(input, feedback);
-                    return true;
-                }
-            }
-
-            function showError(input, feedback, message) {
-                input.classList.add('invalid-input');
-                feedback.textContent = message;
-                feedback.style.display = 'block';
-            }
-
-            function hideError(input, feedback) {
-                input.classList.remove('invalid-input');
-                feedback.style.display = 'none';
-            }
-
-            // Make validation functions globally available
-            window.validateUsername = validateUsername;
-            window.validatePhone = validatePhone;
-
-            // Update form submission to include validation
-            document.getElementById('profileEditForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-
-                const usernameInput = document.getElementById('username');
-                const phoneInput = document.getElementById('phone_input');
-
-                // Validate both fields
-                const isUsernameValid = validateUsername(usernameInput);
-                const isPhoneValid = validatePhone(phoneInput);
-
-                // Only proceed if both validations pass
-                if (!isUsernameValid || !isPhoneValid) {
-                    return;
-                }
-
-                const data = {
-                    username: usernameInput.value.trim(),
-                    mobile: phoneInput.value.trim(),
-                    typeOfAddress: document.getElementById('typeOfAddress').value,
-                };
-
-                axios.post('/user/dash/saveUserDetails', data)
-                    .then(response => {
-                        if (response.data.success) {
-                            const usernameElement = document.querySelector('p[data-field="username"]');
-                            const mobileElement = document.querySelector('p[data-field="mobile"]');
-
-                            if (usernameElement) usernameElement.textContent = `Username: ${data.username}`;
-                            if (mobileElement) mobileElement.textContent = `Mobile: ${data.mobile}`;
-
-                            // Close the edit form
-                            document.getElementById('editProfileForm').style.display = 'none';
-
-                            // Show success message
-                            Toastify({
-                                text: response.data.message || "Profile updated successfully!",
-                                duration: 2000,
-                                gravity: "top",
-                                position: "right",
-                                backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
-                                stopOnFocus: true,
-                                className: "toast_style"
-                            }).showToast();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Toastify({
-                            text: error.response?.data?.message || "Error updating profile",
-                            duration: 2000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#ff6b6b",
-                            stopOnFocus: true,
-                            className: "toast_style"
-                        }).showToast();
-                    });
-            });
-
-            setTimeout(() => {
-                const successDiv = document.getElementById('success_div');
-                const errorDiv = document.getElementById('error_div');
-                const successMessage = document.getElementById("success_message");
-                const errorMessage = document.getElementById("error_message")
-
-                if (successMessage.textContent !== '') {
-                    successDiv.style.opacity = "0";
-                    successMessage.textContent = ''
-                    setTimeout(() => successDiv.style.display = "none", 300); // Remove from view
-                }
-
-                if (errorMessage.textContent !== '') {
-                    errorDiv.style.opacity = "0";
-                    errorMessage.textContent = ''
-                    setTimeout(() => errorDiv.style.display = "none", 300); // Remove from view
-                }
-            }, 3000);
+            };
         });
-        function openModal() {
-            const modal = document.getElementById('passwordModal');
-            if (modal) {
-                console.log('modal shown')
-                modal.classList.add('show');
-            } else {
-                console.error('Modal element not found');
-            }
-        }
-        function closeModal() {
-            const modal = document.getElementById('passwordModal');
-            if (modal) {
-                modal.classList.remove('show');
-            }
-        }
-
     </script>

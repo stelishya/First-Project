@@ -525,6 +525,27 @@ exports.changePassword = async (req, res) => {
     }
 }
 
+exports.deleteAccount = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        console.log("Deleting user account:", userId);
+
+        const user = await User.findByIdAndDelete(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // Clear the session
+        req.session.destroy();
+
+        console.log("Account deleted successfully");
+        res.status(200).json({ success: true, message: "Account deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting account:", error);
+        res.status(500).json({ success: false, message: "Error deleting account", error: error.message });
+    }
+};
+
 exports.userLogout = (req, res) => {
     try {
         req.session.user_id = null;
@@ -537,4 +558,3 @@ exports.userLogout = (req, res) => {
         req.redirect('/user/pageNotFound')
     }
 }
-

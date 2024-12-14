@@ -65,26 +65,29 @@
             <h1 class="text-2xl font-bold mb-4">Your Addresses</h1>
             <% if(addresses && addresses.length>0){ %>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <% addresses.forEach((address, index) => { %>
-                        <div class="bg-gray-200 p-4 rounded-lg shadow-md">
-                            <div class="flex items-start">
-                                <input type="radio" name="address" class="mt-1 mr-2">
-                                <div>
-                                    <h2><%= address.typeOfAddress %></h2>
-                                    <p class="font-bold"><%= address.name %></p>
-                                    <p><%= address.streetAddress %></p>
-                                    <p><%= address.city %>, <%= address.pincode %></p>
-                                    <p><%= address.state %>, <%= address.country %></p>
-                                    <p><%= address.phone %></p>
+                    <% addresses.forEach((addressDoc) => { %>
+                        <% if (addressDoc.address && addressDoc.address.length > 0) { %>
+                            <% addressDoc.address.forEach((address) => { %>
+                                <div class="bg-gray-200 p-4 rounded-lg shadow-md">
+                                    <div class="flex items-start">
+                                        <input type="radio" name="address" class="mt-1 mr-2">
+                                        <div>
+                                            <h2><%= address.typeOfAddress %></h2>
+                                            <p class="font-bold"><%= address.name %></p>
+                                            <p><%= address.streetAddress %></p>
+                                            <p><%= address.city %>, <%= address.pincode %></p>
+                                            <p><%= address.state %>, <%= address.country %></p>
+                                            <p><%= address.mobile %></p>
+                                        </div>
+                                        <div class="ml-auto flex space-x-2">
+                                            <button class="bg-gray-600 text-white px-3 py-1 rounded-full" onclick="editAddressModal('<%= JSON.stringify(address) %>')">Edit</button>
+                                            <button class="bg-gray-600 text-white px-3 py-1 rounded-full" onclick="deleteAddress('<%= address._id %>')">Delete</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="ml-auto flex space-x-2">
-                                    <button class="bg-gray-600 text-white px-3 py-1 rounded-full" onclick="editAddressModal('<%= JSON.stringify(address) %>')">Edit</button>
-                                    <!-- <button class="bg-gray-600 text-white px-3 py-1 rounded-full" onclick="editAddressModal('<%= address._id %>')">Edit</button> -->
-                                    <button class="bg-gray-600 text-white px-3 py-1 rounded-full" onclick="deleteAddress('<%= address._id %>')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
+                            <% }); %>
+                        <% } %>
+                    <% }); %>
                 </div>
             <% } else{ %>
                 <div class="w-full flex justify-center">
@@ -93,7 +96,7 @@
                 </div>
             <% } %>
             <div class="mt-4">
-                <button class="text-white bg-gray-300 px-3 py-1 rounded-md inline-flex font-bold text-lg items-center" onclick="openAddressModal()"><i class="fas fa-plus mr-2"></i> Add a new address</button>
+                <button class="text-gray bg-gray-300 px-3 py-1 rounded-md inline-flex font-bold text-lg items-center" onclick="openAddressModal()">+ Add a new address</button>
             </div>
         </div>
         <!-- Add Address Modal -->
@@ -103,40 +106,53 @@
                 <h2 class="font-bold text-xl mb-4 text-center">Enter the Address Details</h2>
                 <form id="addressForm" action="/user/addAddress" class="flex flex-col gap-4">
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block mb-2">Name</label>
-                            <input id="nameInput" type="text" name="name" placeholder="Full Name" oninput="validateName()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="nameError"></span>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block mb-2">Name</label>
+                                <input id="nameInput" type="text" name="name" placeholder="Full Name" oninput="validateName()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="nameError"></span>
+                            </div>
+                            
+                            <div>
+                                <label class="block mb-2">Street Address</label>
+                                <input id="addressInput" type="text" name="streetAddress" placeholder="Street Address" oninput="validateStreetAddress()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="addressError"></span>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Pincode</label>
+                                <input id="pincodeInput" type="text" name="pincode" placeholder="Pincode" oninput="validatePincode()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="pincodeError"></span>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Country</label>
+                                <input id="countryInput" type="text" name="country" placeholder="Country" oninput="validateCountry()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="countryError"></span>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block mb-2">Street Address</label>
-                            <input id="addressInput" type="text" name="streetAddress" placeholder="Street Address" oninput="validateStreetAddress()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="addressError"></span>
-                        </div>
-                        <div>
-                            <label class="block mb-2">City</label>
-                            <input id="cityInput" type="text" name="city" placeholder="City" oninput="validateCity()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="cityError"></span>
-                        </div>
-                        <div>
-                            <label class="block mb-2">State</label>
-                            <input id="stateInput" type="text" name="state" placeholder="State" oninput="validateState()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="stateError"></span>
-                        </div>
-                        <div>
-                            <label class="block mb-2">Country</label>
-                            <input id="countryInput" type="text" name="country" placeholder="Country" oninput="validateCountry()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="countryError"></span>
-                        </div>
-                        <div>
-                            <label class="block mb-2">Pincode</label>
-                            <input id="pincodeInput" type="text" name="pincode" placeholder="Pincode" oninput="validatePincode()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="pincodeError"></span>
-                        </div>
-                        <div>
-                            <label class="block mb-2">Phone</label>
-                            <input id="phoneInput" type="text" name="mobile" placeholder="Phone Number" oninput="validatePhone()" class="w-full p-2 bg-gray-200 rounded" required>
-                            <span id="phoneError"></span>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block mb-2">Type of Address</label>
+                                <select id="typeSelect" name="typeOfAddress" class="w-full p-2 bg-gray-200 rounded">
+                                    <option value="Home">Home</option>
+                                    <option value="Work">Work</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-2">City</label>
+                                <input id="cityInput" type="text" name="city" placeholder="City" oninput="validateCity()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="cityError"></span>
+                            </div>
+                            <div>
+                                <label class="block mb-2">State</label>
+                                <input id="stateInput" type="text" name="state" placeholder="State" oninput="validateState()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="stateError"></span>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Phone</label>
+                                <input id="phoneInput" type="text" name="mobile" placeholder="Phone Number" oninput="validatePhone()" class="w-full p-2 bg-gray-200 rounded" required>
+                                <span id="phoneError"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-6 text-center">
@@ -148,51 +164,47 @@
         </div>
     </main>
 
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 
-    function openAddressModal(address = null) {
+    function openAddressModal(existingAddress = null) {
         const modal = document.getElementById('addressModal');
-        
-        // Set modal title and button text
         const modalTitle = document.querySelector('#addressModal h2');
         const submitButton = document.querySelector('#addressModal button[type="button"]');
 
-        if (typeof address === 'undefined') {
-        console.error('Address is not defined');
-        return; // Exit the function if address is not defined
-        }
-        if (address && typeof address === 'object') {
-            // Editing mode
+        // Reset form
+        document.getElementById('addressForm').reset();
+
+        if (existingAddress) {
+            // Edit mode
             modalTitle.textContent = 'Edit Address Details';
             submitButton.textContent = 'Save Changes';
+            submitButton.setAttribute('data-edit-mode', 'true');
+            submitButton.setAttribute('data-address-id', existingAddress._id);
 
-            // Prefill form fields with address data
-            document.getElementById('nameInput').value = address.name;
-            document.getElementById('addressInput').value = address.streetAddress;
-            document.getElementById('cityInput').value = address.city;
-            document.getElementById('stateInput').value = address.state;
-            document.getElementById('countryInput').value = address.country;
-            document.getElementById('pincodeInput').value = address.pincode;
-            document.getElementById('phoneInput').value = address.phone;
-
-            // Set an attribute to identify edit mode
-            submitButton.setAttribute('data-edit-mode', true);
-            submitButton.setAttribute('data-address-id', address._id);
-
+            // Prefill form fields
+            document.getElementById('typeSelect').value = existingAddress.typeOfAddress || 'Home';
+            document.getElementById('nameInput').value = existingAddress.name || '';
+            document.getElementById('addressInput').value = existingAddress.streetAddress || '';
+            document.getElementById('cityInput').value = existingAddress.city || '';
+            document.getElementById('stateInput').value = existingAddress.state || '';
+            document.getElementById('countryInput').value = existingAddress.country || '';
+            document.getElementById('pincodeInput').value = existingAddress.pincode || '';
+            document.getElementById('phoneInput').value = existingAddress.mobile || '';
         } else {
-            // Adding mode
-            modalTitle.textContent = 'Enter Address Details';
+            // Add mode
+            modalTitle.textContent = 'Add New Address';
             submitButton.textContent = 'Add Address';
-
-            // Clear form fields
-            document.getElementById('addressForm').reset();
-            submitButton.removeAttribute('data-edit-mode');
+            submitButton.setAttribute('data-edit-mode', 'false');
             submitButton.removeAttribute('data-address-id');
+            document.getElementById('typeSelect').value = 'Home';
         }
 
-
-        modal.classList.remove('hidden')
-        modal.classList.add('show')
+        modal.classList.remove('hidden');
+        modal.classList.add('show');
     }
 
     function closeModal() {
@@ -303,86 +315,167 @@
         const isCountryValid = validateCountry();
         const isPincodeValid = validatePincode();
         const isPhoneValid = validatePhone();
-        const form = document.getElementById('addressForm')
 
         if (isNameValid && isStreetAddressValid && isCityValid && isStateValid && isCountryValid && isPincodeValid && isPhoneValid) {
-        const submitButton = document.querySelector('#addressModal button[type="button"]');
-        const isEditMode = submitButton.getAttribute('data-edit-mode') === 'true';
-        const addressId = submitButton.getAttribute('data-address-id');
+            const submitButton = document.querySelector('#addressModal button[type="button"]');
+            const isEditMode = submitButton.getAttribute('data-edit-mode') === 'true';
+            const addressId = submitButton.getAttribute('data-address-id');
 
-        const form = document.getElementById('addressForm');
-        const message = document.getElementById('message');
-        // Collect form data
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+            const form = document.getElementById('addressForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
 
-        try {
-            console.log("vann vann")
-            const response = await fetch(isEditMode ? `/user/editAddress/${addressId}` : '/user/addAddress', {
+            try {
+                const url = isEditMode ? `/user/editAddress/${addressId}` : '/user/addAddress';
+                console.log("Sending request to:", url, "with data:", data);
+                
+                const response = await fetch(url, {
                     method: isEditMode ? 'PATCH' : 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+                console.log("Server response:", result);
+
+                if (response.ok) {
+                    Toastify({
+                        text: isEditMode ? "Address updated successfully!" : "Address added successfully!",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))"
+                        },
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
+
+                    closeModal();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    Toastify({
+                        text: result.message || "Failed to save address",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#ff6b6b"
+                        },
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                Toastify({
+                    text: "An error occurred while saving the address",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: "#ff6b6b"
+                    },
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+            }
+        } else {
+            Toastify({
+                text: "Please correct the highlighted errors",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#ff6b6b"
+                },
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+        }
+    }
+
+    async function deleteAddress(addressId) {
+        try {
+            const { isConfirmed } = await Swal.fire({
+                title: 'Delete Address',
+                text: 'Are you sure you want to delete this address?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
             });
 
-            const result = await response.json();
-            console.log("response:",response,"result",result)
-            if (response.ok) {
-                message.classList.remove('hidden');
-                message.classList.add('text-green-500');
-                message.textContent = isEditMode ? 'Address updated successfully!' : 'Address added successfully!';
-                message.style.display = 'block';
-                setTimeout(()=>{
-                    message.classList.add('hidden')
-                    message.textContent = ''
-                    message.style.display = 'none'
-                    closeModal(); // Close the modal if successful
-                    setTimeout(() => {
-                    location.reload();
-                    }, 500);
-                },1500)
+            if (!isConfirmed) {
+                return;
+            }
+
+            const response = await fetch(`/user/deleteAddress/${addressId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            console.log("Delete response:", data);
+
+            if (data.success) {
+                Toastify({
+                    text: "Address deleted successfully",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: "#ff6b6b"
+                    },
+                    className: "toast_style"
+                }).showToast();
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
             } else {
-                alert(result.error || "Failed to save address.");
+                throw new Error(data.message || "Failed to delete address");
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("An error occurred while adding the address.");
-        }
-    } else {
-        alert("Please correct the highlighted errors.");
-    }
-    }
-
-    async function deleteAddress(id) {
-        try {
-            const response = await fetch('/user/deleteAddress',{
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
+            Toastify({
+                text: error.message || "An error occurred while deleting the address",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#ff6b6b"
                 },
-                body: JSON.stringify({id}),
-            })
-            const result = await response.json();
-
-            if (response.ok) {
-                alert('Address deleted successfully')
-                location.reload()
-            } else {
-                alert(result.error || "Failed to delete address.");
-            }
-        } catch (error) {
-            console.error(error)
+                className: "toast_style"
+            }).showToast();
         }
     }
 
     function editAddressModal(addressJson) {
-    try {
-        console.log("Received address:", addressJson);
-        const address = JSON.parse(addressJson); // Parse the JSON string back into an object
-        openAddressModal(address);
-    } catch (error) {
-        console.error("Error parsing address:", error);
-    }
+        try {
+            console.log("Received address:", addressJson);
+            const address = JSON.parse(addressJson);
+            openAddressModal(address);
+        } catch (error) {
+            console.error("Error parsing address:", error);
+            Toastify({
+                text: "Error loading address details",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#ff6b6b"
+                },
+                className: "toast_style"
+            }).showToast();
+        }
     }
 </script>

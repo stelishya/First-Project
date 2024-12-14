@@ -45,12 +45,12 @@ user_route.post('/reset-password', userController.resetPassword);
 user_route.get('/dashboard',userAuth,userController.dashboard)
 user_route.post('/dash/saveUserDetails',userController.saveUserDetails)
 user_route.post('/changePassword',userController.changePassword)
+user_route.delete('/deleteAccount/:userId', userController.deleteAccount)
 
 user_route.get('/showUserAddresses',addressController.showUserAddresses)
 user_route.post('/addAddress',addressController.addAddress)
-user_route.get('/deleteAddress',addressController.deleteAddress)
-user_route.get('/editAddress/:addressId',addressController.editAddress)
-
+user_route.patch('/editAddress/:addressId',addressController.editAddress)
+user_route.delete('/deleteAddress/:addressId',addressController.deleteAddress)
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 

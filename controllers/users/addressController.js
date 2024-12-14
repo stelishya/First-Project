@@ -3,24 +3,41 @@ const Addresses = require('../../models/addressSchema')
 
 exports.showUserAddresses = async (req,res)=>{
     try {
-        // const errorMessage = req.session.user.errorMess;
-        // console.log(errorMessage);
-        // const successMessage = req.session.user.successMess;
-        // console.log(successMessage);
         const session = req.session.user;
         if (!session) {
             console.error("Session is undefined. User might not be logged in.");
             return res.status(401).send("User not authenticated");
         }
-        console.log("Session User ID:", session._id);
 
-        const addresses = await Addresses.find({userId:session._id})
-        console.log("Query executed:", { userId: session._id });
+        const addresses = await Addresses.find({userId:session._id});
         console.log("Addresses found:", addresses);
 
+        // Transform addresses to match the expected format
+        const transformedAddresses = addresses.map(doc => {
+            if (doc.address && doc.address.length > 0) {
+                return {
+                    _id: doc._id,
+                    userId: doc.userId,
+                    address: doc.address.map(addr => ({
+                        _id: addr._id,
+                        typeOfAddress: addr.typeOfAddress,
+                        name: addr.name,
+                        streetAddress: addr.streetAddress,
+                        city: addr.city,
+                        state: addr.state,
+                        country: addr.country,
+                        pincode: addr.pincode,
+                        mobile: addr.mobile
+                    }))
+                };
+            }
+            return doc;
+        });
+
         res.render('users/dashboard/address',{
-            addresses,session,activeTab:'addresses'
-            // ,successMessage,errorMessage
+            addresses: transformedAddresses,
+            session,
+            activeTab:'addresses'
         });
     } catch (error) {
         console.error("Error in showUserAddresses",error);
@@ -67,37 +84,75 @@ exports.addAddress = async (req,res)=>{
     }
 }
 
-exports.deleteAddress = async (req,res)=>{
+exports.deleteAddress = async (req, res) => {
     try {
-        const { id } = req.body;
-        if (!id) {
-            return res.status(400).json({ error: 'Address ID is required.' });
+        const addressId = req.params.addressId;
+        const userId = req.session.user._id;
+
+        console.log("Deleting address:", { addressId, userId });
+
+        const addressDoc = await Addresses.findOne({ userId: userId });
+        if (!addressDoc) {
+            return res.status(404).json({ success: false, message: "Address document not found" });
         }
-        const deletedAddress = await Addresses.findByIdAndDelete(id);
-        if (!deletedAddress) {
-            return res.status(404).json({ error: 'Address not found.' });
+
+        const addressIndex = addressDoc.address.findIndex(addr => addr._id.toString() === addressId);
+        if (addressIndex === -1) {
+            return res.status(404).json({ success: false, message: "Address not found" });
         }
-        res.status(200).json('Address deleted successfully.' );
+
+        addressDoc.address.splice(addressIndex, 1);
+        await addressDoc.save();
+
+        console.log("Address deleted successfully");
+        res.status(200).json({ success: true, message: "Address deleted successfully" });
     } catch (error) {
         console.error("Error deleting address:", error);
-        res.status(500).json('An error occurred while deleting the address.' );
+        res.status(500).json({ success: false, message: "Error deleting address", error: error.message });
     }
-}
+};
 
 exports.editAddress = async (req,res)=>{
     try {
+        const addressId = req.params.addressId;
         const address = req.body;
-        const id = req.params.addressId
-        console.log("address:",address,"id:",id)
-        await Addresses.findByIdAndUpdate(id,{
-            name:address.name, streetAddress:address.streetAddress, city:address.city,
-            state:address.state, country:address.country, pincode:address.pincode, mobile:address.mobile,
-        })
-        console.log("Address edited successfully");
-        res.status(200).json('Address edited successfully')
+        const userId = req.session.user._id;
+
+        console.log("Editing address:", { addressId, address, userId });
+
+        // Find the user's address document
+        const addressDoc = await Addresses.findOne({ userId: userId });
+        if (!addressDoc) {
+            return res.status(404).json({ success: false, message: "Address document not found" });
+        }
+
+        // Find the specific address in the array
+        const addressIndex = addressDoc.address.findIndex(addr => addr._id.toString() === addressId);
+        if (addressIndex === -1) {
+            return res.status(404).json({ success: false, message: "Specific address not found" });
+        }
+
+        // Update the specific address in the array
+        addressDoc.address[addressIndex] = {
+            ...addressDoc.address[addressIndex].toObject(), // Convert to plain object
+            typeOfAddress: address.typeOfAddress || addressDoc.address[addressIndex].typeOfAddress,
+            name: address.name,
+            streetAddress: address.streetAddress,
+            city: address.city,
+            state: address.state,
+            country: address.country,
+            pincode: address.pincode,
+            mobile: address.mobile
+        };
+
+        // Save the updated document
+        await addressDoc.save();
+        console.log("Address updated successfully");
+        
+        res.status(200).json({ success: true, message: "Address updated successfully" });
     } catch (error) {
-        console.error(error)
-        res.status(500).json('An error occurred while editing the address.' );
+        console.error("Error editing address:", error);
+        res.status(500).json({ success: false, message: "Error editing address", error: error.message });
     }
 }
 
