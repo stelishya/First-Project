@@ -1,5 +1,5 @@
-const Users = require('../../models/userSchema')
-const Addresses = require('../../models/addressSchema')
+const Users = require('../models/userSchema')
+const Addresses = require('../models/addressSchema')
 
 exports.showUserAddresses = async (req,res)=>{
     try {

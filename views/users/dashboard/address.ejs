@@ -39,6 +39,28 @@
 </style>
 <!-- Header -->
 <%- include('../../partials/user/header') %>
+<nav>
+    <div class="nav-links">
+     <a href="/user/home">
+      Home
+     </a>
+     <span class="divider">
+     </span>
+     <a href="#">
+      Contact
+     </a>
+     <span class="divider">
+     </span>
+     <a href="#">
+      About
+     </a>
+     <span class="divider">
+     </span>
+     <a href="/user/products">
+      Products
+     </a>
+    </div>
+   </nav>
 
     <!-- Main Content -->
     <main class="flex">
@@ -61,7 +83,7 @@
                 </p>
             </div>
         % } %> -->
-        <div class="bg-white shadow-lg rounded-lg p-6 w-4/5">
+        <div class="bg-white shadow-lg rounded-lg p-6 w-4/5" style="background-color: rgb(231, 228, 226);">
             <h1 class="text-2xl font-bold mb-4">Your Addresses</h1>
             <% if(addresses && addresses.length>0){ %>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -163,7 +185,11 @@
             </div>
         </div>
     </main>
-
+<!-- Footer -->
+<div class="text-center p-5 bg-white">
+    <h1 class="text-4xl">CAlliope</h1>
+    <h2 class="text-2xl">Inc</h2>
+</div>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -206,8 +206,9 @@ function resetZoom() {
 
 function updateQuantity(change) {
     const input = document.getElementById('quantity');
-    const newValue = parseInt(input.value) + change;
-    const maxValue = parseInt(input.max);
+    const currentValue = parseInt(input.value);
+    const maxValue = parseInt(input.getAttribute('max'));
+    const newValue = currentValue + change;
     
     if (newValue >= 1 && newValue <= maxValue) {
         input.value = newValue;
@@ -216,87 +217,106 @@ function updateQuantity(change) {
 
 function validateQuantity(input) {
     const value = parseInt(input.value);
-    const max = parseInt(input.max);
+    const max = parseInt(input.getAttribute('max'));
     
     if (value < 1) input.value = 1;
     if (value > max) input.value = max;
 }
 
-async function addToCart(productId) {
-    try {
-        const quantity = document.getElementById('quantity').value;
-        const response = await fetch('/cart/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                productId,
-                quantity: parseInt(quantity)
-            })
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-            showToast('Product added to cart successfully!', 'success');
-            updateCartCount(data.cartCount);
-        } else {
-            showToast(data.message || 'Failed to add product to cart', 'error');
+function addToCart(productId) {
+    const quantity = document.getElementById('quantity').value;
+    
+    fetch('/user/addToCart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            productId,
+            quantity: parseInt(quantity)
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/login';
+                throw new Error('Please login to add items to cart');
+            }
+            return response.json().then(data => {
+                throw new Error(data.message || 'Error adding to cart');
+            });
         }
-    } catch (error) {
-        console.error('Error adding to cart:', error);
-        showToast('Failed to add product to cart', 'error');
-    }
+        return response.json();
+    })
+    .then(data => {
+        Toastify({
+            text: data.message || "Product added to cart successfully!",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: "#4CAF50"
+            }
+        }).showToast();
+    })
+    .catch(error => {
+        if (error.message !== 'Please login to add items to cart') {
+            Toastify({
+                text: error.message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#ff0000"
+                }
+            }).showToast();
+        }
+    });
 }
 
-async function buyNow(productId) {
-    try {
-        const quantity = document.getElementById('quantity').value;
-        const response = await fetch('/cart/buy-now', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                productId,
-                quantity: parseInt(quantity)
-            })
-        });
-        
-        if (response.ok) {
+function buyNow(productId) {
+    const quantity = document.getElementById('quantity').value;
+    
+    fetch('/user/buyNow', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            productId,
+            quantity: parseInt(quantity)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             window.location.href = '/checkout';
         } else {
-            const data = await response.json();
-            showToast(data.message || 'Failed to process buy now request', 'error');
+            Toastify({
+                text: data.message || "Error processing buy now request",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+            }).showToast();
         }
-    } catch (error) {
-        console.error('Error processing buy now:', error);
-        showToast('Failed to process buy now request', 'error');
-    }
-}
-
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
-    }, 3000);
-}
-
-function updateCartCount(count) {
-    const cartCountElement = document.getElementById('cartCount');
-    if (cartCountElement) {
-        cartCountElement.textContent = count;
-    }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Toastify({
+            text: "Error processing buy now request",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#f44336",
+        }).showToast();
+    });
 }
 </script>
+
+<!-- Add Toastify CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<!-- Add Toastify JS -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

@@ -86,28 +86,26 @@
      <i class="fas fa-heart">
      </i>
     </a>
-    <a href="#">
+    <a href="/user/cart">
      <i class="fas fa-shopping-cart">
      </i>
     </a>
    </div>
-   <%if(locals.user){%>
-    <!-- <a href="/user/logout">Logout</a> -->
-
+   <% if(typeof session !== 'undefined' && session) { %>
     <div class="dropdown">
-      <a href="#"class="btn btn-secondary dropdown-toggle">
-        <i class="fas fa-user text-xl "></i>
-        <!-- selu
-        %=locals.user.username%> -->
+      <a href="#" class="btn btn-secondary dropdown-toggle" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #333;">
+        <i class="fas fa-user text-xl"></i>
+        <span><%= session.username %></span>
       </a>
       <div class="dropdown-content">
         <a href="/user/dashboard">Profile</a>
+        <a href="/user/orders">Orders</a>
         <a href="/user/logout">Logout</a>
       </div>
     </div>
-   <%}else{%>
+   <% } else { %>
     <a href="/user/signup" class="sign-in-link">Sign Up</a>
-    <a href="/user/login"  class="sign-in-link">Log In</a>
-   <%}%>
+    <a href="/user/login" class="sign-in-link">Log In</a>
+   <% } %>
    
   </header>

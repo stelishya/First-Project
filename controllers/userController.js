@@ -1,4 +1,5 @@
-const User = require('../../models/userSchema')
+const User = require('../models/userSchema')
+const Product = require('../models/productSchema')
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt');
 
@@ -170,6 +171,64 @@ exports.insertUser = async (req, res) => {
 //     }
 // }
 
+exports.verifyLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const userData = await User.findOne({ is_admin: 0, email: email });
+        if (!userData) {
+            return res.render('users/login', { 
+                message: "User Not Found",
+                title: 'Login'
+            });
+        }
+        
+        if (userData.is_blocked) {
+            return res.render('users/login', { 
+                message: 'User is blocked by admin',
+                title: 'Login'
+            });
+        }
+        
+        const passwordMatch = await bcrypt.compare(password, userData.password);
+        if (passwordMatch) {
+            // Set session data
+            req.session.user = {
+                _id: userData._id,
+                username: userData.username,
+                email: userData.email
+            };
+            
+            // Save session before redirecting
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    return res.render('users/login', { 
+                        message: "Login failed. Please try again.",
+                        title: 'Login'
+                    });
+                }
+                
+                // Set success message
+                req.session.message = 'Welcome back, ' + userData.username + '!';
+                res.redirect('/user/home');
+            });
+        } else {
+            return res.render('users/login', { 
+                message: "Incorrect password",
+                title: 'Login'
+            });
+        }
+    }
+    catch (error) {
+        console.error('Login Error:', error);
+        return res.render('users/login', { 
+            message: "Login failed. Please try again.",
+            title: 'Login'
+        });
+    }
+};
+
 exports.verifyOTP = async (req, res) => {
     try {
         const submittedOTP = parseInt(req.body.otp.join(''));
@@ -253,41 +312,38 @@ exports.loginLoad = async (req, res) => {
     }
 }
 
-exports.verifyLogin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        // const email = req.body.email;
-        // const password = req.body.password;
+// exports.verifyGoogleLogin = async (req, res) => {
+//     try {
+//         console.log("verifyGoogleLogin")
+//         const { email, googleId } = req.body;
 
-        const userData = await User.findOne({ is_admin: 0, email: email });
-        if (!userData) {
-            return res.render('users/login', { message: "User Not Found" });
-        }
-        if (userData.is_blocked) {
-            return res.render('users/login', { message: 'User is blocked by admin' })
-        }
-        if (userData) {
-            const passwordMatch = await bcrypt.compare(password, userData.password);
-            if (passwordMatch) {
-                req.session.user = userData;
-                req.session.user_id = userData._id; // Set session after successful login
-                req.session.username = userData.username;
-                console.log('Login successful!');
-                return res.render('users/home', { user: userData });// Redirect to home page after login
+//         // Wait for the database query to resolve
+//         const userData = await User.findOne({ email: email, googleId: googleId });
+//         console.log("Request Body:", req.body);
+//         console.log("User Data:", userData);
 
-            } else {
-                return res.render('users/login', { message: "Incorrect password" });
-            }
-        }
-        
+//         if (!userData) {
+//             return res.render('users/login', { message: "User Not Found" });
+//         }
+//         if (userData.is_blocked) {
+//             return res.render('login', { message: 'User is blocked by admin' })
+//         }
+//         // Set session after successful login
+//         req.session.user = {
+//             _id: userData._id,
+//             email: userData.email,
+//             googleId: userData.googleId,
+//         }
+//         req.session.user_id = userData._id;
 
-    }
-    catch (error) {
-        console.log('Login Error: ', error.message);
-        res.status(500).send('Internal server error');
-        return res.render('users/login', { message: "Login failed. Please try again." });
-    }
-}
+//         console.log('Login successful!');
+//         res.render('users/home', { user: userData });// Render home page after login
+
+//     } catch (error) {
+//         console.error("Error in verifyGooglrLogin : ", error);
+//         res.status(500).send("Internal server error");
+//     }
+// };
 
 exports.forgotPasswordPage= async(req,res)=>{
 
@@ -391,39 +447,6 @@ exports.sendOtp=async (req,res)=>{
     }
 }
 
-// exports.verifyGoogleLogin = async (req, res) => {
-//     try {
-//         console.log("verifyGoogleLogin")
-//         const { email, googleId } = req.body;
-
-//         // Wait for the database query to resolve
-//         const userData = await User.findOne({ email: email, googleId: googleId });
-//         console.log("Request Body:", req.body);
-//         console.log("User Data:", userData);
-
-//         if (!userData) {
-//             return res.render('users/login', { message: "User Not Found" });
-//         }
-//         if (userData.is_blocked) {
-//             return res.render('login', { message: 'User is blocked by admin' })
-//         }
-//         // Set session after successful login
-//         req.session.user = {
-//             _id: userData._id,
-//             email: userData.email,
-//             googleId: userData.googleId,
-//         }
-//         req.session.user_id = userData._id;
-
-//         console.log('Login successful!');
-//         res.render('users/home', { user: userData });// Render home page after login
-
-//     } catch (error) {
-//         console.error("Error in verifyGooglrLogin : ", error);
-//         res.status(500).send("Internal server error");
-//     }
-// };
-
 exports.pageNotFound = async (req, res) => {
     try {
         // res.status(404).render('layouts/404');
@@ -437,25 +460,49 @@ exports.pageNotFound = async (req, res) => {
 
 exports.loadHome = async (req, res) => {
     try {
-        // const session=req.session.user;
-        // if(userData){
-        //     const userData = await User.findOne({_id:userData._id})
-        //     return res.render('users/home',{ user:userData });
-        // }else{
-        //     return res.render('users/home')
-        // }
+        // Check for user session
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
 
-        const title = 'CAlliope';
-        // const userGreet=req.session.user ? session.username || session.
-        // console.log('welcome to home page!')
-        const userData = await User.findOne({ _id: req.session.user_id })
-        // console.log(userData)
-        return res.render('users/home', { user: userData });
+        // Get user data
+        const userData = await User.findById(req.session.user._id);
+        if (!userData || userData.is_blocked) {
+            req.session.destroy((err) => {
+                if (err) console.error('Error destroying session:', err);
+            });
+            return res.redirect('/login');
+        }
+
+        // Get featured products
+        let products = [];
+        try {
+            products = await Product.find({ is_blocked: false })
+                .sort({ createdAt: -1 })
+                .limit(8);
+        } catch (err) {
+            console.error('Error fetching products:', err);
+        }
+
+        // Render home page with all necessary data
+        res.render('users/home', {
+            title: 'CAlliope - Home',
+            session: req.session.user,
+            products: products,
+            message: req.session.message || '',
+            cartCount: 0 // You can update this with actual cart count if needed
+        });
+
+        // Clear any flash messages
+        delete req.session.message;
+
     } catch (error) {
-        console.log('Home Page Not Found', error.message);
-        res.status(500).send('Server Error')
+        console.error('Error loading home:', error);
+        // Set error message in session
+        req.session.message = 'Error loading home page. Please try logging in again.';
+        res.redirect('/login');
     }
-}
+};
 
 exports.dashboard = async (req, res) => {
     try {

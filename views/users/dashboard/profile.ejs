@@ -12,7 +12,7 @@
             position: fixed;
             left: 0;
             top: 0;
-            width: 100%;
+            width: 80%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
@@ -345,11 +345,33 @@
             border-color: red !important;
         }
     </style>
-    <div class="flex p-5 bg-gray-300" style="background-color: rgb(216, 210, 205);">
+    <nav>
+        <div class="nav-links">
+         <a href="/user/home">
+          Home
+         </a>
+         <span class="divider">
+         </span>
+         <a href="#">
+          Contact
+         </a>
+         <span class="divider">
+         </span>
+         <a href="#">
+          About
+         </a>
+         <span class="divider">
+         </span>
+         <a href="/user/products">
+          Products
+         </a>
+        </div>
+       </nav>
+    <div class="flex p-0 bg-gray-300" style="background-color: rgb(232, 229, 227);">
         <%-include('../../partials/user/dashboard_sideBar') %>
 
-            <div class="w-1/12 border-r border-gray-400"></div>
-            <div class="w-2/3 bg-gray-300 p-5" style="background-color: rgb(216, 210, 205);">
+            <!-- <div class="w-1/12 border-r border-gray-400"></div> -->
+            <div class="w-2/3 bg-gray-300 pl-80" style="background-color: rgb(231, 228, 226); padding-top: 40px;">
                 <div class="w-24 h-24 bg-gray-400 rounded-full mb-5"></div>
                 <h2 class="text-2xl mb-5">User Profile</h2>
                 <div class="mb-5">
@@ -368,7 +390,7 @@
                     <i class="fas fa-edit mr-2"></i>Edit Profile
                 </button>
             </div>
-            <div id="editProfileForm" class="hidden w-full p-6 bg-white rounded-lg shadow-lg">
+            <div id="editProfileForm" class="hidden w-100 p-6 bg-white rounded-lg shadow-lg">
                 <form id="profileEditForm" class="space-y-4" action="/user/dash/saveUserDetails" method="post"
                     onsubmit="handleProfileSubmit(event)">
                     <div class="mb-4">

@@ -1,4 +1,4 @@
-const User = require('../../models/userSchema');
+const User = require('../models/userSchema');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 // const randomstring = require('randomstring');

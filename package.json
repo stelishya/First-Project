@@ -26,7 +26,9 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "path": "^0.12.7",
-    "sharp": "^0.33.5"
+    "pdfkit": "^0.15.1",
+    "sharp": "^0.33.5",
+    "uuid": "^11.0.3"
   },
   "description": ""
 }
