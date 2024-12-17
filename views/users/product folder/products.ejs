@@ -17,15 +17,19 @@
     body {
         background-color: var(--background-color);
     }
+    .con{
+        background-color: #d8d2cd;
+    }
 
     .main-container {
         padding: 2rem 5%;
     }
 
     .breadcrumb {
+        background-color: #d8d2cd;
         margin-bottom: 2rem;
         color: var(--secondary-color);
-        background-color: #fff;
+        /* background-color: #fff; */
         padding: 1rem;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -37,13 +41,15 @@
     }
 
     .main-content {
+        background-color: #d8d2cd;
         display: grid;
         grid-template-columns: 300px 1fr;
         gap: 2rem;
     }
 
     .filters {
-        background: var(--white);
+        background-color: #d8d2cd;
+        /* background: var(--white); */
         padding: 1.5rem;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -245,7 +251,7 @@
 
 <%- include ('../../partials/user/header')%>
 
-<div class="bg-gray-50">
+<div class="con">
     <div class="container mx-auto px-4 py-8">
         <div class="breadcrumb">
             <ol class="flex items-center space-x-2">

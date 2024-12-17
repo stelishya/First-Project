@@ -36,7 +36,7 @@ exports.products = async (req, res) => {
         req.session.errorMessage = null;
         req.session.successMessage = null;
 
-        res.render('admin/product folder/product_list', {
+        res.render('admin/product folder/product-list', {
             products,
             errorMessage,
             successMessage,
@@ -63,7 +63,7 @@ exports.addProductPage = async (req, res) => {
         const categories = await Category.find({}, { name: 1 })
         // const categories = (await Categories.find({}, { name: 1, _id: 0 })).map(category => category.name);
         const offerTypes = Products.schema.path('offerType').enumValues;
-        res.render('admin/product folder/add_product', {
+        res.render('admin/product folder/product-add', {
             successMessage, errorMessage, offerTypes, categories, activeTab: "products"
         })
     } catch (error) {
@@ -272,7 +272,6 @@ exports.productDetailsUser = async (req, res) => {
         })
         .populate('category', 'name')
         .limit(4);  // Show only 4 related products
-
         res.render('users/product folder/product', {
             title: productDetails.productName,
             user: req.session.user || null,
@@ -599,7 +598,7 @@ exports.fetchProducts = async (req, res) => {
 //         req.session.successMessage = null;
 //         // totalPages=0;
 
-//         res.render('admin/product-list', {
+//         res.render('admin/product folder/product_list', {
 //             products,
 //             errorMessage,
 //             successMessage,
@@ -625,7 +624,7 @@ exports.fetchProducts = async (req, res) => {
 //         req.session.errorMessage = null;
 //         req.session.successMessage = null;
 
-//         res.render('admin/product-add', {
+//         res.render('admin/product folder/add_product', {
 //             categories,
 //             errorMessage,
 //             successMessage,
@@ -722,7 +721,7 @@ exports.fetchProducts = async (req, res) => {
 //         req.session.errorMessage = null;
 //         req.session.successMessage = null;
 
-//         res.render('admin/product-edit', {
+//         res.render('admin/product folder/edit_product', {
 //             product,
 //             categories,
 //             errorMessage,

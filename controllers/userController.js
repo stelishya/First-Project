@@ -438,14 +438,14 @@ exports.resetPassword = async (req, res) => {
 };
 
 
-exports.sendOtp=async (req,res)=>{
-    try {
+// exports.sendOtp=async (req,res)=>{
+//     try {
         
-    } catch (error) {
-        console.log('Error in sendOtp: ', error);
+//     } catch (error) {
+//         console.log('Error in sendOtp: ', error);
 
-    }
-}
+//     }
+// }
 
 exports.pageNotFound = async (req, res) => {
     try {
@@ -462,7 +462,7 @@ exports.loadHome = async (req, res) => {
     try {
         // Check for user session
         if (!req.session.user) {
-            return res.redirect('/login');
+            return res.redirect('/user/login');
         }
 
         // Get user data
@@ -471,7 +471,7 @@ exports.loadHome = async (req, res) => {
             req.session.destroy((err) => {
                 if (err) console.error('Error destroying session:', err);
             });
-            return res.redirect('/login');
+            return res.redirect('/user/login');
         }
 
         // Get featured products

@@ -8,7 +8,7 @@ const userAuth = (req, res, next) => {
           next();
         } else {
           // For AJAX requests, send JSON response
-          if (req.xhr || req.headers.accept.includes('application/json')) {
+          if (req.xhr || req.headers.accept?.toLowerCase().includes('application/json')) {
             res.status(401).json({
               success: false,
               message: "Please login to continue"
@@ -20,7 +20,7 @@ const userAuth = (req, res, next) => {
       })
       .catch(err => {
         console.error('Error in user auth middleware:', err);
-        if (req.xhr || req.headers.accept.includes('application/json')) {
+        if (req.xhr || req.headers.accept?.toLowerCase().includes('application/json')) {
           res.status(500).json({
             success: false,
             message: "Internal Server Error"
@@ -31,7 +31,7 @@ const userAuth = (req, res, next) => {
       });
   } else {
     // For AJAX requests, send JSON response
-    if (req.xhr || req.headers.accept.includes('application/json')) {
+    if (req.xhr || req.headers.accept?.toLowerCase().includes('application/json')) {
       res.status(401).json({
         success: false,
         message: "Please login to continue"

@@ -26,7 +26,7 @@ user_route.get('/auth/google/callback',passport.authenticate('google',{failureRe
 user_route.get('/login',userController.loginLoad);
 user_route.post('/login',userController.verifyLogin);
 user_route.get('/forgotPassword',userController.forgotPasswordPage)
-user_route.post('/sendOtp',userController.sendOtp)
+// user_route.post('/sendOtp',userController.sendOtp)
 
 //Home page 
 user_route.get('/home',userAuth,userController.loadHome);
@@ -34,8 +34,8 @@ user_route.get('/logout',userController.userLogout);
 
 //Products
 user_route.get('/products',userAuth,productController.showProductsPage)
-user_route.get('/api/products', productController.fetchProducts);
-user_route.get('/product/details/:productId', productController.productDetailsUser)
+user_route.get('/api/products', userAuth,productController.fetchProducts);
+user_route.get('/product/details/:productId',userAuth, productController.productDetailsUser)
 
 // Profile
 user_route.post('/forgot-password',userController.forgotPasswordPage)
@@ -61,7 +61,7 @@ user_route.post('/cart/updateQuantity', userAuth, cartController.updateQuantity)
 user_route.delete('/cart/removeProduct', userAuth, cartController.removeProduct);
 
 // Orders
-user_route.get('/buyNow', userAuth, orderController.buyNowCheckout)
+user_route.post('/buyNow', userAuth, orderController.buyNowCheckout)
 user_route.get('/checkout', userAuth, orderController.checkout)
 user_route.post('/order/creation',orderController.orderCreation)
 user_route.get('/orders',userAuth,orderController.showOrdersUser)

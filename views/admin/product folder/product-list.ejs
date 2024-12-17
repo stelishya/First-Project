@@ -1,4 +1,4 @@
-<%- include ('../partials/admin/sidebar')%>
+<%- include ('../../partials/admin/sidebar')%>
 <style>
     .search-container {
     width:350px;
@@ -206,50 +206,25 @@
 
             <!-- Pagination -->
 
-            <div class="m-4  flex justify-between items-center" style="padding-left:750px;">
+            <!-- <div class="m-4  flex justify-between items-center" style="padding-left:750px;">
                 <div class="flex space-x-2">
-                    <% if(currentPage > 1) {%>
-                    <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
-                    <% } %>
-                    <% for(let i=1; i <= totalPages; i++) {%>
-                        <% if(i === currentPage){ %>
-                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"><%= i %></span>
-                        <% } else { %>
-                        <a href="?page=<%= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"><%= i %></a>
-                        <% } %>
-                    <% } %>
-                    <% if (currentPage < totalPages){%>
-                    <a href="?page=<%= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
-                    <% } %>
+                    % if(currentPage > 1) {%>
+                    <a href="?page=%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
+                    % } %>
+                    % for(let i=1; i <= totalPages; i++) {%>
+                        % if(i === currentPage){ %>
+                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"> %= i %></span>
+                        % } else { %>
+                        <a href="?page= %= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"> %= i %></a>
+                        % } %>
+                    % } %>
+                    % if (currentPage < totalPages){%>
+                    <a href="?page= %= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
+                    % } %>
                 </div>
-            </div>
+            </div> -->
 
-            <!-- <% if (totalPages > 1) { %>
-                <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                    <div class="flex justify-between items-center w-full">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Page <span class="font-medium"><%= currentPage %></span> of
-                                <span class="font-medium"><%= totalPages %></span>
-                            </p>
-                        </div>
-                        <div class="flex gap-2">
-                            <% if (currentPage > 1) { %>
-                                <a href="?page=<%= currentPage - 1 %>" 
-                                   class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">
-                                    Previous
-                                </a>
-                            <% } %>
-                            <% if (currentPage < totalPages) { %>
-                                <a href="?page=<%= currentPage + 1 %>" 
-                                   class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">
-                                    Next
-                                </a>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-            <% } %> -->
+           
         </div>
     </div>
 </div>
@@ -276,4 +251,4 @@ async function toggleProductStatus(productId, action) {
 }
 </script>
 
-<%- include("../partials/admin/footer") %>
+<%- include("../../partials/admin/footer") %>

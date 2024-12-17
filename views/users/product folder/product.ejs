@@ -132,22 +132,22 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-8">You May Also Like</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <% relatedProducts.forEach(product => { %>
-                    <a href="/product/details/<%= product._id %>" 
+                    <a href="/user/product/details/<%= product._id %>" 
                        class="group bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                        <div class="aspect-w-1 aspect-h-1">
-                            <img src="/uploads/product-images/<%= product.image %>" 
-                                 alt="<%= product.name %>"
+                        <div class="aspect-w-1 aspect-h-1 h-48">
+                            <img src="/uploads/product-images/<%= product.productImage[0] %>" 
+                                 alt="<%= product.productName %>"
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         </div>
                         <div class="p-4">
                             <h3 class="text-lg font-semibold text-gray-800 truncate group-hover:text-green-600 transition-colors duration-200">
-                                <%= product.name %>
+                                <%= product.productName %>
                             </h3>
                             <div class="mt-2 flex items-baseline space-x-2">
-                                <span class="text-xl font-bold text-green-600">₹<%= (product.mrp * (1 - product.offer/100)).toFixed(0) %></span>
-                                <% if (product.offer > 0) { %>
+                                <span class="text-xl font-bold text-green-600">₹<%= product.discountedPrice %></span>
+                                <% if (product.productOffer > 0) { %>
                                     <span class="text-sm text-gray-500 line-through">₹<%= product.mrp %></span>
-                                    <span class="text-sm text-red-500">(<%= product.offer %>% off)</span>
+                                    <span class="text-sm text-red-500">(<%= product.productOffer %>% off)</span>
                                 <% } %>
                             </div>
                         </div>
@@ -277,41 +277,60 @@ function addToCart(productId) {
 }
 
 function buyNow(productId) {
+    console.log("productId : ", productId)
     const quantity = document.getElementById('quantity').value;
+    console.log("quantity : ", quantity)
     
     fetch('/user/buyNow', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
             productId,
             quantity: parseInt(quantity)
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Something went wrong');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            window.location.href = '/checkout';
+            window.location.href = data.redirectUrl || '/user/checkout';
         } else {
             Toastify({
                 text: data.message || "Error processing buy now request",
                 duration: 3000,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "#f44336",
+                style: {
+                    background: "#ff0000"
+                }
             }).showToast();
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        Toastify({
-            text: "Error processing buy now request",
-            duration: 3000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#f44336",
-        }).showToast();
+        if (error.message.includes('login')) {
+            window.location.href = '/user/login';
+        } else {
+            Toastify({
+                text: error.message || "Server Error",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#ff0000"
+                }
+            }).showToast();
+        }
     });
 }
 </script>
