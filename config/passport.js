@@ -12,11 +12,12 @@ passport.use(new GoogleStrategy({
 async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ googleId: profile.id });
+        // console.log(profile)
         if (user) {
             return done(null, user);
         } else {
-            user = new User({
-                name: profile.displayName,
+            user =  new User({
+                username: profile.displayName, 
                 email: profile.emails[0].value,
                 googleId: profile.id
             });
@@ -25,6 +26,7 @@ async (accessToken, refreshToken, profile, done) => {
         }
         
     } catch (error) {
+        console.log("error in passport",error)
         return done(error,null)    
     }
 }));

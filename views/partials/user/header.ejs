@@ -62,10 +62,10 @@
  <body>
   <header>
     <div class="search-container">
-      <input type="text" placeholder="Search for anything">
-      <button>
-          <i class="fas fa-search"></i>
-      </button>
+      <form action="/user/products" method="GET" style="display: flex; justify-content: flex-end;">
+      <input id="searchInput" type="text" placeholder="Search Products" name="search" value="<%= search || '' %>" style="flex-grow: 1;">
+      <button type="submit" style="margin-left: 98px;"><i class="fas fa-search"></i></button>
+      </form>
     </div>
     
    <h1>
@@ -92,7 +92,7 @@
         <span><%= session.username %></span>
       </a>
       <div class="dropdown-content">
-        <a href="/user/dashboard">Profile</a>
+        <a href="/user/dashboard">Settings</a>
         <a href="/user/orders">Orders</a>
         <a href="/user/logout">Logout</a>
       </div>

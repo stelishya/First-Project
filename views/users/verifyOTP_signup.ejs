@@ -131,15 +131,22 @@
             const otpInputs = document.querySelectorAll('.otp-digit');
             const otpArray = Array.from(otpInputs).map(input => input.value);
 
+            console.log('OTP Array:', otpArray);
+            console.log('Request Payload:', { otp: otpArray });
+
             // Send POST request using Axios
             const response = await axios.post('/user/verifyOTP', { otp: otpArray });
-
+            console.log("\notpInputs : "+otpInputs+"\notpArray : "+otpArray)
+            // +"\nresponse : "+response)
             // Handle response
             if (response.data.success) {
-                alert('OTP verified successfully!');
+                showToast(response.data.message || 'OTP verified successfully');
+                // closeModal();
+                // alert('OTP verified successfully!'); 
                 window.location.reload('/user/login')
             } else {
-                alert('OTP verification failed. Please try again.');
+                throw new Error(response.data.message || 'OTP verification failed. Please try again.');
+                // alert('OTP verification failed. Please try again.');
             }
         } catch (error) {
             console.error('Error verifying OTP:', error);
@@ -234,6 +241,27 @@
                 });
             });
         }
+
+        function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
+    toast.style.zIndex = '1100';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Show toast with animation
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+    
+    // Hide and remove toast
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
     </script>
 </body>
 </html>

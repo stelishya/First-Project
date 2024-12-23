@@ -26,6 +26,7 @@ const productSchema = new Schema({
     quantity: {
         type: Number,
         default: 0,
+        required:true,
     },
     productImage: {
         type: [String],
@@ -35,12 +36,29 @@ const productSchema = new Schema({
         type: Boolean,
         default: true,
     },
-    status: {
-        type: String,
-        enum: ["Available", "out of stock", "Discontinued"],
-        required: true,
-        default: "Available",
+    maxDiscount: {
+        type: Number,
+        required: false
     },
+    isAvailable: {
+        type: String,
+        enum: ["Available", "Out of Stock", "Only Few Left"],
+        required: true,
+        default: "Available"
+    },
+    rating:{
+        type:Number,
+        required:false,
+        default:0
+    },
+    isFeatured:{
+        type:Boolean,
+        default:false
+    },
+    popularity:{
+        type: Number,
+        default: 0
+    }
 }, { timestamps: true });
     
 const Product = mongoose.model("Product", productSchema);

@@ -1,5 +1,5 @@
 <!-- Header -->
-<%- include ('../../partials/user/header')%>
+<%- include ('../../partials/user/header' , { search: search })%>
 
 <div class="bg-gray-50" style="background-color: rgb(216, 210, 205);" >
     <main class="container mx-auto px-4 py-8">
@@ -107,7 +107,7 @@
                     <ul class="space-y-3 text-gray-700">
                         <li class="flex items-center">
                             <i class="fas fa-truck text-green-600 mr-3"></i>
-                            Order today to get it by <b class="text-green-600 ml-1">22 Dec 2024</b>
+                            Order today to get it by <b class="text-green-600 ml-1">26 Dec 2024</b>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-coins text-green-600 mr-3"></i>
@@ -281,57 +281,44 @@ function buyNow(productId) {
     const quantity = document.getElementById('quantity').value;
     console.log("quantity : ", quantity)
     
-    fetch('/user/buyNow', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-            productId,
-            quantity: parseInt(quantity)
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.message || 'Something went wrong');
-            });
+    try {
+            // Redirect to checkout with product and quantity information
+            window.location.href = `/user/checkout?productId=${productId}&quantity=${quantity}&buyNow=true`;
+        } catch (error) {
+            console.error('Error processing buy now:', error);
+            showToast("Failed to process buy now request", true);
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            window.location.href = data.redirectUrl || '/user/checkout';
-        } else {
-            Toastify({
-                text: data.message || "Error processing buy now request",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                style: {
-                    background: "#ff0000"
-                }
-            }).showToast();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        if (error.message.includes('login')) {
-            window.location.href = '/user/login';
-        } else {
-            Toastify({
-                text: error.message || "Server Error",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                style: {
-                    background: "#ff0000"
-                }
-            }).showToast();
-        }
-    });
+    // fetch(`/user/checkout?productId=${productId}&quantity=${parseInt(quantity)}`, {
+    //     method: 'GET',
+    //     headers: {
+    //         'Accept': 'application/json',
+    //         'X-Requested-With': 'XMLHttpRequest'
+    //     }
+    // })
+    // .then(response => {
+    //     if (!response.ok) {
+    //         return response.json().then(data => {
+    //             throw new Error(data.message || 'Something went wrong');
+    //         });
+    //     }
+    //     return response.json();
+    // })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    //     if (error.message.includes('login')) {
+    //         window.location.href = '/user/login';
+    //     } else {
+    //         Toastify({
+    //             text: error.message || "Server Error",
+    //             duration: 3000,
+    //             gravity: "top",
+    //             position: "right",
+    //             style: {
+    //                 background: "#ff0000"
+    //             }
+    //         }).showToast();
+    //     }
+    // });
 }
 </script>
 

@@ -59,22 +59,52 @@
                             </select>
                         </div>
                         <div>
-                            <label for="productOffer" class="block text-sm font-medium text-gray-700 mb-1">Product Offer (%)</label>
-                            <input type="number" id="productOffer" name="productOffer" min="0" max="100" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
-                                placeholder="Enter offer percentage">
+                            <label for="isListed" class="block text-sm font-medium text-gray-700 mb-1">Is Listed</label>
+                            <select id="isListed" name="isListed" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                <option value=true selected>Yes</option>
+                                    <option value=false>No</option>
+                            </select>
                         </div>
+                        
                     </div>
-
+                    <!-- <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700">Is Listed</h3>
+                        <div class="mt-4">
+                            <select name="isListed" class="w-full mt-2 p-2 border rounded-md">
+                                <option value=true selected>Yes</option>
+                                <option value=false>No</option>
+                            </select>
+                        </div>
+                    </div> -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="productOffer" class="block text-sm font-medium text-gray-700 mb-1">Product Offer (%)</label>
+                        <input type="number" id="productOffer" name="productOffer" min="0" max="100" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            placeholder="Enter offer percentage">
+                    </div>
+                    <div>
+                        <label for="maxDiscount" class="block text-sm font-medium text-gray-700 mb-1">Max Discount Amount</label>
+                        <div class="flex items-center mt-1">
+                            <span class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">₹</span>
+                            <input type="number" id="maxDiscount" oninput="validateMaxDiscountAmt()" name="maxDiscount" class="w-full p-2 border rounded-r-md" placeholder="Enter max discount">
+                        </div>
+                        <p id="maxDiscountError" class="text-red-600 text-sm hidden"></p>
+                    </div>
+                    
+                </div>
+                    <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"> -->
                     <!-- Image Upload -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Product Images</label>
                         <div class="mt-2">
-                            <input type="file" id="imageInput" accept="image/*" class="w-full">
+                            <input type="file" id="imageInput" accept="" class="w-full">
                             <div id="addedImagesContainer" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
                         </div>
                     </div>
- 
+                    <!-- </div> -->
+
                     <!-- Cropper Modal -->
                     <div id="cropperModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
                         <div class="bg-white p-4 rounded-lg" style="min-width: 500px; max-width: 90vw;">
@@ -87,6 +117,7 @@
                             </div>
                         </div>
                     </div>
+                    
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 border-t border-gray-200 pt-6">
@@ -183,9 +214,10 @@
         // Adding a remove button to each image container
         const removeButton = document.createElement('button');
         removeButton.type = 'button'; // Add type="button" to prevent form submission
-        removeButton.textContent = '❌';
+        removeButton.textContent = '✖';
+        // '❌';
         removeButton.classList.add(
-            'absolute', 'top-[-10px]', 'right-[-10px]', 'z-10', 'bg-gray-200',
+            'absolute', 'top-[-10px]', 'right-[-1px]', 'z-10', 'bg-gray-200',
             'text-gray-800', 'border-none', 'p-1.5', 'rounded-full', 'cursor-pointer'
         );
         removeButton.onclick = function (e) {
@@ -227,9 +259,7 @@
         cropper.destroy();
         imageToCrop.src = '';
     });
-</script>
 
-<script>
     function validateForm() {
         // Get all hidden inputs with name 'images[]'
         const imageInputs = document.querySelectorAll('input[name="images[]"]');

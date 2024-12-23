@@ -74,12 +74,34 @@
      </a>
     </div>
    </nav>
+   
 <!-- Main Content -->
 <div class="flex">
     <!-- Sidebar -->
-    <%- include('../../../partials/user/dashboard_sideBar') %>
+    <%- include('../../../partials/user/dashboard_sideBar',{search}) %>
     <!-- Main Section -->
-    <main class="p-6 w-4/5">
+    <main class="p-6 w-4/5" style="background-color: rgb(211, 208, 206);">
+        <nav class="flex mb-4 bg-gray-400 rounded" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="/user/dashboard" class="inline-flex items-center text-gray-700 hover:text-white-600">
+                        <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        Account
+                    </a>
+                </li>
+                
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-500 md:ml-2">Orders history</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
         <h2 class="text-2xl font-bold mb-4">Order History</h2>
         <div class="space-y-4">
         <% if(totalOrders < 1){ %>
@@ -94,25 +116,27 @@
                         <!-- Product Image and Name -->
                         <a href="/user/product/<%= order.orderedItems[0].product._id %>">
                             <img alt="Product Image" class="w-16 h-16 rounded mr-4" height="100" width="100" 
-                                 src="<%= order.orderedItems[0].product.images && order.orderedItems[0].product.images.length 
-                                        ? '/uploads/product-images/' + order.orderedItems[0].product.images[0] 
-                                        : '/images/no_productImage.png' %>"/>
+                                 src="<%= order.orderedItems[0].product.productImage && order.orderedItems[0].product.productImage.length 
+                                        ? '/uploads/product-images/' + order.orderedItems[0].product.productImage[0] 
+                                        : 'User/images/no_productImage.png' %>"/>
                         </a>
                         <div>
-                            <p class="font-bold"><%= order.orderedItems[0].product.name %></p>
+                            <p class="font-bold"><%= order.orderedItems[0].product.productName.substring(0, 15) || 'No Product Name' %></p>
                             <% if (order.orderedItems.length > 1) { %>
                                 <p class="text-gray-500 text-sm">+ <%= order.orderedItems.length - 1 %> other product<%= order.orderedItems.length === 2 ? '' : "s" %></p>
                             <% } %>
                         </div>
+                    <% } else { %>
+                        <p>No items in this order.</p>
                     <% } %>
                 </div>
                 <!-- Order Info -->
                 <div class="flex-1 ml-4">
-                    <p class="text-sm">Order ID: <%= order.orderId ? order.orderId : order._id %></p>
-                    <p class="text-sm">Ordered on: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                    <p class="text-sm">Order ID: <%= order.orderId ? order.orderId : order._id || 'N/A' %></p>
+                    <p class="text-sm">Ordered on: <%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Date not available' %></p>
                 </div>
                 <!-- Total Amount -->
-                <div class="text-xl font-bold mr-4">Total: ₹<%= order.totalAmount %></div>
+                <div class="text-xl font-bold mr-4">Total: ₹<%= order.finalAmount || '0.00' %></div>
                 <div class="flex flex-col space-y-2">
                     <!-- Order Status -->
                     <div class="text-right">
@@ -273,7 +297,10 @@
                     duration: 2000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                    style: {
+                    backgroundColor:"linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))"
+                    },
+                    // backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
                     stopOnFocus: true,
                     className: "toast_style"
                 }).showToast();
@@ -285,7 +312,9 @@
                 duration: 3000,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                style: {
+                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))"
+                },
                 stopOnFocus: true,
                 className: "toast_style"
             }).showToast();

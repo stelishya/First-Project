@@ -19,7 +19,15 @@ user_route.post('/verifyOTP',userController.verifyOTP);// OTP Verification route
 user_route.post('/resendOTP',userController.resendOTP);
 user_route.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
 user_route.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
-    res.redirect('/user/home')
+    if (req.isAuthenticated()) {
+        const user = req.user;
+        console.log('Authenticated user:', user);
+        req.session.user = user;
+        res.redirect('/user/home');
+    } else {
+        console.log('Authentication failed, redirecting to signup.');
+        res.redirect('/signup');
+    }
 });
 
 // user_route.get("/",userController.loginLoad);
@@ -29,6 +37,8 @@ user_route.get('/forgotPassword',userController.forgotPasswordPage)
 // user_route.post('/sendOtp',userController.sendOtp)
 
 //Home page 
+user_route.get('/demo',userAuth,(req,res)=>{res.render('users/home')});
+
 user_route.get('/home',userAuth,userController.loadHome);
 user_route.get('/logout',userController.userLogout);
 
@@ -49,6 +59,7 @@ user_route.post('/dash/saveUserDetails',userController.saveUserDetails)
 user_route.post('/changePassword',userController.changePassword)
 user_route.delete('/deleteAccount/:userId', userController.deleteAccount)
 
+//Address
 user_route.get('/showUserAddresses',addressController.showUserAddresses)
 user_route.post('/addAddress',addressController.addAddress)
 user_route.patch('/editAddress/:addressId',addressController.editAddress)
@@ -61,7 +72,6 @@ user_route.post('/cart/updateQuantity', userAuth, cartController.updateQuantity)
 user_route.delete('/cart/removeProduct', userAuth, cartController.removeProduct);
 
 // Orders
-user_route.post('/buyNow', userAuth, orderController.buyNowCheckout)
 user_route.get('/checkout', userAuth, orderController.checkout)
 user_route.post('/order/creation',orderController.orderCreation)
 user_route.get('/orders',userAuth,orderController.showOrdersUser)

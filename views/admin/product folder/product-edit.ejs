@@ -23,6 +23,7 @@
             <!-- Form -->
             <div class="p-6">
                 <form action="/admin/products/edit/<%= product._id %>" method="POST" onsubmit="return validateForm()">
+                    <input type="hidden" name="productId" value="<%= product._id %>">
                     <!-- Product Name -->
                     <div class="mb-6">
                         <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>

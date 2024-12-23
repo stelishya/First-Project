@@ -22,31 +22,31 @@
     </div>
    </nav>
 <main class="flex bg-orange-50 min-h-screen">
-    <%- include('../../../partials/user/dashboard_sideBar') %>
+    <%- include('../../../partials/user/dashboard_sideBar',{search}) %>
 
-    <div class="flex-1 p-8">
+    <div class="flex-1 p-8" style="background-color: rgb(211, 208, 206);">
         <div class="max-w-4xl mx-auto">
-            <nav class="flex mb-4" aria-label="Breadcrumb">
+            <nav class="flex mb-4 bg-gray-400 rounded" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                     <li class="inline-flex items-center">
-                        <a href="/user/profile" class="inline-flex items-center text-gray-700 hover:text-orange-600">
-                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <a href="/user/dashboard" class="inline-flex items-center text-gray-700 hover:text-white-600">
+                            <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                             </svg>
-                            Dashboard
+                            Account
                         </a>
                     </li>
                     <li>
                         <div class="flex items-center">
-                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                             </svg>
-                            <a href="/user/orders" class="ml-1 text-gray-700 hover:text-orange-600 md:ml-2">Orders</a>
+                            <a href="/user/orders" class="ml-1 text-gray-700 hover:text-orange-600 md:ml-2">Orders history </a>
                         </div>
                     </li>
                     <li aria-current="page">
                         <div class="flex items-center">
-                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                             </svg>
                             <span class="ml-1 text-gray-500 md:ml-2">Order Details</span>
@@ -86,20 +86,20 @@
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold mb-4">Order Items</h2>
                 <div class="space-y-4">
-                    <% order.products.forEach(item => { %>
+                    <% order.orderedItems.forEach(item => { %>
                         <div class="flex items-center p-4 border rounded-lg hover:shadow-md transition-shadow duration-300">
-                            <img src="<%= item.productId.image && item.productId.image.length ? '/uploads/product-images/' + item.productId.image[0] : '/images/no_productImage.png' %>" 
-                                alt="<%= item.productId.name %>" 
+                            <img src="<%= item.product.productImage && item.product.productImage.length ? '/uploads/product-images/' + item.product.productImage[0] : '/images/no_productImage.png' %>" 
+                                alt="<%= item.product.productName %>" 
                                 class="w-24 h-24 object-cover rounded-md">
                             <div class="ml-6 flex-1">
-                                <h3 class="text-lg font-semibold"><%= item.productId.name %></h3>
+                                <h3 class="text-lg font-semibold"><%= item.product.productName %></h3>
                                 <div class="text-sm text-gray-600">Quantity: <%= item.quantity %></div>
                                 <div class="mt-2">
-                                    <span class="text-sm text-gray-500 line-through">₹<%= item.productId.mrp %></span>
+                                    <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp %></span>
                                     <span class="ml-2 text-lg font-semibold text-gray-900">₹<%= item.priceAtPurchase %></span>
-                                    <% if(item.productId.mrp > item.priceAtPurchase) { %>
+                                    <% if(item.product.mrp > item.priceAtPurchase) { %>
                                         <span class="ml-2 text-green-600 text-sm">
-                                            (<%= Math.round(((item.productId.mrp - item.priceAtPurchase) / item.productId.mrp) * 100) %>% off)
+                                            (<%= Math.round(((item.product.mrp - item.priceAtPurchase) / item.product.mrp) * 100) %>% off)
                                         </span>
                                     <% } %>
                                 </div>
@@ -127,7 +127,7 @@
                     </div>
                     <% if (order.paymentStatus === 'Failed' && order.paymentMethod === 'Online') { %>
                         <div class="mt-4">
-                            <button onclick="retryPayment('<%= order._id %>', '<%= order.totalAmount %>')" 
+                            <button onclick="retryPayment('<%= order._id %>', '<%= order.finalAmount %>')" 
                                     class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg 
                                            flex items-center gap-2 transition duration-300">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -155,22 +155,22 @@
                 <div class="space-y-2">
                     <div class="flex justify-between text-gray-600">
                         <span>Items Total (MRP)</span>
-                        <span>₹<%= order.products.reduce((total, item) => total + (item.productId.mrp * item.quantity), 0) %></span>
+                        <span>₹<%= order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0) %></span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>Discount</span>
-                        <span class="text-green-600">-₹<%= order.totalDiscountAmount || 0 %></span>
+                        <span class="text-green-600">-₹<%= order.totalDiscount || 0 %></span>
                     </div>
-                    <% if(order.coupon && order.coupon.couponCode) { %>
+                    <!-- <% if(order.coupon && order.coupon.couponCode) { %>
                         <div class="flex justify-between text-gray-600">
                             <span>Coupon Applied (<%= order.coupon.couponCode %>)</span>
                             <span class="text-green-600">-₹<%= order.coupon.discountAmount || 0 %></span>
                         </div>
-                    <% } %>
+                    <% } %> -->
                     <div class="border-t pt-2 mt-2">
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total Amount</span>
-                            <span class="text-orange-600">₹<%= order.totalAmount %></span>
+                            <span class="text-orange-600">₹<%= order.finalAmount %></span>
                         </div>
                     </div>
                 </div>
@@ -197,7 +197,7 @@
         animation: fadeIn 0.5s ease-out forwards;
     }
 </style>
-<script>
+<!-- <script>
     async function retryPayment(orderId, amount) {
         try {
             // Create new Razorpay order
@@ -207,7 +207,7 @@
 
             if (response.status === 200) {
                 const options = {
-                    key: '<%= razorpayKey %>',
+                    key: '%= razorpayKey %>',
                     amount: amount * 100,
                     currency: "INR",
                     name: "Craftora",
@@ -279,4 +279,4 @@
             });
         }
     }
-</script>
+</script> -->

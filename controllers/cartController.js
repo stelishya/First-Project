@@ -2,6 +2,7 @@ const Carts = require('../models/cartSchema')
 const Products = require('../models/productSchema')
 
 exports.getCart = async (req,res)=>{
+    const search = req.query.search || ''; 
     try {
         if (!req.session.user) {
             return res.redirect('/login');
@@ -23,7 +24,8 @@ exports.getCart = async (req,res)=>{
                 session: req.session.user,
                 countOfProducts: 0,
                 products: [],
-                totalAmount: 0
+                totalAmount: 0,
+                search
             });
         }
 
@@ -67,12 +69,13 @@ exports.getCart = async (req,res)=>{
         
         const totalAmount = products.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
         const countOfProducts = products.length;
-
+        console.log("Hi i'm rendering cart page")
         res.render('users/cart/cart', {
             session: req.session.user,
             products,
             countOfProducts,
-            totalAmount: totalAmount.toFixed(2)
+            totalAmount: totalAmount.toFixed(2),
+            search
         });
         
     } catch (error) {
@@ -93,9 +96,10 @@ exports.addToCart = async (req,res)=>{
         const userId = req.session.user._id;
         const productId = req.body.productId;
         const quantity = parseInt(req.body.quantity) || 1;
-
+        console.log("\nuserId : "+userId+"\nproductId : "+productId+"\nquantity : "+quantity)
         // Get product details
         const product = await Products.findById(productId);
+        console.log(product)
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -104,7 +108,7 @@ exports.addToCart = async (req,res)=>{
         }
 
         // Check inventory and max quantity
-        const maxAllowedQuantity = Math.min(product.inventory, 5);
+        const maxAllowedQuantity = Math.min(product.quantity, 5);
         if (quantity > maxAllowedQuantity) {
             return res.status(400).json({
                 success: false,
@@ -185,21 +189,25 @@ exports.updateQuantity = async (req, res) => {
     const userId = req.session.user._id;
 
     try {
-        // // Find the user's cart
         const cart = await Carts.findOne({ userId }).populate({
             path: 'items.productId',
             populate: { path: 'category' }
         });
-        // const cart = await Carts.findOne({ userId });
         if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
 
-        // Find the product in the cart and update the quantity
         const productIndex = cart.items.findIndex(item => item.productId._id.toString() === productId);
         if (productIndex > -1) {
             cart.items[productIndex].quantity += change;
-            if (cart.items[productIndex].quantity < 1) cart.items[productIndex].quantity = 1; // Ensure quantity stays positive
+            if (cart.items[productIndex].quantity < 1) cart.items[productIndex].quantity = 1;
+
+            // Recalculate total price for the updated item
+            const product = cart.items[productIndex].productId;
+            const price = product.discountedPrice || product.mrp;
+            cart.items[productIndex].totalPrice = price * cart.items[productIndex].quantity;
+
+            // Save the updated cart
             await cart.save();
             return res.json({
                 success: true,

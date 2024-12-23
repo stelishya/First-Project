@@ -3,14 +3,6 @@ const Product = require('../models/productSchema')
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt');
 
-// const securePassword = async (password) => {
-//     try {
-//         const passwordHash = await bcrypt.hash(password, 10)
-//         return passwordHash;
-//     } catch (error) {
-//         console.log('Error hashing password:',error.message)
-//     }
-// } 
 
 exports.loadRegister = async (req, res) => {
     try {
@@ -117,10 +109,6 @@ exports.insertUser = async (req, res) => {
             await newuser.save();
             console.log("User saved successfully");
 
-
-            // if(findUser) {
-            //     return res.render('users/signup', {message: 'User with this email already exists'});
-            // }
             const otp = generateOtp();
 
             try {
@@ -142,19 +130,7 @@ exports.insertUser = async (req, res) => {
             console.error('user already exists');
             res.redirect('/user/login'); // User already exists
         }
-        // console.log('emailsent: ', emailSent);
-
-        // if(!emailSent) {
-        //     return res.status(500).render('users/signup', {message: 'Failed to send verification email'});
-        // }
-
-        // Store data in session
-        // req.session.otp = otp;
-        // req.session.tempUserData = {username,email,password,mobile,address};
-
-        // console.log('OTP sent:', otp);
-        // return res.render('users/signup_verifyOTP', { email: email });
-
+        
     } catch (error) {
 
         console.error('signup error', error);
@@ -162,14 +138,6 @@ exports.insertUser = async (req, res) => {
     }
 };
 
-// const securePassword = async (password) => {
-//     try {
-//         const passwordHash = await bcrypt.hash(password, 10)
-//         return passwordHash;
-//     } catch (error) {
-//         console.error('Error hashing password:',error.message)
-//     }
-// }
 
 exports.verifyLogin = async (req, res) => {
     try {
@@ -234,22 +202,20 @@ exports.verifyOTP = async (req, res) => {
         const submittedOTP = parseInt(req.body.otp.join(''));
         console.log('submittedOTP', submittedOTP)
         console.log("isOTPmatched", Number(req.session.otp) === submittedOTP)
-
-        if (req.session.otp === submittedOTP && req.session.otpExpires > Date.now()) {
+        if(req.session.otp !== submittedOTP){
+            res.status(400).json({ success: false, message: 'Invalid OTP' })
+        }
+        else if (req.session.otp === submittedOTP && req.session.otpExpires > Date.now()) {
             // const user=req.session.
             req.session.otp = null;
             req.session.otpExpires = null;
             console.log('hai hello')
             await User.findOneAndUpdate({ email: req.session.otp_cred }, { is_verified: true })
-            // console.log()
-            console.log('hai hello')
+            // console.log('hai hello')
             res.status(200).json({ success: true, message: "successfully verified" })
         } else if (req.session.otpExpires < Date.now()) {
             res.status(400).json({ success: false, message: 'OTP Expired' })
-        } else {
-            res.status(400).json({ message: 'Invalid OTP' })
-        }
-
+        } 
     } catch (error) {
         console.error('Error in verifying OTP: ', error)
         res.status(500).send('Server error');
@@ -257,7 +223,6 @@ exports.verifyOTP = async (req, res) => {
 };
 
 exports.resendOTP = async (req, res) => {
-    // console.log("resend otp hai parann")
     try {
         const email = req.session.otp_cred;
         console.log('email', email)
@@ -267,7 +232,6 @@ exports.resendOTP = async (req, res) => {
                 message: "Session expired. Please try signing up again."
             });
         }
-        // Generate new OTP
         const newOTP = generateOtp();
 
         try {
@@ -301,7 +265,6 @@ exports.resendOTP = async (req, res) => {
     }
 };
 
-//Login user methods started
 exports.loginLoad = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -312,38 +275,6 @@ exports.loginLoad = async (req, res) => {
     }
 }
 
-// exports.verifyGoogleLogin = async (req, res) => {
-//     try {
-//         console.log("verifyGoogleLogin")
-//         const { email, googleId } = req.body;
-
-//         // Wait for the database query to resolve
-//         const userData = await User.findOne({ email: email, googleId: googleId });
-//         console.log("Request Body:", req.body);
-//         console.log("User Data:", userData);
-
-//         if (!userData) {
-//             return res.render('users/login', { message: "User Not Found" });
-//         }
-//         if (userData.is_blocked) {
-//             return res.render('login', { message: 'User is blocked by admin' })
-//         }
-//         // Set session after successful login
-//         req.session.user = {
-//             _id: userData._id,
-//             email: userData.email,
-//             googleId: userData.googleId,
-//         }
-//         req.session.user_id = userData._id;
-
-//         console.log('Login successful!');
-//         res.render('users/home', { user: userData });// Render home page after login
-
-//     } catch (error) {
-//         console.error("Error in verifyGooglrLogin : ", error);
-//         res.status(500).send("Internal server error");
-//     }
-// };
 
 exports.forgotPasswordPage= async(req,res)=>{
 
@@ -438,15 +369,6 @@ exports.resetPassword = async (req, res) => {
 };
 
 
-// exports.sendOtp=async (req,res)=>{
-//     try {
-        
-//     } catch (error) {
-//         console.log('Error in sendOtp: ', error);
-
-//     }
-// }
-
 exports.pageNotFound = async (req, res) => {
     try {
         // res.status(404).render('layouts/404');
@@ -460,7 +382,8 @@ exports.pageNotFound = async (req, res) => {
 
 exports.loadHome = async (req, res) => {
     try {
-        // Check for user session
+        const search = req.query.search || ''; 
+
         if (!req.session.user) {
             return res.redirect('/user/login');
         }
@@ -490,7 +413,8 @@ exports.loadHome = async (req, res) => {
             session: req.session.user,
             products: products,
             message: req.session.message || '',
-            cartCount: 0 // You can update this with actual cart count if needed
+            cartCount: 0, // You can update this with actual cart count if needed
+            search 
         });
 
         // Clear any flash messages
@@ -506,14 +430,16 @@ exports.loadHome = async (req, res) => {
 
 exports.dashboard = async (req, res) => {
     try {
+        const search = req.query.search || ''; 
         const session = req.session.user;
-        // const errorMessage = req.session.user.errorMess;
-        // const successMessage = req.session.user.successMess;
+        const errorMessage = req.session.user.errorMessage;
+        const successMessage = req.session.user.successMessage;
         const user = await User.findOne({ email: session.email })
         res.render('users/dashboard/profile', {
             session: session.email, user,
-            //  errorMessage, successMessage, 
-             activeTab: 'profile'
+             errorMessage, successMessage, 
+             activeTab: 'profile',
+             search
         })
     } catch (error) {
         console.error("Error in user Dashboard",error)

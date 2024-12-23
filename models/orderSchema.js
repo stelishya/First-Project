@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const {v4:uuidv4}=require('uuid')
 
 const orderSchema=new Schema({
     userId:{
@@ -10,7 +9,6 @@ const orderSchema=new Schema({
     },
     orderId: {
         type: String,
-        default: () => uuidv4(),
         unique: true
     },
     orderedItems: [{
@@ -21,52 +19,108 @@ const orderSchema=new Schema({
         },
         quantity: {
             type: Number,
+            default: 1,
             required: true
         },
-        price: {
+        priceAtPurchase: {
             type: Number,
-            default:0
+            default:0,
+            required: true
         }
     }],
+    status: {
+        type: String,
+        required: true,
+        enum: ['Pending','Order Placed','Processing', 'Shipped',"Out for delivery", 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+        default:"Order Placed"
+    },
     totalDiscount: {
         type: Number,
         default: 0
     },
     finalAmount: {
         type: Number,
+        default:0,
         required: true
     },
-    address: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    address:{
+        name:{
+            type:String,
+            // required: true
+        },
+        mobile:{
+            type:Number,
+            // required: true
+        },
+        typeOfAddress: {
+            type: String,
+            enum: ['Work', 'Home'],
+            default: 'Home'
+        },
+        streetAddress: {
+            type: String,
+            // required: true
+        },
+        city: {
+            type: String,
+            // required: true
+        },
+        state: {
+            type: String,
+            // required: true
+        },
+        country: {
+            type: String,
+            // required: true
+        },
+        pincode: {
+            type: Number,
+            // required: true
+        }
     },
+    // address: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'User',
+    //     required: true
+    // },
     paymentMethod:{
         type: String,
         required: true,
-        enum:['COD','Online Payment','Wallet']
+        enum:['COD','Online Payment','Wallet'],
+        default:"COD"
+    },
+    paymentStatus: {
+        type: String,
+        enum: ["Pending", "Success", "Failed","Cancelled"],
+        required: true,
+        default: "Pending"
     },
     invoiceDate: {
         type: Date
     },
-    status: {
-        type: String,
-        required: true,
-        enum: ['Pending','Order Placed','Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
-        default:"Pending"
-    },
-    createdOn: {
-        type: Date,
-        default: Date.now,
-        required: true
-    },
-    couponApplied: {
-        type: Boolean,
-        default: false
+    
+    // createdOn: {
+    //     type: Date,
+    //     default: Date.now,
+    //     required: true
+    // },
+    // couponApplied: {
+    //     type: Boolean,
+    //     default: false
+    // }
+    deliveredOn: { type: Date, default: null },
+    cancelledOn: { type: Date, default: null },
+    returnedOn: { type: Date, default: null },
+},{timestamps:true})
+
+// Pre-save middleware to generate a unique orderId
+orderSchema.pre('save', async function(next) {
+    if (!this.orderId) {
+        // Generate a unique orderId, e.g., using a timestamp
+        this.orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     }
-})
-
-
+    next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports=Order;

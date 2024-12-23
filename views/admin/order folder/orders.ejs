@@ -1,0 +1,368 @@
+<style>
+    .container {
+        display: flex;
+        flex-direction: row;
+        min-height: 100vh;
+        /* Full height */
+    }
+
+    .sidebar {
+        width: 250px;
+        /* Adjust as needed */
+        background-color: #f4f4f4;
+        padding: 20px;
+    }
+
+    .content {
+        flex: 1;
+        /* Takes up remaining space */
+        padding: 20px;
+        background-color: #fff;
+        /* Optional: match design */
+    }
+
+    .toast_style {
+        width: fit-content !important;
+        max-width: 300px !important;
+        border-radius: 8px !important;
+        padding: 12px 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        font-family: Arial, sans-serif !important;
+        font-size: 16px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 9999 !important;
+    }
+
+    .notification-icon {
+        position: fixed;
+        top: 50px;
+        right: 20px;
+        background-color: #007BFF;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1000;
+        transition: right 0.3s ease, left 0.3s ease;
+    }
+
+    .return-requests-sidebar.show+.notification-icon {
+        top: 20px !important;
+        left: 20px !important;
+        border-radius: 0 50% 50% 0;
+    }
+
+    .return-requests-sidebar {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 300px;
+        height: 100%;
+        background-color: #f0f8ff;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        transition: right 0.3s ease;
+        z-index: 999;
+    }
+
+    .return-requests-sidebar.show {
+        right: 0;
+    }
+
+    .return-requests-sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .return-requests-sidebar li {
+        background-color: #e7f0ff;
+        border: 1px solid #007BFF;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        padding: 15px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .return-requests-sidebar li:hover {
+        background-color: #d0e7ff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .return-requests-sidebar p {
+        margin: 5px 0;
+        color: #333;
+    }
+
+    .approve-btn,
+    .reject-btn {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        margin-top: 10px;
+        margin-right: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .approve-btn:hover,
+    .reject-btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+<!-- <div class="flex"> -->
+<div class="container" style="background-color: #787575;">
+
+    <aside class="sidebar">
+        <%- include('../../partials/admin/sidebar') %>
+    </aside>
+
+    <!-- Main Content -->
+    <!-- <div class="flex-1 p-6"> -->
+    <main class="content">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold">Order</h2>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="mt-4 text-sm text-gray-500">
+                <a href="/admin/dashboard" class="text-blue-500">Dashboard</a>
+                &gt;
+                <span>Order List</span>
+            </div>
+
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-gray-600">
+                        <th class="py-2">Order ID</th>
+                        <th class="py-2">Product</th>
+                        <th class="py-2">Date</th>
+                        <th class="py-2">Customer</th>
+                        <th class="py-2">Total</th>
+                        <th class="py-2">Payment</th>
+                        <th class="py-2">Status</th>
+                        <th class="py-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    <% orders.forEach((order,index)=>{ %>
+                        <tr class="border-b">
+                            <td class="py-2">
+                                <a class="text-blue-500" href="#">
+                                    <%= order.orderId ? order.orderId : order._id %>
+                                </a>
+                            </td>
+                            <td class="py-2">
+                                <% if (order.orderedItems.length> 0) { %>
+                                    <%= order.orderedItems[0].product.name %>
+                                        <% if (order.orderedItems.length> 1) { %>
+                                            <br />
+                                            <span class="text-gray-500 text-sm">+ <%= order.orderedItems.length - 1 %>
+                                                    other products</span>
+                                            <% } %>
+                                                <% } %>
+                            </td>
+                            <td class="py-2">
+                                <%= new Date(order.createdAt).toLocaleString() %>
+                            </td>
+                            <td class="py-2">
+                                <%= order.userId.username %>
+                                    <br />
+                                    <span class="text-gray-500 text-sm">
+                                        <%= order.userId.email %>
+                                    </span>
+                            </td>
+                            <td class="py-2">
+                                <%= order.totalAmount %>
+                            </td>
+                            <td class="py-2">
+                                <%= order.paymentMethod %>
+                            </td>
+                            <td class="py-2">
+                                <% if (order.status==="Cancelled" || order.status==="Returned" ||
+                                    order.status==="Delivered" ) { %>
+                                    <% if(order.status==="Cancelled" ){ %>
+                                        <span class="inline-block bg-red-100 text-red-600 px-2 py-1 rounded-lg">
+                                            <%= order.status %>
+                                        </span>
+                                        <% } else if(order.status==="Returned" ){ %>
+                                            <span class="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded-lg">
+                                                <%= order.status %>
+                                            </span>
+                                            <% } else if(order.status==="Delivered" ) { %>
+                                                <span
+                                                    class="inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg">
+                                                    <%= order.status %>
+                                                </span>
+                                                <% } %>
+                                                    <% } else { %>
+                                                        <!-- Select input for changing status -->
+                                                        <select name="status" class="px-2 py-1 rounded-lg"
+                                                            onchange="updateOrderStatus('<%= order._id %>', this); updateStatusColor(this)"
+                                                            data-status="<%= order.status %>">
+                                                            <% orderStatuses.forEach((status)=> { %>
+                                                                <% if (status !=="Returned" ) { %>
+                                                                    <option value="<%= status %>"
+                                                                        <%=order.status===status ? 'selected' : '' %>>
+                                                                        <%= status %>
+                                                                    </option>
+                                                                    <% } %>
+                                                                        <% }) %>
+                                                        </select>
+                                                        <% } %>
+                            </td>
+                            <td class="py-2">
+                                <% if (order.status==="Cancelled" || order.status==="Out for delivery" ||
+                                    order.status==="Returned" || order.status==="Delivered" ) { %>
+                                    <!-- Hide cancel button if cancellation isn't allowed -->
+                                    <i class="fas fa-ban text-gray-400"></i>
+                                    <% } else { %>
+                                        <!-- Show cancel button if cancellation is allowed -->
+                                        <button onclick="cancelOrder('<%= order._id %>')">
+                                            <i class="fas fa-ban text-red-600"></i>
+                                        </button>
+                                        <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-between items-center mt-4">
+            <div class="text-gray-500">
+                Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalOrders) %> of <%= totalOrders %>
+            </div>
+            <div class="flex items-center space-x-2">
+                <% if (page> 1) { %>
+                    <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                    <% } %>
+
+                        <% for (let i=1; i <=totalPages; i++) { %>
+                            <a href="?page=<%= i %>"
+                                class="px-3 py-1 rounded-md <%= i === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' %>">
+                                <%= i %>
+                            </a>
+                            <% } %>
+
+                                <% if (page < totalPages) { %>
+                                    <a href="?page=<%= page + 1 %>"
+                                        class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                                    <% } %>
+            </div>
+        </div>
+    </main>
+</div>
+
+
+
+
+
+<script>
+
+    async function updateOrderStatus(orderId, statusSelect) {
+        const status = statusSelect.value;
+        const parentElement = statusSelect.parentElement;
+        try {
+            const response = await axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
+            if (response.status === 200) {
+                const newStatus = statusSelect.value;
+                if (newStatus === 'Delivered') {
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = 'inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg';
+                    statusSpan.textContent = newStatus;
+                    parentElement.innerHTML = ''; // Clear the td
+                    parentElement.appendChild(statusSpan);
+                }
+                Toastify({
+                    text: "Order status updated successfully",
+                    className: "toast_style",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                    offset: {
+                        x: 0,
+                        y: 0
+                    },
+                    onClick: function () { } // Callback after click
+                }).showToast();
+                console.log("Order status updated successfully.");
+            }
+        } catch (error) {
+            Toastify({
+                text: "Failed to update order status",
+                className: "toast_style",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                },
+                offset: {
+                    x: 0,
+                    y: 0
+                },
+                onClick: function () { } // Callback after click
+            }).showToast();
+            console.error("Error updating order status:", error);
+        }
+
+    }
+    async function cancelOrder(orderId) {
+        try {
+            const response = await axios.post(`/admin/cancelOrder/${orderId}`)
+            if (response.status === 200) {
+                Toastify({
+                    text: response.data.message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+            }
+        } catch (error) {
+            alert("error")
+            console.error(error)
+        }
+    }
+</script>
+<script>
+    function getStatusColorStyle(status) {
+        switch (status) {
+            case 'Delivered':
+            case 'Out for delivery':
+                return { backgroundColor: '#d1fae5', color: '#047857' };
+            case 'Returned':
+                return { backgroundColor: '#dbeafe', color: '#1e3a8a' };
+            case 'Cancelled':
+                return { backgroundColor: '#fee2e2', color: '#b91c1c' };
+            case 'Order Placed':
+                return { backgroundColor: '#ffedd5', color: '#ea580c' };
+            default:
+                return { backgroundColor: '#fef9c3', color: '#ca8a04' };
+        }
+    }
+
+    function updateStatusColor(select) {
+        const status = select.value;
+        const { backgroundColor, color } = getStatusColorStyle(status);
+        select.style.backgroundColor = backgroundColor;
+        select.style.color = color;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('select[name="status"]').forEach(select => {
+            const status = select.getAttribute('data-status');
+            const { backgroundColor, color } = getStatusColorStyle(status);
+            select.style.backgroundColor = backgroundColor;
+            select.style.color = color;
+        });
+    });
+</script>

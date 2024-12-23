@@ -1,4 +1,4 @@
-<%- include ('../../partials/user/header')%>
+<%- include ('../../partials/user/header',{search})%>
     <title>Calliope</title>
     <style>
         #editProfileForm {
@@ -367,13 +367,38 @@
          </a>
         </div>
        </nav>
-    <div class="flex p-0 bg-gray-300" style="background-color: rgb(232, 229, 227);">
+    <div class="flex p-0 bg-gray-300" style="background-color: rgb(211, 208, 206);">
         <%-include('../../partials/user/dashboard_sideBar') %>
 
             <!-- <div class="w-1/12 border-r border-gray-400"></div> -->
-            <div class="w-2/3 bg-gray-300 pl-80" style="background-color: rgb(231, 228, 226); padding-top: 40px;">
-                <div class="w-24 h-24 bg-gray-400 rounded-full mb-5"></div>
-                <h2 class="text-2xl mb-5">User Profile</h2>
+            <div class="w-2/3 bg-gray-300 pl-10 m-10 pr-10" style="background-color: rgb(231, 228, 226); padding-top: 40px;">
+                <nav class="flex mb-4 bg-gray-400 rounded" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="/user/dashboard" class="inline-flex items-center text-gray-700 hover:text-white-600">
+                                <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                                </svg>
+                                Account
+                            </a>
+                        </li>
+                        
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="ml-1 text-gray-500 md:ml-2">Profile</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <div class="m-10 ">
+                    
+                <div class="w-24 h-24 bg-gray-400 rounded-full mb-5">
+                    <img class="h-30 w-30 rounded-full object-cover" src="https://storage.googleapis.com/a1aa/image/QlVQv9UycyrXId08LjHLfJNJNy3WUewLUUrR3pO8cmo1Rd8TA.jpg">
+                </div>
+                <h2 class="text-2xl mb-5">Profile</h2>
                 <div class="mb-5">
                     <p data-field="username">Name: <%= user.username %>
                     </p>
@@ -386,10 +411,11 @@
                     <p data-field="mobile">Phone: <%= user.mobile %>
                     </p>
                 </div>
-                <button id="editButton" class="bg-gray-500 text-white p-2 flex items-center">
-                    <i class="fas fa-edit mr-2"></i>Edit Profile
+                <button id="editButton" class="bg-gray-500 text-white p-2 flex items-center mb-8">
+                    <i class="fas fa-edit mr-2 "></i>Edit Profile
                 </button>
             </div>
+                </div>
             <div id="editProfileForm" class="hidden w-100 p-6 bg-white rounded-lg shadow-lg">
                 <form id="profileEditForm" class="space-y-4" action="/user/dash/saveUserDetails" method="post"
                     onsubmit="handleProfileSubmit(event)">
@@ -439,6 +465,14 @@
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <h2 class="text-2xl font-bold mb-4">Change Password</h2>
             <form id="passwordForm" class="space-y-4">
+                <div class="password-input-group">
+                    <input type="password" class="form-input" id="currentPassword"
+                        oninput="validate_PasswordOnInput(this.value)" required placeholder="Current Password">
+                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                        <i class="fas fa-eye-slash"></i>
+                    </span>
+                </div>
+                <div class="validation-feedback space-y-1 text-sm"></div>
                 <div class="password-input-group">
                     <input type="password" class="form-input" id="newPassword"
                         oninput="validatePasswordOnInput(this.value)" required placeholder="New Password">

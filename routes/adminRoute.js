@@ -5,6 +5,8 @@ const adminController = require("../controllers/adminController");
 const customerController = require("../controllers/customerController");
 const categoryController = require("../controllers/categoryController")
 const productController = require("../controllers/productController")
+const orderController = require("../controllers/orderController")
+
 const bodyParser = require("body-parser");
 const Category = require("../models/categorySchema");
 
@@ -34,8 +36,6 @@ admin_route.get('/unblockCustomer', customerController.unblockCustomer)
 //Category Management
 admin_route.get('/category', categoryController.categoryInfo)
 admin_route.post('/addCategory', categoryController.addCategory)
-// admin_route.post('/addCategoryOffer',categoryController.addCategoryOffer)
-// admin_route.post('/removeCategoryOffer',categoryController.removeCategoryOffer)
 admin_route.get('/listCategory', categoryController.getListCategory)
 admin_route.get('/unlistCategory', categoryController.getUnlistCategory)
 admin_route.get('/editCategory', categoryController.getEditCategory)
@@ -51,13 +51,9 @@ admin_route.get('/products/edit/:id', productController.editPage);
 admin_route.post('/products/edit/:id', productController.edittingProduct);
 admin_route.get('/products/view/:id', productController.productDetails);
 
-// admin_route.get('/addProducts',productController.getProductAddPage)
-// adminAuth,
-
-
-
-// admin_route.post('/addProducts',uploads.array("images",4),productController.addProducts);
-// adminAuth,
-
+// Orders
+admin_route.get('/orders',orderController.getOrdersAdmin)
+admin_route.post('/cancelOrder/:orderId',orderController.cancelOrder)
+admin_route.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
 
 module.exports = admin_route;

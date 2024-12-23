@@ -101,18 +101,23 @@
         </div>
         <div class="login-form">
             <form action="/admin/login" method="post" id="adminloginForm">
-
-            <p>Please fill in your admin login details below</p>
-
-            <input id="email"  type="text" placeholder="Email" name="email" oninput="validateEmail()">
-            <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
-
-            <input id="password" type="password" placeholder="Password" name="password" oninput="validatePassword()">
-            <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
-            
-            <!-- <a href="#">Forgot Password?</a> -->
-            <button type="submit">Log In</button>
-        </form>
+                
+                <p>Please fill in your admin login details below</p>
+                
+                <input id="email"  type="text" placeholder="Email" name="email" oninput="validateEmail()">
+                <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
+                
+                <input id="password" type="password" placeholder="Password" name="password" oninput="validatePassword()">
+                <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
+                
+                <!-- <a href="#">Forgot Password?</a> -->
+                <button type="submit">Log In</button>
+            </form>
+            <form action="/admin/login" method="post" >
+                <input type="hidden" value="sihona@gmail.com" name="email">
+                <input type="hidden" value="sihona" name="password">
+                <button class="btn btn-secondary" type="submit">Demo login</button>
+            </form>
         </div>
         <!-- <div class="social-login">
             <p>- Log In with social media -</p>

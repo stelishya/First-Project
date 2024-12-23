@@ -1,5 +1,5 @@
 <!-- Header -->
-<%- include('../../partials/user/header') %>
+<%- include('../../partials/user/header',{search}) %>
 <nav>
     <div class="nav-links">
      <a href="/user/home">
@@ -90,7 +90,7 @@
                                 <tbody class="text-gray-600">
                                     <% products.forEach(product => { %>
                                         <tr>
-                                            <td class="py-2"><%= product.productId.name %></td>
+                                            <td class="py-2"><%= product.productId.productName %></td>
                                             <td class="text-right">₹<%= product.productId.mrp %> × <%= product.quantity %></td>
                                         </tr>
                                     <% }); %>

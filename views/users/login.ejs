@@ -6,6 +6,12 @@
 </div>
 <h2 class="text-center mb-4" style="font-size:30px; ">Log In</h2>
 
+<!-- <button class="bg-gray-300 color-white"><a href="/user/demo">Demo</a></button> -->
+<form action="/user/login" method="post" >
+    <input type="hidden" value="delwin@gmail.com" name="email">
+    <input type="hidden" value="Delwin@123" name="password">
+    <button class="btn btn-secondary bg-gray-300 color-white" type="submit">Demo login</button>
+</form>
 <form action="/user/login" method="post" id="userloginForm">
     <div class="login-container">
         <label for="email"><b>Email</b></label>
