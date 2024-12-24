@@ -6,6 +6,7 @@ const productController = require('../controllers/productController')
 const addressController = require('../controllers/addressController')
 const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderController')
+const User = require('../models/userSchema')
 
 const passport = require('passport')
 
@@ -17,16 +18,27 @@ user_route.get('/signup',userController.loadRegister);
 user_route.post("/signup",userController.insertUser);
 user_route.post('/verifyOTP',userController.verifyOTP);// OTP Verification routes
 user_route.post('/resendOTP',userController.resendOTP);
-user_route.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
-user_route.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
-    if (req.isAuthenticated()) {
-        const user = req.user;
-        console.log('Authenticated user:', user);
-        req.session.user = user;
-        res.redirect('/user/home');
-    } else {
-        console.log('Authentication failed, redirecting to signup.');
-        res.redirect('/signup');
+user_route.get('/auth/google',passport.authenticate('google',{scope:['profile','email'],prompt: 'select_account'}));
+user_route.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/user/signup'}),async (req,res)=>{
+    try {
+        if (req.isAuthenticated() && req.user) {
+            const {user}= req.user;
+            // const googleId = req.user.googleId;
+            // const user= await User.findOne({googleId}).lean();
+            if(user){
+                req.session.user = user;
+                // req.session.save();
+                res.redirect('/user/home');
+            }else{
+                res.redirect('/user/login');
+            }
+        } else {
+            console.log('Authentication failed, redirecting to signup.');
+            res.redirect('/user/signup');
+        }
+    } catch (error) {
+        console.error('Google authentication error:', error);
+        res.status(500).send('Google authentication failed');
     }
 });
 

@@ -199,11 +199,31 @@ exports.updateQuantity = async (req, res) => {
 
         const productIndex = cart.items.findIndex(item => item.productId._id.toString() === productId);
         if (productIndex > -1) {
-            cart.items[productIndex].quantity += change;
-            if (cart.items[productIndex].quantity < 1) cart.items[productIndex].quantity = 1;
+            const product = cart.items[productIndex].productId;
+            const newQuantity = cart.items[productIndex].quantity + change;
+
+            // Check if trying to increase quantity
+            if (change > 0) {
+                // Get latest product stock
+                const currentProduct = await Products.findById(productId);
+                if (!currentProduct) {
+                    return res.status(404).json({ success: false, message: 'Product not found' });
+                }
+
+                // Check if new quantity exceeds stock or max limit
+                const maxAllowedQuantity = Math.min(currentProduct.quantity, 5);
+                if (newQuantity > maxAllowedQuantity) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: `Cannot add more items. ${maxAllowedQuantity === 5 ? 'Maximum limit is 5' : 'Not enough stock available'}`
+                    });
+                }
+            }
+
+            // Update quantity if all checks pass
+            cart.items[productIndex].quantity = newQuantity < 1 ? 1 : newQuantity;
 
             // Recalculate total price for the updated item
-            const product = cart.items[productIndex].productId;
             const price = product.discountedPrice || product.mrp;
             cart.items[productIndex].totalPrice = price * cart.items[productIndex].quantity;
 
@@ -219,12 +239,11 @@ exports.updateQuantity = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found in cart' });
         }
     } catch (error) {
-        console.error(error);
+        console.error('Error updating cart quantity:', error);
         res.status(500).json({ success: false, message: 'Error updating quantity' });
     }
 };
 
-// In your controller file
 exports.removeProduct = async (req, res) => {
     try {
         const userId = req.session.user._id;

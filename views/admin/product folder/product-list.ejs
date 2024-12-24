@@ -65,8 +65,7 @@
         <div class="user-info">
             <div>
              <div class="name">
-                <span><%= session.username %></span>
-              <!-- Selin Stelishya Oliver -->
+              Selin Stelishya Oliver
              </div>
              <div class="role">
               Admin
@@ -189,23 +188,23 @@
 
             <!-- Pagination -->
 
-            <!-- <div class="m-4  flex justify-between items-center" style="padding-left:750px;">
+            <div class="m-4  flex justify-between items-center" style="padding-left:750px;">
                 <div class="flex space-x-2">
-                    % if(currentPage > 1) {%>
-                    <a href="?page=%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
-                    % } %>
-                    % for(let i=1; i <= totalPages; i++) {%>
-                        % if(i === currentPage){ %>
-                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"> %= i %></span>
-                        % } else { %>
-                        <a href="?page= %= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"> %= i %></a>
-                        % } %>
-                    % } %>
-                    % if (currentPage < totalPages){%>
-                    <a href="?page= %= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
-                    % } %>
+                    <% if(currentPage > 1) {%>
+                    <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
+                    <% } %>
+                    <% for(let i=1; i <= totalPages; i++) {%>
+                        <% if(i === currentPage){ %>
+                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"> <%= i %></span>
+                        <% } else { %>
+                        <a href="?page= <%= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"> <%= i %></a>
+                        <% } %>
+                    <% } %>
+                    <% if (currentPage < totalPages){%>
+                    <a href="?page= <%= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
+                    <% } %>
                 </div>
-            </div> -->
+            </div>
 
            
         </div>

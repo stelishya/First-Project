@@ -14,15 +14,15 @@ async (accessToken, refreshToken, profile, done) => {
         let user = await User.findOne({ googleId: profile.id });
         // console.log(profile)
         if (user) {
-            return done(null, user);
+            return done(null, {user});
         } else {
-            user =  new User({
+            const newUser =  new User({
                 username: profile.displayName, 
                 email: profile.emails[0].value,
                 googleId: profile.id
             });
-            await user.save();
-            return done(null, user);
+            await newUser.save();
+            return done(null, {user:newUser});
         }
         
     } catch (error) {
@@ -31,8 +31,8 @@ async (accessToken, refreshToken, profile, done) => {
     }
 }));
 
-passport.serializeUser((user, done) => {
-    done(null, user.id);
+passport.serializeUser((userObj,done)=>{
+    done(null,userObj.user.id)
 });
 
 passport.deserializeUser((id, done) => {

@@ -65,7 +65,7 @@ exports.checkout = async (req, res) => {
 
         const paymentMethods = Orders.schema.path('paymentMethod').enumValues;
 
-        finalAmount = finalAmount || 0; // Ensure finalAmount is never undefined
+        finalAmount = finalAmount || 0; 
 
         res.render('users/order/checkout', {
             products,
@@ -79,7 +79,7 @@ exports.checkout = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in checkout:', error);
-        res.status(500).render('error', { 
+        res.status(500).render('users/page-404', { 
             message: 'Error loading checkout page',
             error: error
         });
@@ -87,7 +87,8 @@ exports.checkout = async (req, res) => {
 };
 
 exports.orderCreation = async (req,res)=>{
-    console.log("orderCreation called")
+    console.log("orderCreation called",req.session.user._id)
+
     const userId = req.session.user._id;
     const { finalAmount, paymentType, addressId, singleProductId, productsLength } = req.body;
     const  orderData  = req.body;
@@ -172,9 +173,7 @@ exports.orderCreation = async (req,res)=>{
             }
 
             const totalMRP = product.mrp;
-            // const totalMRP = product.mrp*orderData.quantity;
-
-            // Percentage discounts
+            
             const productPercentageDiscount = product.offer || 0;
             const categoryPercentageDiscount = product.category.offer || 0;
             const percentageDiscount = Math.max(productPercentageDiscount, categoryPercentageDiscount);
@@ -186,31 +185,25 @@ exports.orderCreation = async (req,res)=>{
             console.log("percentageDiscountAmount : "+percentageDiscountAmount+
                 "\npriceAfterPercentageDiscount: "+priceAfterPercentageDiscount)
             // Fixed amount discounts
-            const productFixedDiscount = product.fixedAmount || 0;
-            const categoryFixedDiscount = product.category.fixedAmount || 0;
-            const fixedDiscountAmount = Math.max(productFixedDiscount, categoryFixedDiscount);
-            console.log("productFixedDiscount: "+productFixedDiscount+
-                "\n categoryFixedDiscount : "+categoryFixedDiscount+
-                "fixedDiscountAmount : "+fixedDiscountAmount)
-            totalDiscountAmount = Math.round(Math.max(percentageDiscountAmount, fixedDiscountAmount) * 100) / 100;
+            // const productFixedDiscount = product.fixedAmount || 0;
+            // const categoryFixedDiscount = product.category.fixedAmount || 0;
+            // const fixedDiscountAmount = Math.max(productFixedDiscount, categoryFixedDiscount);
+            
+            // totalDiscountAmount = Math.round(Math.max(percentageDiscountAmount, fixedDiscountAmount) * 100) / 100;
 
-            const priceAfterFixedDiscount = Math.round(Math.max(totalMRP - productFixedDiscount, totalMRP - categoryFixedDiscount) * 100) / 100;
-            const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
-            const totalPriceAfterDiscount = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
-            console.log("totalDiscountAmount: "+totalDiscountAmount+
-                "\n priceAfterFixedDiscount : "+priceAfterFixedDiscount+
-                "finalDiscountedPrice : "+finalDiscountedPrice+
-                "totalPriceAfterDiscount : "+totalPriceAfterDiscount)
-            subtotal = totalPriceAfterDiscount*orderData.quantity;
+            // const priceAfterFixedDiscount = Math.round(Math.max(totalMRP - productFixedDiscount, totalMRP - categoryFixedDiscount) * 100) / 100;
+            // const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
+            // const totalPriceAfterDiscount = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
+            
+            subtotal = priceAfterPercentageDiscount*orderData.quantity;
             console.log("Subtotal:", subtotal);
                 console.log("product._id : "+product._id+
-                    "orderData.quantity : "+orderData.quantity+
-                    "totalPriceAfterDiscount : "+totalPriceAfterDiscount)
+                    "orderData.quantity : "+orderData.quantity)
             productsWithLatestPrices = [
                 {
                     productId: product._id,
                     quantity: orderData.quantity,
-                    priceAtPurchase: totalPriceAfterDiscount
+                    priceAtPurchase: subtotal
                 }
             ];
             
@@ -228,13 +221,10 @@ exports.orderCreation = async (req,res)=>{
                 userId:userId,
                 address:selectedAddress._id ||'address ahn',
                 orderedItems: orderItems,
-                // totalPrice: subtotal,
-                // products: productsWithLatestPrices,
                 finalAmount: subtotal ,
                 totalDiscount:totalDiscountAmount,
                 paymentMethod: orderData.paymentType,
                 status:'Order Placed',
-                // createdOn: new Date() 
             });
             console.log("Creating order with data:", newOrder);
 
@@ -245,7 +235,7 @@ exports.orderCreation = async (req,res)=>{
             console.log("orderData.buyNow : ",orderData.buyNow)
             // Update inventory
             if(orderData.buyNow) {
-                await Products.findByIdAndUpdate(orderData.productId, {
+                await Products.findByIdAndUpdate(orderData.singleProductId, {
                     $inc: { quantity: -orderData.quantity }
                 });
                 console.log("Inventory updated for buy now.");
@@ -255,16 +245,13 @@ exports.orderCreation = async (req,res)=>{
                 console.log("Cart populated for user:", userId);
                 if(cart){
                     for (const item of cart.items) {
-                        const productId = item.productId._id;
-                        const quantityOrdered = item.quantity;
-            
-                        await Products.findByIdAndUpdate(productId, {
-                            $inc: { quantity: -quantityOrdered }
+                        await Products.findByIdAndUpdate(item.productId._id, {
+                            $inc: { quantity: -item.quantity }
                         });
+                        console.log(`Updated inventory for product ${item.productId._id}, reduced by ${item.quantity}`);
                     }
                     await Carts.findOneAndDelete({ userId });
                 }
-
             }
             return res.status(200).json({ 
                 success: true, 

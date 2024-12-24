@@ -66,12 +66,25 @@
                                 </div>                                                 
                             </div>
                             <div class="flex flex-col space-y-3">
-                                <div class="flex items-center justify-center space-x-4">
-                                    <button onclick="updateQuantity('<%= product.productId._id %>', -1,'<%= product.quantity %>','<%= product.discountedPrice %>')" class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded-lg">-</button>
-                                    <div class="bg-gray-200 px-6 py-2 rounded-lg">
-                                        <span id="quantity-<%= product._id %>"><%= product.quantity %></span>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-gray-700 font-medium">Quantity:</span>
+                                    <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden">
+                                        <button onclick="updateQuantity('<%= product.productId._id %>', -1, '<%= product.productId.quantity %>',' <%= product.discountedPrice %>')" 
+                                                class="px-4 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                                            <i class="fas fa-minus text-gray-600"></i>
+                                        </button>
+                                        <input type="number" 
+                                               id="quantity-<%= product.productId._id %>" 
+                                               value="<%= product.quantity %>" 
+                                               min="1" 
+                                               max="<%= Math.min(product.productId.quantity, 5) %>"
+                                               class="w-16 text-center border-x border-gray-300 py-2 focus:outline-none"
+                                               onchange="validateAndUpdateQuantity(this, '<%= product.productId._id %>', '<%= product.productId.quantity %>', '<%= product.discountedPrice %>')">
+                                        <button onclick="updateQuantity('<%= product.productId._id %>', 1, '<%= product.productId.quantity %>', '<%= product.discountedPrice %>')"
+                                                class="px-4 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                                            <i class="fas fa-plus text-gray-600"></i>
+                                        </button>
                                     </div>
-                                    <button onclick="updateQuantity('<%= product.productId._id %>', 1,'<%= product.quantity %>','<%= product.discountedPrice %>')" class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded-lg">+</button>
                                 </div>
                                 <div class="flex justify-between gap-2">
                                     <button class="flex-1 text-gray-500 hover:text-red-500 bg-gray-100 hover:bg-red-50 py-2 rounded-lg transition-colors" onclick="removeProduct('<%= product.productId._id %>')">Remove</button>
@@ -117,89 +130,143 @@
 
 <script>
 
+    // Function to validate and update quantity when input changes
+    async function validateAndUpdateQuantity(input, productId, stock, price) {
+        try {
+            const maxQuantity = Math.min(5, parseInt(stock));
+            let newValue = parseInt(input.value);
+            
+            // Ensure the value is within bounds
+            if (isNaN(newValue) || newValue < 1) {
+                newValue = 1;
+                showErrorToast("Quantity cannot be less than 1");
+                input.value = 1;
+                return;
+            }
+            if (newValue > maxQuantity) {
+                showErrorToast(`Maximum quantity allowed is ${maxQuantity}`);
+                input.value = maxQuantity;
+                return;
+            }
+            
+            // Calculate the change needed
+            const currentQuantity = parseInt(document.getElementById(`quantity-${productId}`).value);
+            const change = newValue - currentQuantity;
+            
+            if (change !== 0) {
+                await updateQuantity(productId, change, stock, price);
+            }
+        } catch (error) {
+            console.error('Error in validateAndUpdateQuantity:', error);
+            showErrorToast("Error updating quantity");
+        }
+    }
+
     // Function to update quantity
     async function updateQuantity(productId, change, stock, price) {
-        const quantityElement = document.getElementById(`quantity-${productId}`);
-        const totalPriceElement = document.getElementById(`total-price-${productId}`);
-        let currentQuantity = parseInt(quantityElement.textContent);
-        const maxQuantity = Math.min(5, stock); // Limit to either 5 or stock, whichever is lower
-
-
-        // Check limits before making the API call
-        const newQuantity = currentQuantity + change;
-        if (newQuantity < 1 || newQuantity > maxQuantity) {
-            Toastify({
-                text: newQuantity < 1 ? "Quantity cannot be less than 1" : "Cannot add more than " + maxQuantity + " items",
-                duration: 2000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                stopOnFocus: true,
-                className: "toast_style"
-            }).showToast();
-            return;
-        }
-
         try {
-            const response = await axios.patch('/user/cart/update-quantity', {
-                productId,
-                change
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            const currentQuantity = parseInt(quantityElement.value);
+            const maxQuantity = Math.min(5, parseInt(stock));
+            const newQuantity = currentQuantity + change;
+            console.log("currentQuantity,newQuantity : ",currentQuantity,newQuantity)
+            // Validate before making the request
+            if (newQuantity < 1) {
+                showErrorToast("Quantity cannot be less than 1");
+                return;
+            }
+            if (newQuantity > maxQuantity) {
+                showErrorToast(`Maximum quantity allowed is ${maxQuantity}`);
+                return;
+            }
+
+            // Make the API request
+            const response = await axios({
+                method: 'post',
+                url: '/user/cart/updateQuantity',
+                data: {
+                    productId: productId,
+                    change: change
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
 
             const data = response.data;
             if (data.success) {
                 // Update quantity display
-                quantityElement.textContent = newQuantity;
-                totalPriceElement.textContent = (price * newQuantity).toFixed(2);
+                quantityElement.value = newQuantity;
+                
+                // Update total price
+                const totalPriceElement = document.getElementById(`total-price-${productId}`);
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = (price * newQuantity).toFixed(2);
+                }
 
-                // Update item summary and total amount from response
+                // Update cart total
                 if (data.totalAmount !== undefined) {
-                    document.querySelector('.text-xl.font-bold.text-green-600').textContent = `₹ ${data.totalAmount}`;
+                    const totalElement = document.querySelector('.text-xl.font-bold.text-green-600');
+                    if (totalElement) {
+                        totalElement.textContent = `₹ ${data.totalAmount}`;
+                    }
                 }
                 
-                if (data.products) {
-                    const itemSummary = data.products
-                        .map(p => `${p.quantity} × ${p.productId.productName}`)
-                        .join(', ');
-                    document.getElementById('itemSummary').textContent = itemSummary;
+                // Update item summary
+                if (data.items) {
+                    const summaryElement = document.getElementById('itemSummary');
+                    if (summaryElement) {
+                        const itemSummary = data.items
+                            .map(item => `${item.quantity} × ${item.productId.productName}`)
+                            .join(', ');
+                        summaryElement.textContent = itemSummary;
+                    }
                 }
 
-                Toastify({
-                    text: data.message || "Quantity updated successfully",
-                    duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    stopOnFocus: true,
-                    backgroundColor: "linear-gradient(135deg, rgba(144, 238, 144, 0.9), rgba(50, 205, 50, 0.9))",
-                    className: "toast_style"
-                }).showToast();
+                showSuccessToast(data.message || "Quantity updated successfully");
             } else {
-                Toastify({
-                    text: data.message || "Error updating quantity",
-                    duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                    stopOnFocus: true,
-                    className: "toast_style"
-                }).showToast();
+                // Reset quantity on error
+                quantityElement.value = currentQuantity;
+                showErrorToast(data.message || "Failed to update quantity");
             }
-
         } catch (error) {
             console.error('Error updating quantity:', error);
-            Toastify({
-                gravity: "top",
-                text: "Failed to update quantity",
-                duration: 2000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                stopOnFocus: true,
-                className: "toast_style"
-            }).showToast();
+            const errorMessage = error.response?.data?.message || "Error updating quantity";
+            showErrorToast(errorMessage);
+            
+            // Reset the input to the previous valid value
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            if (quantityElement) {
+                quantityElement.value = currentQuantity;
+            }
         }
     }
 
+    function showSuccessToast(message) {
+        Toastify({
+            text: message,
+            duration: 2000,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: "linear-gradient(135deg, rgba(75, 192, 192, 0.9), rgba(153, 102, 255, 0.9))"
+            },
+            className: "toast_style"
+        }).showToast();
+    }
+
+    function showErrorToast(message) {
+        Toastify({
+            text: message,
+            duration: 2000,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))"
+            },
+            className: "toast_style"
+        }).showToast();
+    }
 
     // Function to remove product
     async function removeProduct(productId) {
@@ -240,42 +307,17 @@
                         window.location.reload();
                     }
 
-                    Toastify({
-                        text: "Product removed from cart",
-                        duration: 2000,
-                        gravity: "top",
-                        position: "right",
-                        stopOnFocus: true,
-                        backgroundColor: "linear-gradient(135deg, rgba(144, 238, 144, 0.9), rgba(50, 205, 50, 0.9))",
-                        className: "toast_style"
-                    }).showToast();
+                    showSuccessToast("Product removed from cart");
                 }
             } else {
                 console.error('Failed to remove product:', response.data.message);
-                Toastify({
-                    text: "Failed to remove product",
-                    duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    stopOnFocus: true,
-                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                    className: "toast_style"
-                }).showToast();
+                showErrorToast("Failed to remove product");
             }
         } catch (error) {
             console.error('Error removing product:', error);
-            Toastify({
-                text: "Error removing product",
-                duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    stopOnFocus: true,
-                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                    className: "toast_style"
-            }).showToast();
+            showErrorToast("Error removing product");
         }
     }
-
 
     async function buyNow(productId, quantity) {
         try {
@@ -283,7 +325,7 @@
             window.location.href = `/user/checkout?productId=${productId}&quantity=${quantity}&buyNow=true`;
         } catch (error) {
             console.error('Error processing buy now:', error);
-            showToast("Failed to process buy now request", true);
+            showErrorToast("Failed to process buy now request");
         }
     }
 </script>

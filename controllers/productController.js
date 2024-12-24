@@ -9,6 +9,7 @@ const sharp = require('sharp');
 exports.products = async (req, res) => {
     try {
         let search = req.query.search || '';
+        const session = req.session.user || {};
 
         // Pagination
         const page = parseInt(req.query.page) || 1;
@@ -41,11 +42,12 @@ exports.products = async (req, res) => {
             search,
             errorMessage,
             successMessage,
-            page,
+            currentPage:page,
             totalPages,
             limit,
             totalProducts,
-            activeTab: "products"
+            activeTab: "products",
+            session
         });
     } catch (error) {
         console.error(error);
@@ -60,10 +62,7 @@ exports.addProductPage = async (req, res) => {
         req.session.errorMessage = null
         req.session.successMessage = null
 
-        //product data handling
         const categories = await Category.find({}, { name: 1 })
-        // const categories = (await Categories.find({}, { name: 1, _id: 0 })).map(category => category.name);
-        // const offerTypes = Products.schema.path('offerType').enumValues;
         res.render('admin/product folder/product-add', {
             successMessage, errorMessage, categories, activeTab: "products"
         })
@@ -124,9 +123,7 @@ exports.addProduct = async (req, res) => {
                 category,
                 quantity,
                 isListed,
-                // inventory: stock,
                 productImage: image,
-                // status
             });
             await newProduct.save();
             console.log("Product added successfully");
@@ -309,6 +306,7 @@ exports.productDetails = async (req, res) => {
 exports.productDetailsUser = async (req, res) => {
     try {
         const search = req.query.search || ''; 
+        const session = req.session.user;
         const productId = req.params.productId;
         const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
             .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -331,7 +329,7 @@ exports.productDetailsUser = async (req, res) => {
             product: productDetails,
             deliveryDate,
             relatedProducts,
-            search
+            search,session
         });
     } catch (error) {
         console.error('Error in productDetailsUser:', error);
@@ -354,49 +352,6 @@ exports.showProductsPage = async (req, res) => {
         let sortField = 'createdAt'; // Default sort field
         let sortOrder = -1; // Default sort order (descending)
 
-        // switch (req.query.sortBy) {
-        //     case 'popularity':
-        //         sortField = 'popularity';
-        //         sortOrder = -1;
-        //         break;
-        //     case 'priceLowToHigh':
-        //         sortField = 'mrp';
-        //         sortOrder = 1;
-        //         break;
-        //     case 'priceHighToLow':
-        //         sortField = 'mrp';
-        //         sortOrder = -1;
-        //         break;
-        //     case 'averageRatings':
-        //         sortField = 'averageRating';
-        //         sortOrder = -1;
-        //         break;
-        //     case 'featured':
-        //         sortField = 'isFeatured';
-        //         sortOrder = -1;
-        //         break;
-        //     case 'newArrivals':
-        //         sortField = 'createdAt';
-        //         sortOrder = -1;
-        //         break;
-        //     case 'aToZ':
-        //         sortField = 'productName';
-        //         sortOrder = 1;
-        //         break;
-        //     case 'zToA':
-        //         sortField = 'productName';
-        //         sortOrder = -1;
-        //         break;
-        //     default:
-        //         break;
-        // }
-
-        console.log('Received sortBy parameter:', req.query.sortBy);
-        console.log('Using sortField:', sortField, 'and sortOrder:', sortOrder);
-
-        console.log('Sort by:', req.query.sortBy);
-        console.log('Sort field:', sortField);
-        console.log('Sort order:', sortOrder);
 
         const count = await Products.find({
             $or:[
@@ -434,7 +389,7 @@ exports.showProductsPage = async (req, res) => {
 
         res.render('users/product folder/products', {
             title: "All Products",
-            session: req.session.username,
+            session: session,
             products,
             currentPage: page,
             totalPages,
@@ -457,6 +412,8 @@ exports.showProductsPage = async (req, res) => {
 // Dynamic product update
 exports.fetchProducts = async (req, res) => {
     try {
+        console.log("fetchProducts called")
+
         const sortOption = req.query.sortBy || 'new';
         let sortCriteria;
         let collationOptions = null;
@@ -487,6 +444,8 @@ exports.fetchProducts = async (req, res) => {
 
         const minPrice = parseInt(req.query.min, 10) || 0;
         const maxPrice = parseInt(req.query.max, 10) || Infinity;
+        const categories = await Category.find({},{name:1});
+
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
@@ -495,7 +454,7 @@ exports.fetchProducts = async (req, res) => {
         let totalProducts;
 
             let query = {
-                name: { $regex: search, $options: 'i' },
+                productName: { $regex: search, $options: 'i' },
                 isListed: true,
                 mrp: { $gte: minPrice, $lte: maxPrice}
             };
@@ -512,23 +471,30 @@ exports.fetchProducts = async (req, res) => {
                 .populate('category', 'name');
             totalProducts = await Products.countDocuments(query);
             // totalProducts = products.length;
-        
+            
         
         // const totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' } });
         const totalPages = Math.ceil(totalProducts / limit);
-
-        res.json({
+            console.log("rendering details : ",products,totalProducts,totalPages,page,limit,sortOption,!!req.session.user,search,
+                categories,
+                minPrice,
+                maxPrice)
+        res.json( {
             products: products,
             totalProducts: totalProducts,
             totalPages: totalPages,
-            page: page,
+            currentPage: page,
             limit: limit,
             sortOption,
-            isLoggedIn: !!req.session.user
+            isLoggedIn: !!req.session.user,
+            search,
+            categories,
+            minPrice,
+            maxPrice
         });
     } catch (error) {
-        console.log("Error in fetchProducts:", error);
-        res.status(500).json({ message: "An error occurred while loading the products." });
+        console.error('Error fetching products:', error);
+        res.status(500).json({ message: 'An error occurred while fetching products.' });
     }
 };
 

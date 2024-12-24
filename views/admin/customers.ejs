@@ -260,18 +260,6 @@
         <th>
          Phone
         </th>
-        <!-- <th>
-         Orders
-        </th>
-        <th>
-         Balance
-        </th> -->
-        <!-- <th>
-         Status
-        </th>
-        <th>
-         Created
-        </th> -->
         <th>
          Action
         </th>
@@ -280,9 +268,6 @@
       <tbody>
         <% for(let i=0;i<data.length;i++){%>
        <tr>
-        <!-- <td>
-         <input type="checkbox"/>
-        </td> -->
         <td>
           <%=data[i].username%>
          </td>
@@ -292,20 +277,14 @@
         <td>
          <%=data[i].mobile%>
         </td>
-        <!-- <td>
-         124
-        </td>
-        <td>
-         $121.00
-        </td> -->
         <td>
             <% if(data[i].is_blocked===false){%>
                 <span class="status blocked">
-                    <a href="/admin/blockCustomer?id=<%=data[i]._id%>">Blocked</a>
+                    <a href="/admin/blockCustomer?id=<%=data[i]._id%>">Block</a>
                 </span>
             <% } else{ %>
                 <span class="status active">
-                    <a href="/admin/unblockCustomer?id=<%=data[i]._id%>">UnBlocked </a>
+                    <a href="/admin/unblockCustomer?id=<%=data[i]._id%>">UnBlock </a>
                 </span>
             <%} %>
         </td>

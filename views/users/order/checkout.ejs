@@ -142,11 +142,11 @@
                                         id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
                                         <input type="radio" name="payment" value="<%= method %>" class="text-gray-500 focus:ring-gray-500"
                                             id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>"
-                                            <% if (method === 'COD' && finalAmount > 1000) { %>disabled<% } %>>
+                                            <% if (method === 'COD' && finalAmount > 3000) { %>disabled<% } %>>
                                         <span><%= method %></span>
-                                        <% if (method === 'COD' && finalAmount > 1000) { %>
+                                        <!-- % if (method === 'COD' && finalAmount > 1000) { %>
                                             <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
-                                        <% } %>
+                                        % } %> -->
                                     </label>
                                 <% }); %>
                             </div>

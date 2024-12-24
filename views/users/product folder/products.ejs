@@ -273,7 +273,7 @@
                         <h3 class="text-lg font-semibold mb-2">Categories</h3>
                         <div class="space-y-2">
                             <% categories.forEach((category)=> { %>
-                                <button id="category-<%= category._id %>" class="category-item w-full text-left px-1 py-1 rounded-md transition duration-300 bg-gray-400
+                                <button id="category-<%= category._id %>" class="filter-option category-item w-full text-left px-1 py-1 rounded-md transition duration-300 bg-gray-400
                             hover:bg-gray-300 text-grey-100 font-small md:text-sm lg:text-base"
                                     onclick="categoryFilter('<%= category._id %>')">
                                     <%= category.name %>
@@ -372,7 +372,7 @@
                         </select>
                     </div>
 
-                    <div class="products-grid">
+                    <div id="productsContainer" class="products-grid ">
                         <% products.forEach(product=> { %>
                             <a href="/user/product/details/<%= product._id %>">
                                 <div class="product-card">
@@ -380,8 +380,8 @@
                                         <img src="/uploads/product-images/<%= product.productImage[0] %>"
                                             alt="<%= product.productName %>" class="product-image">
                                     </div>
-                                    <div class="product-info">
-                                        <h3 class="product-title">
+                                    <div class="product-info p-8">
+                                        <h3 class="product-title p-8">
                                             <%= product.productName %>
                                         </h3>
                                         <div class="product-price">
@@ -404,7 +404,7 @@
                             <% }); %>
                     </div>
 
-                    <div id="paginationContainer"></div>
+                    <!-- <div id="paginationContainer"></div> -->
                     <div id="rangeInfo"></div>
 
                     <div class="mt-4 flex justify-between items-center">
@@ -434,13 +434,6 @@
                         </div>
                     </div>
 
-                    <!-- <div class="pagination">
-                    <button>&lt;</button>
-                    <button class="active">1</button>
-                    <button>2</button>
-                    <button>3</button>
-                    <button>&gt;</button>
-                </div> -->
                 </section>
             </div>
         </div>
@@ -449,10 +442,8 @@
     <%- include ('../../partials/user/footer')%>
 
         <script>
-            // Add event listeners for filters and sorting
             document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', function () {
-                    // Add filter functionality here
                     console.log('Filter changed:', this.checked);
                 });
             });
@@ -486,7 +477,7 @@
                 });
             }
             
-            function toggleSidebar() {
+        function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
         sidebar.classList.toggle('show');
@@ -583,17 +574,19 @@
 
     async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new', categoryId = '', priceRange = {}) {
         try {
+            console.log("fetchProducts called")
+            console.log("searchQuery", searchQuery)
+            console.log("page", page)
+            console.log("sortBy", sortBy)
+            console.log("categoryId", categoryId)
+            console.log("priceRange", priceRange)
             const response = await axios.get(`/user/api/products`, {
                 params: { search: searchQuery, page: page, sortBy: sortBy, category: categoryId, ...priceRange },
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
             if (response.data.products) {
-                // Get wishlist items to check product status
-                // const wishlistResponse = await axios.get('/user/wishlist/check');
-                // const wishlistItems = wishlistResponse.data || [];
-                
-                // displayProducts(response.data.products, wishlistItems);
+                displayProducts(response.data.products);
                 updatePagination(response.data.totalPages, page, response.data.totalProducts, response.data.limit);
                 setSortSelection(response.data.sortOption);
             }
@@ -602,57 +595,31 @@
         }
     }
 
-    // function displayProducts(products, wishlistItems) {
-    //     const productsContainer = document.getElementById('productsContainer');
-    //     productsContainer.innerHTML = ''; // Clear previous results
+    function displayProducts(products) {
+        const productsContainer = document.getElementById('productsContainer');
+        productsContainer.innerHTML = ''; // Clear previous results
 
-    //     if (!products || products.length === 0) {
-    //         productsContainer.innerHTML = '<p>No products found.</p>';
-    //         return;
-    //     }
+        if (!products || products.length === 0) {
+            productsContainer.innerHTML = '<p>No products found.</p>';
+            return;
+        }
 
-    //     const isLoggedIn = '<%- session %>';
-
-    //     products.forEach(product => {
-            
-    //         let productHtml = `
-    //             <div class="relative rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl">
-    //                 <a href="/user/product/${product._id}">
-    //                     <div class="bg-white p-4 rounded-lg">
-    //                         <img 
-    //                             alt="Product Image" 
-    //                             class="w-full h-48 object-cover rounded-lg mb-2" 
-    //                             src="${product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png'}"
-    //                         />
-    //                         <div class="text-center">
-    //                             <h3 class="font-bold text-lg text-gray-800">${product.name}</h3>
-    //                             <div class="text-green-500 text-xl">
-    //                                 <b>₹</b> ${product.sellingPrice}
-    //                                 <span class="line-through text-gray-500 text-sm">₹ ${product.mrp}</span>
-    //                                 ${product.offer ? `<span class="text-red-500 text-sm">(${product.offer}% off)</span>` : ''}
-    //                             </div>
-    //                         </div>
-    //                     </div>
-    //                 </a>
-    //         `;
-    //         if (isLoggedIn) {
-    //             const isInWishlist = wishlistItems.some(item => item.productId === product._id);
-    //             const heartClass = isInWishlist ? 'text-red-500' : 'text-gray-400';
-
-    //             productHtml += `
-    //                 <!-- Heart Icon as Overlay -->
-    //                 <button 
-    //                     class="absolute top-2 right-2 hover:text-red-500 transition duration-300" 
-    //                     onclick="toggleWishlist('${product._id}', this)"
-    //                 >
-    //                     <i class="fas fa-heart ${heartClass}"></i>
-    //                 </button>
-    //             `;
-    //         }
-    //         productHtml += `</div>`;
-    //         productsContainer.insertAdjacentHTML('beforeend', productHtml);
-    //     });
-    // }
+        products.forEach(product => {
+            const productHtml = `
+                <div class="product-card">
+                    <a href="/user/product/details/${product._id}">
+                        <img src="/uploads/product-images/${product.productImage[0]}" alt="${product.productName}" class="product-image">
+                        <h1 class="product-title p-2">${product.productName}</h1>
+                        <div class="product-price p-3">
+                            <span class="price">₹${product.mrp}</span>
+                            ${product.productOffer ? `<span class="original-price">₹${product.mrp}</span><span class="discount">${product.productOffer}% OFF</span>` : ''}
+                        </div>
+                    </a>
+                </div>
+            `;
+            productsContainer.insertAdjacentHTML('beforeend', productHtml);
+        });
+    }
 
     function updatePagination(totalPages, currentPage, totalProducts, limit) {
         const paginationContainer = document.getElementById('paginationContainer');
@@ -683,7 +650,7 @@
             pageButton.classList.add('px-3', 'py-1', 'rounded-md', 'text-gray-700');
 
             if (i === currentPage) {
-                pageButton.classList.add('bg-orange-500', 'text-white');
+                pageButton.classList.add('bg-gray-500', 'text-white');
             } else {
                 pageButton.classList.add('bg-gray-200');
             }
@@ -717,37 +684,7 @@
         sortDropdown.value = selectedSort;
     }
 
-    async function toggleWishlist( productId, button) {
-        const isLoggedIn = '<%- session %>';
-        if (!isLoggedIn) {
-            alert('Please log in to add items to your wishlist.');
-            return;
-        }
-        try {
-            const icon = button.querySelector('i');
-
-            // Toggle heart state (empty or filled)
-            if (icon.classList.contains('text-gray-400')) {
-                // Add to wishlist
-                const response = await axios.post('/user/wishlist/add', { productId });
-                if (response.status === 200) {
-                    icon.classList.remove('text-gray-400');
-                    icon.classList.add('text-red-500');
-                    console.log('Product added to wishlist');
-                }
-            } else {
-                // Remove from wishlist
-                const response = await axios.delete(`/user/wishlist/remove?productId=${productId}`);
-                if (response.status === 200) {
-                    icon.classList.remove('text-red-500');
-                    icon.classList.add('text-gray-400');
-                    console.log('Product removed from wishlist');
-                }
-            }
-        } catch (error) {
-            console.error('Error toggling wishlist:', error);
-        }
-    }
+    
 
     // Initial load
     document.addEventListener('DOMContentLoaded', () => fetchProducts());

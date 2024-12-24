@@ -7,38 +7,21 @@ const userAuth = (req, res, next) => {
         if (data && !data.is_blocked) {
           next();
         } else {
-          // For AJAX requests, send JSON response
-          if (req.xhr || req.headers.accept?.toLowerCase().includes('application/json')) {
-            res.status(401).json({
-              success: false,
-              message: "Please login to continue"
-            });
-          } else {
-            res.redirect("/user/login");
-          }
+          delete req.session.user;
+          req.session.save((err) => {
+            if (err) {
+              console.error('Error saving session:', err);
+            }
+            return res.redirect('/user/login');
+          });
         }
       })
       .catch(err => {
         console.error('Error in user auth middleware:', err);
-        if (req.xhr || req.headers.accept?.toLowerCase().includes('application/json')) {
-          res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-          });
-        } else {
-          res.status(500).send('Internal Server Error');
-        }
+        return res.status(500).send('Internal Server Error');
       });
   } else {
-    // For AJAX requests, send JSON response
-    if (req.xhr || req.headers.accept?.toLowerCase().includes('application/json')) {
-      res.status(401).json({
-        success: false,
-        message: "Please login to continue"
-      });
-    } else {
-      res.redirect("/user/login");
-    }
+    next()
   }
 };
 
