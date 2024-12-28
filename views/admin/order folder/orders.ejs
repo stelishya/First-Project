@@ -265,10 +265,13 @@
     async function updateOrderStatus(orderId, statusSelect) {
         const status = statusSelect.value;
         const parentElement = statusSelect.parentElement;
+        console.log("status : ",status)
         try {
             const response = await axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
+            console.log("response : ",response)
             if (response.status === 200) {
                 const newStatus = statusSelect.value;
+                console.log("newStatus : ",newStatus)
                 if (newStatus === 'Delivered') {
                     const statusSpan = document.createElement('span');
                     statusSpan.className = 'inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg';

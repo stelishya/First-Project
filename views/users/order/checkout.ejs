@@ -1,777 +1,940 @@
 <!-- Header -->
 <%- include('../../partials/user/header',{search}) %>
-<nav>
-    <div class="nav-links">
-     <a href="/user/home">
-      Home
-     </a>
-     <span class="divider">
-     </span>
-     <a href="#">
-      Contact
-     </a>
-     <span class="divider">
-     </span>
-     <a href="#">
-      About
-     </a>
-     <span class="divider">
-     </span>
-     <a href="/user/products">
-      Products
-     </a>
-    </div>
-   </nav>
-<!-- Main Content -->
-<main class="flex">
-    <!-- Main Section -->
-    <div class="flex-1 p-8 bg-gray-50" style="background-color: #d8d2cd;">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex justify-start mb-4">
-                <a href="/user/products" class="px-4 py-2 bg-gray-400 text-black rounded hover:bg-gray-600 transition">Back to Products</a>
-            </div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Checkout</h1>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left Column: Address Selection -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Delivery Address</h2>
-                        <div id="addressList" class="space-y-4">
-                            <% if (addresses && addresses.length > 0) { %>
-                                <% addresses.forEach(address => { %>
-                                    <div data-address-id="<%= address._id %>" class="address-card rounded-lg p-4 border-2 border-transparent transition-all duration-200 hover:border-gray-400">
-                                        <div class="flex justify-between items-start">
-                                            <div>
-                                                <h3 class="font-bold text-gray-800"><%= address.name %></h3>
-                                                <p class="text-sm text-gray-500"><%= address.typeOfAddress %></p>
-                                                <p class="text-gray-600"><%= address.streetAddress %></p>
-                                                <p class="text-gray-600"><%= address.city %>, <%= address.state %></p>
-                                                <p class="text-gray-600"><%= address.country %> - <%= address.pincode %></p>
-                                                <p class="text-gray-600">Phone: <%= address.phone %></p>
-                                            </div>
-                                            <div class="flex space-x-2">
-                                                <button onclick="editAddress('<%= JSON.stringify(address) %>')" class="px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
-                                                    Edit
-                                                </button>
-                                                <button onclick="selectAddress('<%= address._id %>',this)" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-                                                    Select
-                                                </button>
+    <nav>
+        <div class="nav-links">
+            <a href="/user/home">
+                Home
+            </a>
+            <span class="divider">
+            </span>
+            <a href="#">
+                Contact
+            </a>
+            <span class="divider">
+            </span>
+            <a href="#">
+                About
+            </a>
+            <span class="divider">
+            </span>
+            <a href="/user/products">
+                Products
+            </a>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="flex">
+        <!-- Main Section -->
+        <div class="flex-1 p-8 bg-gray-50" style="background-color: #d8d2cd;">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-start mb-4">
+                    <a href="/user/products"
+                        class="px-4 py-2 bg-gray-400 text-black rounded hover:bg-gray-600 transition">Back to
+                        Products</a>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Checkout</h1>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Address Selection -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Delivery Address</h2>
+                            <div id="addressList" class="space-y-4">
+                                <% if (addresses && addresses.length> 0) { %>
+                                    <% addresses.forEach(address=> { %>
+                                        <div data-address-id="<%= address._id %>"
+                                            class="address-card rounded-lg p-4 border-2 border-transparent transition-all duration-200 hover:border-gray-400">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="font-bold text-gray-800">
+                                                        <%= address.name %>
+                                                    </h3>
+                                                    <p class="text-sm text-gray-500">
+                                                        <%= address.typeOfAddress %>
+                                                    </p>
+                                                    <p class="text-gray-600">
+                                                        <%= address.streetAddress %>
+                                                    </p>
+                                                    <p class="text-gray-600">
+                                                        <%= address.city %>, <%= address.state %>
+                                                    </p>
+                                                    <p class="text-gray-600">
+                                                        <%= address.country %> - <%= address.pincode %>
+                                                    </p>
+                                                    <p class="text-gray-600">Phone: <%= address.phone %>
+                                                    </p>
+                                                </div>
+                                                <div class="flex space-x-2">
+                                                    <button onclick="editAddress('<%= JSON.stringify(address) %>')"
+                                                        class="px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                                                        Edit
+                                                    </button>
+                                                    <button onclick="selectAddress('<%= address._id %>',this)"
+                                                        class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+                                                        Select
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                <% }); %>
-                            <% } else { %>
-                                <p class="text-gray-600">No addresses found. Please add a delivery address.</p>
-                            <% } %>
-                            
-                            <!-- Add New Address Button -->
-                            <button onclick="openAddAddressModal()" class="w-full mt-4 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
-                                <i class="fas fa-plus mr-2"></i>
-                                Add New Address
+                                        <% }); %>
+                                            <% } else { %>
+                                                <p class="text-gray-600">No addresses found. Please add a delivery
+                                                    address.</p>
+                                                <% } %>
+
+                                                    <!-- Add New Address Button -->
+                                                    <button onclick="openAddAddressModal()"
+                                                        class="w-full mt-4 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
+                                                        <i class="fas fa-plus mr-2"></i>
+                                                        Add New Address
+                                                    </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Order Summary -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Order Summary</h2>
+                            <!-- Product Price Breakdown -->
+                            <div class="mb-4">
+                                <table class="w-full text-sm">
+                                    <thead class="text-gray-600 border-b">
+                                        <tr>
+                                            <th class="text-left py-2">Product</th>
+                                            <th class="text-right py-2">MRP × Qty</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600">
+                                        <% products.forEach(product=> { %>
+                                            <tr>
+                                                <td class="py-2">
+                                                    <%= product.productId.productName %>
+                                                </td>
+                                                <td class="text-right">₹<%= product.productId.mrp %> × <%=
+                                                            product.quantity %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                    <tfoot class="border-t">
+                                        <tr class="font-semibold">
+                                            <td class="py-2">Total MRP</td>
+                                            <!-- <td class="text-right">₹%= totalMRP.toFixed(2) %></td> -->
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <hr class="my-4 border-gray-200" <!-- Discount Breakdown -->
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between text-gray-600">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-minus-circle text-red-500 mr-2"></i>
+                                        Total Discount
+                                    </span>
+                                    <!-- <span class="text-red-500">-₹%= totalDiscount.toFixed(2) %></span> -->
+                                </div>
+                                <!-- <div id="couponDiscount" class="flex hidden justify-between text-gray-600">
+                                <span>Coupon Discount</span>
+                                <span id="couponDiscountValue" class="text-red-600">-₹0</span>
+                            </div> -->
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Shipping</span>
+                                    <span class="text-green-600">Free</span>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-gray-200" <!-- Final Amount -->
+                            <div class="flex justify-between font-bold text-lg">
+                                <span>Final Amount</span>
+                                <span id="totalAmount" class="text-orange-500">₹<%= finalAmount.toFixed(2) %></span>
+                            </div>
+
+                            <!-- Payment Options -->
+                            <div class="mt-6">
+                                <h3 class="font-semibold text-gray-700 mb-3">Payment Methods</h3>
+                                <div class="space-y-2">
+                                    <% paymentMethods.forEach(method=> { %>
+                                        <label
+                                            class="flex items-center space-x-3 p-3 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
+                                            id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
+                                            <input type="radio" name="payment" value="<%= method %>"
+                                                class="text-gray-500 focus:ring-gray-500"
+                                                id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" <% if
+                                                (method==='COD' && finalAmount> 3000) { %>disabled<% } %>>
+                                                <span>
+                                                    <%= method %>
+                                                </span>
+                                                <!-- % if (method === 'COD' && finalAmount > 1000) { %>
+                                            <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
+                                        % } %> -->
+                                        </label>
+                                        <% }); %>
+                                </div>
+                            </div>
+
+                            <button onclick="placeOrder('<%= finalAmount %>','<%= products[0].productId._id %>')"
+                                class="w-full py-3  text-white rounded-lg hover:bg-gray-500 transition-colors mt-6"
+                                style="background-color: #716f6e;">
+                                Place Order
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Right Column: Order Summary -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Order Summary</h2>
-                        <!-- Product Price Breakdown -->
-                        <div class="mb-4">
-                            <table class="w-full text-sm">
-                                <thead class="text-gray-600 border-b">
-                                    <tr>
-                                        <th class="text-left py-2">Product</th>
-                                        <th class="text-right py-2">MRP × Qty</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-gray-600">
-                                    <% products.forEach(product => { %>
-                                        <tr>
-                                            <td class="py-2"><%= product.productId.productName %></td>
-                                            <td class="text-right">₹<%= product.productId.mrp %> × <%= product.quantity %></td>
-                                        </tr>
-                                    <% }); %>
-                                </tbody>
-                                <tfoot class="border-t">
-                                    <tr class="font-semibold">
-                                        <td class="py-2">Total MRP</td>
-                                        <!-- <td class="text-right">₹%= totalMRP.toFixed(2) %></td> -->
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                        <hr class="my-4 border-gray-200"
-
-                        <!-- Discount Breakdown -->
-                        <div class="space-y-2 mb-4">
-                            <div class="flex justify-between text-gray-600">
-                                <span class="flex items-center">
-                                    <i class="fas fa-minus-circle text-red-500 mr-2"></i>
-                                    Total Discount
-                                </span>
-                                <!-- <span class="text-red-500">-₹%= totalDiscount.toFixed(2) %></span> -->
-                            </div>
-                            <!-- <div id="couponDiscount" class="flex hidden justify-between text-gray-600">
-                                <span>Coupon Discount</span>
-                                <span id="couponDiscountValue" class="text-red-600">-₹0</span>
-                            </div> -->
-                            <div class="flex justify-between text-gray-600">
-                                <span>Shipping</span>
-                                <span class="text-green-600">Free</span>
-                            </div>
-                        </div>
-
-                        <hr class="my-4 border-gray-200"
-
-                         <!-- Final Amount  -->
-                        <div class="flex justify-between font-bold text-lg">
-                            <span>Final Amount</span>
-                            <span id="totalAmount" class="text-orange-500">₹<%= finalAmount.toFixed(2) %></span>
-                        </div>
-
-                        <!-- Payment Options -->
-                        <div class="mt-6">
-                            <h3 class="font-semibold text-gray-700 mb-3">Payment Methods</h3>
-                            <div class="space-y-2">
-                                <% paymentMethods.forEach(method => { %>
-                                    <label class="flex items-center space-x-3 p-3 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
-                                        id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
-                                        <input type="radio" name="payment" value="<%= method %>" class="text-gray-500 focus:ring-gray-500"
-                                            id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>"
-                                            <% if (method === 'COD' && finalAmount > 3000) { %>disabled<% } %>>
-                                        <span><%= method %></span>
-                                        <!-- % if (method === 'COD' && finalAmount > 1000) { %>
-                                            <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
-                                        % } %> -->
-                                    </label>
-                                <% }); %>
-                            </div>
-                        </div>
-
-                        <button onclick="placeOrder('<%= finalAmount %>','<%= products[0].productId._id %>')" class="w-full py-3  text-white rounded-lg hover:bg-gray-500 transition-colors mt-6" style="background-color: #716f6e;">
-                            Place Order
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
+    </main>
+    <!-- Footer -->
+    <div class="text-center p-5 bg-white">
+        <h1 class="text-4xl">CAlliope</h1>
+        <h2 class="text-2xl">Inc</h2>
     </div>
-</main>
-<!-- Footer -->
-<div class="text-center p-5 bg-white">
-    <h1 class="text-4xl">CAlliope</h1>
-    <h2 class="text-2xl">Inc</h2>
-</div>
 
-<style>
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        opacity: 0;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .modal.show {
-        display: flex;
-        opacity: 1;
-    }
-
-    .modal-content {
-        transform: translateY(-20px);
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .modal.show .modal-content {
-        transform: translateY(0);
-    }
-
-    .toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        transform: translateX(120%);
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .toast.show {
-        transform: translateX(0);
-    }
-
-    .address-card {
-        background-image: linear-gradient(to right, #b9b6b4, #c4bfbb);
-        color: inherit;
-    }
-
-    .border-gray-500 {
-        border: 3px solid #6c6867; /* Tomato color for a more vibrant border */
-        background-color: #fff5f5; /* Softer background to match the theme */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-        transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
-        border-radius: 8px; /* Rounded corners for a modern look */
-    }
-
-    .selected-button {
-        background-color: #4a4a4a; 
-        color: #ffffff;
-        border: none; 
-        padding: 8px 16px; 
-        border-radius: 5px; 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
-        transition: background-color 0.3s ease, box-shadow 0.3s ease; 
-        cursor: pointer; 
-    }
-    
-    .selected-button:hover {
-        background-color: #e5533d; /* Slightly darker shade on hover */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
-    }
-</style>
-
-<!-- Address Modal -->
-<div id="addressModal" class="modal">
-    <div class="modal-content w-full max-w-xl bg-white rounded-lg shadow-lg relative">
-        <div class="bg-orange-400 text-white p-4 rounded-t-lg">
-            <h2 class="text-xl font-semibold" id="modalTitle">Add New Address</h2>
-            <button onclick="closeModal()" class="absolute top-3 right-3 text-white hover:text-yellow-200">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <form id="addressForm" class="p-6">
-            <input type="hidden" id="addressId" name="addressId">
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-700 font-medium mb-1">Type of Address</label>
-                    <select name="typeOfAddress" id="typeInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
-                        <option value="Home">Home</option>
-                        <option value="Work">Work</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-gray-700 font-medium mb-1">Full Name</label>
-                    <input name="name" type="text" id="nameInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter your full name">
-                    <span id="nameError" class="text-red-500 text-sm"></span>
-                </div>
-
-                <div>
-                    <label class="block text-gray-700 font-medium mb-1">Street Address</label>
-                    <input name="streetAddress" type="text" id="streetInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter street address">
-                    <span id="streetError" class="text-red-500 text-sm"></span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">City</label>
-                        <input name="city" type="text" id="cityInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter city">
-                        <span id="cityError" class="text-red-500 text-sm"></span>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">State</label>
-                        <input name="state" type="text" id="stateInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter state">
-                        <span id="stateError" class="text-red-500 text-sm"></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Country</label>
-                        <input name="country" type="text" id="countryInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter country">
-                        <span id="countryError" class="text-red-500 text-sm"></span>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Pincode</label>
-                        <input name="pincode" type="text" id="pincodeInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter pincode">
-                        <span id="pincodeError" class="text-red-500 text-sm"></span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-gray-700 font-medium mb-1">Phone Number</label>
-                    <input name="mobile" type="tel" id="phoneInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400" placeholder="Enter phone number">
-                    <span id="phoneError" class="text-red-500 text-sm"></span>
-                </div>
-            </div>
-
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                    Cancel
-                </button>
-                <button type="submit" class="px-6 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors">
-                    Save Address
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-
-// Address selection
-let selectedAddressId = null;
-function selectAddress(addressId,buttonElement) {
-    selectedAddressId = addressId;
-    console.log("selectedAddressId:",selectedAddressId)
-    // Remove selection from all addresses
-    document.querySelectorAll('#addressList > div').forEach(div => {
-        div.classList.remove('border-gray-500');
-        div.querySelector('button:last-child').textContent = 'Select';
-    });
-    // Add selection to clicked address
-    const addressCard = buttonElement.closest('[data-address-id]');
-    addressCard.classList.add('border-gray-500');
-    buttonElement.textContent = 'Selected';
-    buttonElement.classList.add('selected-button');
-}
-
-async function saveAddress(event) {
-    event.preventDefault();
-    
-    try {
-        const addressId = document.getElementById('addressId').value;
-        const formData = {
-            typeOfAddress: document.getElementById('typeInput').value,
-            name: document.getElementById('nameInput').value,
-            streetAddress: document.getElementById('streetInput').value,
-            city: document.getElementById('cityInput').value,
-            state: document.getElementById('stateInput').value,
-            country: document.getElementById('countryInput').value,
-            pincode: document.getElementById('pincodeInput').value,
-            mobile: document.getElementById('phoneInput').value
-        };
-
-        // Validate required fields
-        const requiredFields = ['name', 'streetAddress', 'city', 'state', 'country', 'pincode', 'mobile'];
-        const missingFields = requiredFields.filter(field => !formData[field]);
-        
-        if (missingFields.length > 0) {
-            throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
         }
 
-        let response;
-        if (addressId) {
-            // Edit existing address
-            response = await fetch(`/user/editAddress/${addressId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(formData)
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .address-card {
+            background-image: linear-gradient(to right, #b9b6b4, #c4bfbb);
+            color: inherit;
+        }
+
+        .border-gray-500 {
+            border: 3px solid #6c6867;
+            /* Tomato color for a more vibrant border */
+            background-color: #fff5f5;
+            /* Softer background to match the theme */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow for depth */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            /* Smooth transitions */
+            border-radius: 8px;
+            /* Rounded corners for a modern look */
+        }
+
+        .selected-button {
+            background-color: #4a4a4a;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .selected-button:hover {
+            background-color: #e5533d;
+            /* Slightly darker shade on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* Enhanced shadow on hover */
+        }
+    </style>
+
+    <!-- Address Modal -->
+    <div id="addressModal" class="modal">
+        <div class="modal-content w-full max-w-xl bg-white rounded-lg shadow-lg relative">
+            <div class="bg-orange-400 text-white p-4 rounded-t-lg">
+                <h2 class="text-xl font-semibold" id="modalTitle">Add New Address</h2>
+                <button onclick="closeModal()" class="absolute top-3 right-3 text-white hover:text-yellow-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="addressForm" class="p-6">
+                <input type="hidden" id="addressId" name="addressId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1">Type of Address</label>
+                        <select name="typeOfAddress" id="typeInput"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
+                            <option value="Home">Home</option>
+                            <option value="Work">Work</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+                        <input name="name" type="text" id="nameInput"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                            placeholder="Enter your full name">
+                        <span id="nameError" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1">Street Address</label>
+                        <input name="streetAddress" type="text" id="streetInput"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                            placeholder="Enter street address">
+                        <span id="streetError" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">City</label>
+                            <input name="city" type="text" id="cityInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                placeholder="Enter city">
+                            <span id="cityError" class="text-red-500 text-sm"></span>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">State</label>
+                            <input name="state" type="text" id="stateInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                placeholder="Enter state">
+                            <span id="stateError" class="text-red-500 text-sm"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">Country</label>
+                            <input name="country" type="text" id="countryInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                placeholder="Enter country">
+                            <span id="countryError" class="text-red-500 text-sm"></span>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">Pincode</label>
+                            <input name="pincode" type="text" id="pincodeInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                placeholder="Enter pincode">
+                            <span id="pincodeError" class="text-red-500 text-sm"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-1">Phone Number</label>
+                        <input name="mobile" type="tel" id="phoneInput"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                            placeholder="Enter phone number">
+                        <span id="phoneError" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors">
+                        Save Address
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+
+        // Address selection
+        let selectedAddressId = null;
+        function selectAddress(addressId, buttonElement) {
+            selectedAddressId = addressId;
+            console.log("selectedAddressId:", selectedAddressId)
+            // Remove selection from all addresses
+            document.querySelectorAll('#addressList > div').forEach(div => {
+                div.classList.remove('border-gray-500');
+                div.querySelector('button:last-child').textContent = 'Select';
             });
-        } else {
-            // Add new address
-            response = await fetch('/user/addAddress', {
+            // Add selection to clicked address
+            const addressCard = buttonElement.closest('[data-address-id]');
+            addressCard.classList.add('border-gray-500');
+            buttonElement.textContent = 'Selected';
+            buttonElement.classList.add('selected-button');
+        }
+
+        async function saveAddress(event) {
+            event.preventDefault();
+
+            try {
+                const addressId = document.getElementById('addressId').value;
+                const formData = {
+                    typeOfAddress: document.getElementById('typeInput').value,
+                    name: document.getElementById('nameInput').value,
+                    streetAddress: document.getElementById('streetInput').value,
+                    city: document.getElementById('cityInput').value,
+                    state: document.getElementById('stateInput').value,
+                    country: document.getElementById('countryInput').value,
+                    pincode: document.getElementById('pincodeInput').value,
+                    mobile: document.getElementById('phoneInput').value
+                };
+
+                // Validate required fields
+                const requiredFields = ['name', 'streetAddress', 'city', 'state', 'country', 'pincode', 'mobile'];
+                const missingFields = requiredFields.filter(field => !formData[field]);
+
+                if (missingFields.length > 0) {
+                    throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+                }
+
+                let response;
+                if (addressId) {
+                    // Edit existing address
+                    response = await fetch(`/user/editAddress/${addressId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    // Add new address
+                    response = await fetch('/user/addAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            address: formData
+                        })
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message || 'Address saved successfully');
+                    closeModal();
+                    // Reload the page to show updated addresses
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to save address');
+                }
+            } catch (error) {
+                console.error('Error saving address:', error);
+                showToast(error.message || 'Failed to save address. Please try again.', true);
+            }
+        }
+
+        // Update the form submission handler
+        document.getElementById('addressForm').onsubmit = saveAddress;
+
+        function editAddress(addressData) {
+            try {
+                const address = typeof addressData === 'string' ? JSON.parse(addressData) : addressData;
+                openAddressModal(address);
+                // const address = JSON.parse(addressData);
+                const modal = document.getElementById('addressModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const form = document.getElementById('addressForm');
+
+                // Set modal title
+                // modalTitle.textContent = 'Edit Address';
+
+                // Fill form fields
+                document.getElementById('addressId').value = address._id;
+                document.getElementById('nameInput').value = address.name;
+                document.getElementById('typeInput').value = address.typeOfAddress || '';
+                document.getElementById('streetInput').value = address.streetAddress;
+                document.getElementById('cityInput').value = address.city;
+                document.getElementById('stateInput').value = address.state;
+                document.getElementById('countryInput').value = address.country;
+                document.getElementById('pincodeInput').value = address.pincode;
+                document.getElementById('phoneInput').value = address.phone || address.mobile;
+
+                // Update form action
+                form.onsubmit = saveAddress;
+
+                // Show modal
+                modal.classList.add('show');
+            } catch (error) {
+                console.error('Error parsing address data:', error);
+                showToast('Error editing address', true);
+            }
+        }
+        function openAddressModal(address = null) {
+            const modal = document.getElementById('addressModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('addressForm');
+            modal.style.zIndex = '1100';
+
+            // Reset form and clear any previous errors
+            form.reset();
+            clearErrors();
+
+            if (address) {
+                // Edit mode
+                modalTitle.textContent = 'Edit Address';
+
+                // Fill form with existing address data
+                document.getElementById('nameInput').value = address.name;
+                document.getElementById('streetInput').value = address.streetAddress;
+                document.getElementById('cityInput').value = address.city;
+                document.getElementById('stateInput').value = address.state;
+                document.getElementById('countryInput').value = address.country;
+                document.getElementById('pincodeInput').value = address.pincode;
+                document.getElementById('phoneInput').value = address.phone;
+
+                form.action = `/user/editAddress/${address._id}`;
+                form.method = 'PATCH';
+            } else {
+                // Add mode
+                modalTitle.textContent = 'Add New Address';
+                form.action = '/user/addAddress';
+                form.method = 'POST';
+            }
+
+            modal.classList.add('show');
+        }
+
+        function openAddAddressModal() {
+            const modal = document.getElementById('addressModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('addressForm');
+
+            // Reset form
+            form.reset();
+            document.getElementById('addressId').value = '';
+
+            // Set title
+            modalTitle.textContent = 'Add New Address';
+
+            // Update form action
+            form.onsubmit = saveAddress;
+
+            // Show modal
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('addressModal');
+            modal.classList.remove('show');
+
+            // Clear form fields
+            const form = document.getElementById('addressForm');
+            form.reset();
+
+            // Clear all error messages
+            const errorElements = document.querySelectorAll('[id$="Error"]');
+            errorElements.forEach(element => {
+                element.textContent = '';
+            });
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
+            toast.style.zIndex = '1100';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // Show toast with animation
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+
+            // Hide and remove toast
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function updateCODAvailability(totalAmount) {
+            const codInput = document.getElementById('payment-cod');
+            const codLabel = document.getElementById('payment-cod-label');
+
+            if (!codInput || !codLabel) return; // Exit if elements don't exist
+
+            if (totalAmount > 1000) {
+                codInput.disabled = true;
+                codInput.checked = false; // Uncheck if it was checked
+                if (!codLabel.querySelector('.text-red-500')) {
+                    const warning = document.createElement('span');
+                    warning.className = 'ml-2 text-sm text-red-500';
+                    warning.textContent = '(Not available for orders above ₹1000)';
+                    codLabel.appendChild(warning);
+                }
+            } else {
+                codInput.disabled = false;
+                const warning = codLabel.querySelector('.text-red-500');
+                if (warning) {
+                    warning.remove();
+                }
+            }
+        }
+
+
+        async function placeOrder(finalAmount, productId = null) {
+            if (!selectedAddressId) {
+                showToast('Please select a delivery address', true);
+                return;
+            }
+
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            console.log('Selected Payment:', selectedPayment.value);
+            if (!selectedPayment) {
+                showToast('Please select a payment method', true);
+                return;
+            }
+
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const isBuyNow = urlParams.get('buyNow') === 'true';
+                let orderData = {
+                    addressId: selectedAddressId,
+                    total: parseFloat(finalAmount),
+                    paymentType: selectedPayment.value,
+                    buyNow: false
+                };
+                console.log("orderData.buyNow", orderData.buyNow)
+                if (isBuyNow && productId) {
+                    orderData.singleProductId = productId;
+                    orderData.quantity = parseInt(urlParams.get('quantity')) || 1;
+                    orderData.buyNow = true;
+                }
+
+                if (selectedPayment.value === 'Online Payment') {
+                    try {
+                        // Create Razorpay order
+                        const response = await axios.post('/user/create-order', { amount: finalAmount });
+                        console.log("Razorpay order response:", response.data);
+                        
+                        if (!response.data.id) {
+                            showToast('Failed to create payment order', true);
+                            return;
+                        }
+
+                        // Store order data for later use
+                        const currentOrderData = {
+                            addressId: selectedAddressId,
+                            total: parseFloat(finalAmount),
+                            paymentType: 'Online Payment',
+                            buyNow: true, // Since this is a buy now flow
+                            singleProductId: productId,
+                            quantity: parseInt(urlParams.get('quantity')) || 1
+                        };
+
+                        console.log("Preparing order with data:", currentOrderData);
+
+                        // Initialize Razorpay payment
+                        const options = {
+                            key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                            amount: response.data.amount,
+                            currency: "INR",
+                            name: "CAlliope",
+                            description: "Product Purchase",
+                            order_id: response.data.id,
+                            handler: function (response) {
+                                handlePaymentSuccess(response, currentOrderData);
+                            },
+                            theme: {
+                                color: "#3399cc"
+                            }
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.on('payment.failed', function (response){
+                            console.error("Payment failed:", response.error);
+                            showToast(response.error.description || 'Payment failed', true);
+                        });
+                        rzp.open();
+                    } catch (error) {
+                        console.error('Razorpay initialization error:', error);
+                        showToast('Failed to initialize payment', true);
+                    }
+                } else {
+                    // For COD and other payment methods
+                    const response = await axios.post('/user/order/creation', orderData);
+                    if (response.data.success) {
+                        await Swal.fire({
+                            title: 'Order Placed Successfully!',
+                            text: 'Thank you for your purchase.',
+                            icon: 'success',
+                            confirmButtonText: 'View Orders',
+                            confirmButtonColor: '#f97316'
+                        });
+                        window.location.href = '/user/orders';
+                    }
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                showToast(error.response?.data?.message || 'Failed to place order', true);
+            }
+        }
+
+        async function handlePaymentSuccess(response, orderData) {
+            try {
+                console.log("Verifying payment...", response);
+                const verifyResponse = await axios.post('/user/verify-payment', {
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderData: orderData
+                });
+
+                if (verifyResponse.data.success) {
+                    await Swal.fire({
+                        title: 'Payment Successful!',
+                        text: 'Your order has been placed.',
+                        icon: 'success',
+                        confirmButtonText: 'View Orders',
+                        confirmButtonColor: '#f97316'
+                    });
+                    window.location.href = '/user/orders';
+                } else {
+                    throw new Error(verifyResponse.data.message || 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Payment verification error:', error);
+                showToast(error.message || 'Payment verification failed', true);
+            }
+        }
+
+        // Form validation functions
+        function validateName() {
+            const input = document.getElementById('nameInput').value.trim();
+            const error = document.getElementById('nameError');
+            if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
+                error.textContent = 'Name should only contain letters';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        function validateStreetAddress() {
+            const input = document.getElementById('streetInput').value.trim();
+            const error = document.getElementById('streetError');
+            if (!input || input.length < 5) {
+                error.textContent = 'Street address should be at least 5 characters long';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        function validateCity() {
+            const input = document.getElementById('cityInput').value.trim();
+            const error = document.getElementById('cityError');
+            if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
+                error.textContent = 'City should only contain letters';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        function validateState() {
+            const input = document.getElementById('stateInput').value.trim();
+            const error = document.getElementById('stateError');
+            if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
+                error.textContent = 'State should only contain letters';
+                error.style.color = 'red';
+                return false;
+            } else if (input[0].toLowerCase() === input[0]) {
+                error.textContent = 'First letter should be uppercase';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        function validatePincode() {
+            const input = document.getElementById('pincodeInput').value.trim();
+            const error = document.getElementById('pincodeError');
+            if (!input || !/^\d{6}$/.test(input)) {
+                error.textContent = 'Pincode should be exactly 6 digits';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        function validatePhone() {
+            const input = document.getElementById('phoneInput').value.trim();
+            const error = document.getElementById('phoneError');
+            if (!input || !/^\d{10}$/.test(input)) {
+                error.textContent = 'Phone number should be exactly 10 digits';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        function validateCountry() {
+            const input = document.getElementById('countryInput').value.trim();
+            const error = document.getElementById('countryError');
+            if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
+                error.textContent = 'Country should only contain letters';
+                error.style.color = 'red';
+                return false;
+            } else {
+                error.textContent = '';
+                return true;
+            }
+        }
+
+        // Add input event listeners
+        document.getElementById('nameInput')?.addEventListener('input', validateName);
+        document.getElementById('streetInput')?.addEventListener('input', validateStreetAddress);
+        document.getElementById('cityInput')?.addEventListener('input', validateCity);
+        document.getElementById('stateInput')?.addEventListener('input', validateState);
+        document.getElementById('pincodeInput')?.addEventListener('input', validatePincode);
+        document.getElementById('phoneInput')?.addEventListener('input', validatePhone);
+        document.getElementById('countryInput')?.addEventListener('input', validateCountry);
+
+        // Handle form submission with validation
+        document.getElementById('addressForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Run all validations
+            const isNameValid = validateName();
+            const isStreetAddressValid = validateStreetAddress();
+            const isCityValid = validateCity();
+            const isStateValid = validateState();
+            const isPincodeValid = validatePincode();
+            const isPhoneValid = validatePhone();
+            const isCountryValid = validateCountry();
+
+            if (isNameValid && isStreetAddressValid && isCityValid && isStateValid &&
+                isPincodeValid && isPhoneValid && isCountryValid) {
+
+                try {
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData);
+                    const isEditMode = this.action.includes('editAddress');
+
+                    let response;
+                    if (isEditMode) {
+                        const addressId = this.action.split('/').pop();
+                        response = await axios.patch(`/user/editAddress/${addressId}`, data);
+                    } else {
+                        response = await axios.post('/user/addAddress', data);
+                    }
+
+                    if (response.status === 200 || response.status === 201) {
+                        showToast(isEditMode ? 'Address updated successfully!' : 'Address saved successfully!');
+                        closeModal();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error("Error saving address:", error);
+                    showToast('Failed to save address. Please try again.', true);
+                }
+            } else {
+                showToast('Please correct all validation errors before submitting.', true);
+            }
+        });
+
+        // Razorpay
+        function initiatePayment(amount) {
+            fetch('/user/create-order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    address: formData
+                body: JSON.stringify({ amount: amount })
+            })
+                .then(response => response.json())
+                .then(order => {
+                    var options = {
+                        "key": process.env.RAZORPAY_KEY_ID,
+                        "amount": order.amount,
+                        "currency": "INR",
+                        "name": "CAlliope",
+                        "description": "Wall Art",
+                        "order_id": order.id,
+                        "handler": function (response) {
+                            // Handle successful payment
+                            verifyPayment(response);
+                        },
+                        // "prefill": {
+                        //     "name": "%= session.user.username %>",
+                        //     "email": "%= session.user.email %>",
+                        //     "contact": "%= session.user.mobile || '' %>"
+                        // },
+                        "theme": {
+                            "color": "#3399cc"
+                        }
+                    };
+                    var rzp1 = new Razorpay(options);
+                    rzp1.open();
+                    
                 })
-            });
+                .catch(error => console.error('Error:', error));
         }
 
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast(data.message || 'Address saved successfully');
-            closeModal();
-            // Reload the page to show updated addresses
-            window.location.reload();
-        } else {
-            throw new Error(data.message || 'Failed to save address');
+        function verifyPayment(response) {
+            fetch('/user/verify-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(response)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === "Payment verified successfully") {
+                        // Handle successful payment (e.g., redirect to success page)
+                        window.location.href = '/user/payment-success';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         }
-    } catch (error) {
-        console.error('Error saving address:', error);
-        showToast(error.message || 'Failed to save address. Please try again.', true);
-    }
-}
-
-// Update the form submission handler
-document.getElementById('addressForm').onsubmit = saveAddress;
-
-function editAddress(addressData) {
-    try {
-        const address = typeof addressData === 'string' ? JSON.parse(addressData) : addressData;
-        openAddressModal(address);
-        // const address = JSON.parse(addressData);
-        const modal = document.getElementById('addressModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const form = document.getElementById('addressForm');
         
-        // Set modal title
-        // modalTitle.textContent = 'Edit Address';
-        
-        // Fill form fields
-        document.getElementById('addressId').value = address._id;
-        document.getElementById('nameInput').value = address.name;
-        document.getElementById('typeInput').value = address.typeOfAddress || '';
-        document.getElementById('streetInput').value = address.streetAddress;
-        document.getElementById('cityInput').value = address.city;
-        document.getElementById('stateInput').value = address.state;
-        document.getElementById('countryInput').value = address.country;
-        document.getElementById('pincodeInput').value = address.pincode;
-        document.getElementById('phoneInput').value = address.phone || address.mobile;
-        
-        // Update form action
-        form.onsubmit = saveAddress;
-        
-        // Show modal
-        modal.classList.add('show');
-    } catch (error) {
-        console.error('Error parsing address data:', error);
-        showToast('Error editing address', true);
-    }
-}
-function openAddressModal(address = null) {
-    const modal = document.getElementById('addressModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const form = document.getElementById('addressForm');
-    modal.style.zIndex = '1100';
-
-    // Reset form and clear any previous errors
-    form.reset();
-    clearErrors();
-
-    if (address) {
-        // Edit mode
-        modalTitle.textContent = 'Edit Address';
-        
-        // Fill form with existing address data
-        document.getElementById('nameInput').value = address.name;
-        document.getElementById('streetInput').value = address.streetAddress;
-        document.getElementById('cityInput').value = address.city;
-        document.getElementById('stateInput').value = address.state;
-        document.getElementById('countryInput').value = address.country;
-        document.getElementById('pincodeInput').value = address.pincode;
-        document.getElementById('phoneInput').value = address.phone;
-        
-        form.action = `/user/editAddress/${address._id}`;
-        form.method = 'PATCH';
-    } else {
-        // Add mode
-        modalTitle.textContent = 'Add New Address';
-        form.action = '/user/addAddress';
-        form.method = 'POST';
-    }
-
-    modal.classList.add('show');
-}
-
-function openAddAddressModal() {
-    const modal = document.getElementById('addressModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const form = document.getElementById('addressForm');
-    
-    // Reset form
-    form.reset();
-    document.getElementById('addressId').value = '';
-    
-    // Set title
-    modalTitle.textContent = 'Add New Address';
-    
-    // Update form action
-    form.onsubmit = saveAddress;
-    
-    // Show modal
-    modal.classList.add('show');
-}
-
-function closeModal() {
-    const modal = document.getElementById('addressModal');
-    modal.classList.remove('show');
-    
-    // Clear form fields
-    const form = document.getElementById('addressForm');
-    form.reset();
-    
-    // Clear all error messages
-    const errorElements = document.querySelectorAll('[id$="Error"]');
-    errorElements.forEach(element => {
-        element.textContent = '';
-    });
-}
-
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
-    toast.style.zIndex = '1100';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    // Show toast with animation
-    requestAnimationFrame(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateY(0)';
-    });
-    
-    // Hide and remove toast
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-function updateCODAvailability(totalAmount) {
-    const codInput = document.getElementById('payment-cod');
-    const codLabel = document.getElementById('payment-cod-label');
-    
-    if (!codInput || !codLabel) return; // Exit if elements don't exist
-    
-    if (totalAmount > 1000) {
-        codInput.disabled = true;
-        codInput.checked = false; // Uncheck if it was checked
-        if (!codLabel.querySelector('.text-red-500')) {
-            const warning = document.createElement('span');
-            warning.className = 'ml-2 text-sm text-red-500';
-            warning.textContent = '(Not available for orders above ₹1000)';
-            codLabel.appendChild(warning);
-        }
-    } else {
-        codInput.disabled = false;
-        const warning = codLabel.querySelector('.text-red-500');
-        if (warning) {
-            warning.remove();
-        }
-    }
-}
-
-
-async function placeOrder(finalAmount, productId = null) {
-    // const selectedAddress = document.querySelector('[data-address-id].border-gray-500');
-    if (!selectedAddressId) {
-        showToast('Please select a delivery address', true);
-        return;
-    }
-    const selectedPayment = document.querySelector('input[name="payment"]:checked');
-    console.log('Selected Payment:', selectedPayment.value);
-    if (!selectedPayment) {
-        showToast('Please select a payment method', true);
-        return;
-    }
-
-    try {
-        // Check if this is a buyNow order using URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const isBuyNow = urlParams.get('buyNow') === 'true';
-        console.log("isBuyNow",isBuyNow)
-        console.log('place order address:',selectedAddressId)
-        let orderData = {
-            addressId: selectedAddressId,
-            total: parseFloat(finalAmount),
-            paymentType: selectedPayment.value,
-            buyNow: false
-        };
-        console.log("orderData.buyNow",orderData.buyNow)
-        if(isBuyNow && productId){ 
-                // ...orderData,
-                orderData.singleProductId=productId,  // Add this
-                orderData.quantity= parseInt(urlParams.get('quantity')) || 1,    // Add this
-                orderData.buyNow= true          // Add this
-            };
-            console.log("Sending orderData :",orderData)
-        
-        // else{
-        //     orderData.buyNow = false;
-        // }
-
-        // In checkout.ejs
-        const response = await axios.post('/user/order/creation', orderData );
-        console.log("response",response)
-        if (!response.data.success) {
-            return console.error('Error creating order:', response.data.error);
-        }
-        const ourOrderId = response.data.order._id;
-        console.log('Our Order ID:', ourOrderId);
-         
-            // Show success message with SweetAlert
-            await Swal.fire({
-                title: 'Order Placed Successfully!',
-                text: 'Thank you for your purchase.',
-                icon: 'success',
-                confirmButtonText: 'View Orders',
-                confirmButtonColor: '#f97316', // orange-500
-                allowOutsideClick: false
-            });
-            // Redirect to orders page
-            window.location.href = '/user/orders';
-        
-
-        
-    } catch (error) {
-        console.error('Error placing order:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to place order. Please try again.';
-        showToast(errorMessage, true);
-    }
-}
-
-// Form validation functions
-function validateName() {
-    const input = document.getElementById('nameInput').value.trim();
-    const error = document.getElementById('nameError');
-    if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
-        error.textContent = 'Name should only contain letters';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-function validateStreetAddress() {
-    const input = document.getElementById('streetInput').value.trim();
-    const error = document.getElementById('streetError');
-    if (!input || input.length < 5) {
-        error.textContent = 'Street address should be at least 5 characters long';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-function validateCity() {
-    const input = document.getElementById('cityInput').value.trim();
-    const error = document.getElementById('cityError');
-    if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
-        error.textContent = 'City should only contain letters';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-function validateState() {
-    const input = document.getElementById('stateInput').value.trim();
-    const error = document.getElementById('stateError');
-    if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
-        error.textContent = 'State should only contain letters';
-        error.style.color = 'red';
-        return false;
-    } else if(input[0].toLowerCase() === input[0]) {
-        error.textContent = 'First letter should be uppercase';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-function validatePincode() {
-    const input = document.getElementById('pincodeInput').value.trim();
-    const error = document.getElementById('pincodeError');
-    if (!input || !/^\d{6}$/.test(input)) {
-        error.textContent = 'Pincode should be exactly 6 digits';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-function validatePhone() {
-    const input = document.getElementById('phoneInput').value.trim();
-    const error = document.getElementById('phoneError');
-    if (!input || !/^\d{10}$/.test(input)) {
-        error.textContent = 'Phone number should be exactly 10 digits';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-function validateCountry() {
-    const input = document.getElementById('countryInput').value.trim();
-    const error = document.getElementById('countryError');
-    if (!input || !/^[a-zA-Z\s]+$/.test(input)) {
-        error.textContent = 'Country should only contain letters';
-        error.style.color = 'red';
-        return false;
-    } else {
-        error.textContent = '';
-        return true;
-    }
-}
-
-// Add input event listeners
-document.getElementById('nameInput')?.addEventListener('input', validateName);
-document.getElementById('streetInput')?.addEventListener('input', validateStreetAddress);
-document.getElementById('cityInput')?.addEventListener('input', validateCity);
-document.getElementById('stateInput')?.addEventListener('input', validateState);
-document.getElementById('pincodeInput')?.addEventListener('input', validatePincode);
-document.getElementById('phoneInput')?.addEventListener('input', validatePhone);
-document.getElementById('countryInput')?.addEventListener('input', validateCountry);
-
-// Handle form submission with validation
-document.getElementById('addressForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Run all validations
-    const isNameValid = validateName();
-    const isStreetAddressValid = validateStreetAddress();
-    const isCityValid = validateCity();
-    const isStateValid = validateState();
-    const isPincodeValid = validatePincode();
-    const isPhoneValid = validatePhone();
-    const isCountryValid = validateCountry();
-
-    if (isNameValid && isStreetAddressValid && isCityValid && isStateValid && 
-        isPincodeValid && isPhoneValid && isCountryValid) {
-        
-        try {
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-            const isEditMode = this.action.includes('editAddress');
-            
-            let response;
-            if (isEditMode) {
-                const addressId = this.action.split('/').pop();
-                response = await axios.patch(`/user/editAddress/${addressId}`, data);
-            } else {
-                response = await axios.post('/user/addAddress', data);
-            }
-            
-            if (response.status === 200 || response.status === 201) {
-                showToast(isEditMode ? 'Address updated successfully!' : 'Address saved successfully!');
-                closeModal();
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            }
-        } catch (error) {
-            console.error("Error saving address:", error);
-            showToast('Failed to save address. Please try again.', true);
-        }
-    } else {
-        showToast('Please correct all validation errors before submitting.', true);
-    }
-});
-</script>
+    </script>

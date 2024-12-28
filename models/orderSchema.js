@@ -34,6 +34,18 @@ const orderSchema=new Schema({
         enum: ['Pending','Order Placed','Processing', 'Shipped',"Out for delivery", 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
         default:"Order Placed"
     },
+    statusHistory: [{
+        status: {
+            type: String,
+            required: true,
+            enum: ['Pending','Order Placed','Processing', 'Shipped',"Out for delivery", 'Delivered', 'Cancelled', 'Return Request', 'Returned']
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        },
+        note: String
+    }],
     totalDiscount: {
         type: Number,
         default: 0
@@ -91,7 +103,7 @@ const orderSchema=new Schema({
     },
     paymentStatus: {
         type: String,
-        enum: ["Pending", "Success", "Failed","Cancelled"],
+        enum: ["Pending", "Success","Paid", "Failed","Cancelled"],
         required: true,
         default: "Pending"
     },
@@ -110,7 +122,15 @@ const orderSchema=new Schema({
     // }
     deliveredOn: { type: Date, default: null },
     cancelledOn: { type: Date, default: null },
-    returnedOn: { type: Date, default: null },
+    returnDetails: {
+        returnStatus: {
+            type: String,
+            enum: ['Pending', 'Accepted', 'Rejected'],
+            default: 'Pending'
+        },
+        returnReason: String,
+        returnDate: Date
+    }
 },{timestamps:true})
 
 // Pre-save middleware to generate a unique orderId

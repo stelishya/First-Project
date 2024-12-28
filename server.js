@@ -27,7 +27,7 @@ const port = config.PORT || 4000
 
 // Set up middleware
 app.use(express.json({limit: '10mb'}));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); 
 // Set up session middleware
 app.use(session({
     secret: config.SECRET,  // Change this to a secure secret
@@ -57,6 +57,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads'));
 
+// app.use('/',userAuth,(req,res)=>{
+//     res.redirect('/user/');
+// })
 app.use('/user', userRoute);
 app.use('/admin',adminAuth,adminRoute)
 
@@ -66,4 +69,4 @@ app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
 })
 
-module.exports = app
+module.exports = app;

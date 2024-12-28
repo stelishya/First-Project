@@ -46,23 +46,54 @@ exports.categoryInfo = async(req,res)=>{
 exports.addCategory = async(req,res)=>{
     const {name, description, offer} = req.body;
     try {
-        const existingCategory = await Category.findOne({ name });
-        if (existingCategory) {
-            return res.status(400).json({ message: 'Category already exists' });
+        // Validate required fields
+        if (!name || !description) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name and description are required'
+            });
         }
+
+        // Trim and convert name to lowercase for comparison
+        const normalizedName = name.trim().toLowerCase();
+
+        // Check for existing category (case-insensitive)
+        const existingCategory = await Category.findOne({
+            name: { $regex: new RegExp(`^${normalizedName}$`, 'i') }
+        });
+
+        if (existingCategory) {
+            console.log('Category exists:', existingCategory); // Debug log
+            return res.status(400).json({
+                success: false,
+                message: `Category "${name}" already exists`
+            });
+        }
+
+        // Create new category
         const newCategory = new Category({
-            name,
-            description,
-            categoryOffer:offer||0
-            // fixedAmount: fixedAmount || 0,
-            // discountType: discountType || 'No Discount'
+            name: name.trim(), // Store trimmed name
+            description: description.trim(),
+            categoryOffer: offer || 0
         });
         
         await newCategory.save();
-        res.redirect('/admin/category');
+        console.log('New category created:', newCategory); // Debug log
+
+        // Send success response
+        return res.status(200).json({
+            success: true,
+            message: 'Category added successfully',
+            category: newCategory
+        });
+
     } catch (error) {
-        console.log(error.message);
-        res.status(500).send('Server Error');
+        console.error('Error adding category:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'An error occurred while adding the category',
+            error: error.message
+        });
     }
 }
 

@@ -3,6 +3,7 @@ const Addresses = require('../models/addressSchema')
 
 exports.showUserAddresses = async (req,res)=>{
     try {
+        const search = req.query.search || ''; 
         const session = req.session.user;
         if (!session) {
             console.error("Session is undefined. User might not be logged in.");
@@ -37,6 +38,7 @@ exports.showUserAddresses = async (req,res)=>{
         res.render('users/dashboard/address',{
             addresses: transformedAddresses,
             session,
+            search,
             activeTab:'addresses'
         });
     } catch (error) {

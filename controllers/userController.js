@@ -158,14 +158,10 @@ exports.verifyLogin = async (req, res) => {
             });
         }
         
-        const passwordMatch = await bcrypt.compare(password, userData.password);
+        const passwordMatch = bcrypt.compare(password, userData.password);
         if (passwordMatch) {
             // Set session data
-            req.session.user = {
-                _id: userData._id,
-                username: userData.username,
-                email: userData.email
-            };
+            req.session.user = userData;
             
             // Save session before redirecting
             req.session.save((err) => {
@@ -382,6 +378,7 @@ exports.pageNotFound = async (req, res) => {
 
 exports.loadHome = async (req, res) => {
     try {
+        console.log("loadHome called")
         const search = req.query.search || ''; 
 
         if (!req.session.user) {

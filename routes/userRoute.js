@@ -6,6 +6,8 @@ const productController = require('../controllers/productController')
 const addressController = require('../controllers/addressController')
 const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderController')
+const paymentController = require('../controllers/paymentController');
+
 const User = require('../models/userSchema')
 
 const passport = require('passport')
@@ -91,6 +93,10 @@ user_route.get('/order/details/:orderId',userAuth,orderController.orderDetailsUs
 user_route.get('/order/invoice/:orderId',userAuth,orderController.downloadInvoice)
 user_route.patch('/order/cancel/:orderId',userAuth,orderController.cancelOrder)
 user_route.post('/order/return/:orderId',userAuth,orderController.returnOrder)
+
+//Payment
+user_route.post('/create-order', userAuth, paymentController.createOrder);
+user_route.post('/verify-payment', userAuth, paymentController.verifyPayment);
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 
