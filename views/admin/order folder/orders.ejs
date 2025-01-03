@@ -1,24 +1,20 @@
 <style>
-    .container {
+    .c_ontainer {
         display: flex;
         flex-direction: row;
         min-height: 100vh;
-        /* Full height */
     }
 
     .sidebar {
         width: 250px;
-        /* Adjust as needed */
         background-color: #f4f4f4;
         padding: 20px;
     }
 
     .content {
         flex: 1;
-        /* Takes up remaining space */
         padding: 20px;
-        background-color: #fff;
-        /* Optional: match design */
+        background-color: #d1cfcf;
     }
 
     .toast_style {
@@ -26,10 +22,10 @@
         max-width: 300px !important;
         border-radius: 8px !important;
         padding: 12px 20px !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border: 1px solid rgba(63, 61, 61, 0.3) !important;
         font-family: Arial, sans-serif !important;
         font-size: 16px !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 4px 10px rgba(88, 83, 83, 0.2) !important;
         position: fixed !important;
         top: 20px !important;
         right: 20px !important;
@@ -115,7 +111,7 @@
     }
 </style>
 <!-- <div class="flex"> -->
-<div class="container" style="background-color: #787575;">
+<div class="c_ontainer" style="background-color: #ca1414;">
 
     <aside class="sidebar">
         <%- include('../../partials/admin/sidebar') %>
@@ -127,37 +123,38 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold">Order</h2>
         </div>
-        <div class="bg-gray-300 p-6 rounded-lg shadow-md">
+        <div class="bg-white p-6 rounded-lg shadow-md">
             <div class="mt-4 text-sm text-gray-500">
                 <a href="/admin/dashboard" class="text-blue-500">Dashboard</a>
                 &gt;
                 <span>Order List</span>
             </div>
 
-            <table class="w-full text-left" style="background-color: #bdbbbb;">
+            <table class="w-full text-left" style="background-color: #fbf7f7;">
                 <thead>
                     <tr class="text-gray-600">
-                        <th class="py-2">Order ID</th>
-                        <th class="py-2">Product</th>
-                        <th class="py-2">Date</th>
-                        <th class="py-2">Customer</th>
-                        <th class="py-2">Total</th>
-                        <th class="py-2">Payment</th>
-                        <th class="py-2">Status</th>
-                        <th class="py-2">Action</th>
+                        <th class="py-2 text-center">Product</th>
+                        <th class="py-2 text-center">Date & Time</th>
+                        <th class="py-2 text-center">Order ID</th>
+                        <th class="py-2 text-center">Customer</th>
+                        <th class="py-2 text-center">Total</th>
+                        <th class="py-2 text-center">Payment Method</th>
+                        <th class="py-2 text-center">Status</th>
+                        <th class="py-2 text-center">Details</th>
+                        <th class="py-2 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-700">
                     <% orders.forEach((order,index)=>{ %>
-                        <tr class="border-b">
+                        <tr class=" text-center border-b">
                             <td class="py-2">
                                 <a class="text-gray-500" href="#">
-                                    <%= order.orderId ? order.orderId : order._id %>
+                                    <%= order.orderId ? order.orderId.substring(0, 10) : order._id %>...
                                 </a>
                             </td>
-                            <td class="py-2">
+                            <td class="text-center py-2">
                                 <% if (order.orderedItems.length> 0) { %>
-                                    <%= order.orderedItems[0].product.name %>
+                                    <%= order.orderedItems[0].product.productName.substring(0, 10) %>
                                         <% if (order.orderedItems.length> 1) { %>
                                             <br />
                                             <span class="text-gray-500 text-sm">+ <%= order.orderedItems.length - 1 %>
@@ -165,18 +162,19 @@
                                             <% } %>
                                                 <% } %>
                             </td>
-                            <td class="py-2">
-                                <%= new Date(order.createdAt).toLocaleString() %>
+                            <td class="text-center py-2">
+                                <%= new Date(order.createdAt).toLocaleDateString() %><br>
+                                    <!-- <%= new Date(order.createdAt).toLocaleTimeString() %> -->
                             </td>
-                            <td class="py-2">
+                            <td class="text-center py-2">
                                 <%= order.userId.username %>
                                     <br />
-                                    <span class="text-gray-500 text-sm">
+                                    <!-- <span class="text-gray-500 text-sm">
                                         <%= order.userId.email %>
-                                    </span>
+                                    </span> -->
                             </td>
                             <td class="py-2">
-                                <%= order.totalAmount %>
+                                <%= order.finalAmount %>
                             </td>
                             <td class="py-2">
                                 <%= order.paymentMethod %>
@@ -214,6 +212,12 @@
                                                         </select>
                                                         <% } %>
                             </td>
+                            <td>
+                                <a href="/user/order/details/<%= order._id %>"
+                                    class="inline-flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                                    <i class="fas fa-info-circle mr-2"></i>View Details
+                                </a>
+                            </td>
                             <td class="py-2">
                                 <% if (order.status==="Cancelled" || order.status==="Out for delivery" ||
                                     order.status==="Returned" || order.status==="Delivered" ) { %>
@@ -222,7 +226,7 @@
                                     <% } else { %>
                                         <!-- Show cancel button if cancellation is allowed -->
                                         <button onclick="cancelOrder('<%= order._id %>')">
-                                            <i class="fas fa-ban text-red-600"></i>
+                                            <i class="fas fa-ban text-red-600" style="font-size: small;"> Cancel</i>
                                         </button>
                                         <% } %>
                             </td>
@@ -256,22 +260,18 @@
     </main>
 </div>
 
-
-
-
-
 <script>
 
     async function updateOrderStatus(orderId, statusSelect) {
         const status = statusSelect.value;
         const parentElement = statusSelect.parentElement;
-        console.log("status : ",status)
+        console.log("status : ", status)
         try {
             const response = await axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
-            console.log("response : ",response)
+            console.log("response : ", response)
             if (response.status === 200) {
                 const newStatus = statusSelect.value;
-                console.log("newStatus : ",newStatus)
+                console.log("newStatus : ", newStatus)
                 if (newStatus === 'Delivered') {
                     const statusSpan = document.createElement('span');
                     statusSpan.className = 'inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg';

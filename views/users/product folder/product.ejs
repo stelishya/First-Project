@@ -28,7 +28,10 @@
             </div>
 
             <!-- Main Image -->
-            <div class="col-span-5">
+            <div class="col-span-5 relative">
+                <div class="wishlist-icon absolute top-4 right-4 z-10" data-product="<%= product._id %>" onclick="toggleWishlist(event, '<%= product._id %>')">
+                    <i class="fas fa-heart text-2xl"></i>
+                </div>
                 <div class="zoom-container rounded-lg overflow-hidden bg-white" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
                     <img id="zoomable-image" 
                          alt="<%= product.name %>"
@@ -41,10 +44,15 @@
             <div class="col-span-6" style="border-color: rgb(201, 194, 194);border-width: 2px;border-radius: 5px; padding:30px;">
                 <div class="flex justify-between items-start">
                     <h1 class="text-3xl font-bold text-gray-900"><%= product.productName %></h1>
-                    <div class="flex items-center bg-green-500 text-white px-3 py-1.5 rounded-full">
-                        <span class="mr-1"><%= product.rating %></span>
-                        <i class="fas fa-star"></i>
-                    </div>
+                    <!-- <div class="flex items-center gap-4">
+                        <div class="wishlist-icon" data-product="<%= product._id %>" onclick="toggleWishlist(event, '<%= product._id %>')">
+                            <i class="fas fa-heart text-2xl"></i>
+                        </div> 
+                    </div> -->
+                        <div class="flex items-center bg-green-500 text-white px-3 py-1.5 rounded-full">
+                            <span class="mr-1"><%= product.rating %></span>
+                            <i class="fas fa-star"></i>
+                        </div>
                 </div>
 
                 <!-- Price Section -->
@@ -173,6 +181,22 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
+    }
+    .wishlist-icon {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .wishlist-icon i {
+        color: #ccc;
+    }
+
+    .wishlist-icon.active i {
+        color: #ff4444;
+    }
+
+    .wishlist-icon:hover i {
+        transform: scale(1.1);
     }
 </style>
 
@@ -320,6 +344,79 @@ function buyNow(productId) {
     //     }
     // });
 }
+         // Wishlist functions
+    async function toggleWishlist(event, productId) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        try {
+            const response = await fetch('/user/wishlist/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const wishlistIcon = document.querySelector(`.wishlist-icon[data-product="${productId}"]`);
+                if (data.inWishlist) {
+                    wishlistIcon.classList.add('active');
+                    showToast('Added to wishlist!', 'success');
+                } else {
+                    wishlistIcon.classList.remove('active');
+                    showToast('Removed from wishlist!', 'info');
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+            showToast('Error updating wishlist', 'error');
+        }
+    }
+
+    // Check initial wishlist status
+    async function checkWishlistStatus(productId) {
+        try {
+            const response = await fetch(`/user/wishlist/check/${productId}`);
+            const data = await response.json();
+            
+            if (data.success && data.inWishlist) {
+                const wishlistIcon = document.querySelector(`.wishlist-icon[data-product="${productId}"]`);
+                wishlistIcon.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Error checking wishlist status:', error);
+        }
+    }
+
+    // Initialize wishlist status
+    document.addEventListener('DOMContentLoaded', function() {
+        const productId = document.querySelector('.wishlist-icon').dataset.product;
+        checkWishlistStatus(productId);
+    });
+    function showToast(message, type) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                className: "toastify-custom",
+                style: {
+                    background: type === 'success' ? "#4CAF50" : "#ff4444",
+                    position: "fixed",
+                    top: "20px",
+                    right: "20px",
+                    zIndex: "9999",
+                    padding: "12px 24px",
+                    minWidth: "200px",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: "500"
+                }
+            }).showToast();
+        }
 </script>
 
 <!-- Add Toastify CSS -->

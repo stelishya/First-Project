@@ -41,7 +41,7 @@
                             <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                             </svg>
-                            <a href="/user/orders" class="ml-1 text-gray-700 hover:text-orange-600 md:ml-2">Orders history </a>
+                            <a href="/user/orders" class="ml-1 text-gray-700 hover:text-gray-600 md:ml-2">Orders history </a>
                         </div>
                     </li>
                     <li aria-current="page">
@@ -145,7 +145,7 @@
                 <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
                 <% if(order.status === 'Delivered') { %>
                     <a href="/user/order/invoice/<%= order._id %>" 
-                       class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-sm font-medium transition-colors duration-300">
+                       class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-300">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -170,7 +170,7 @@
                     <div class="border-t pt-2 mt-2">
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total Amount</span>
-                            <span class="text-orange-600">₹<%= order.finalAmount %></span>
+                            <span class="text-brown-600">₹<%= order.finalAmount %></span>
                         </div>
                     </div>
                 </div>

@@ -1,12 +1,16 @@
 const express=require("express")
 const user_route =express.Router();
 const  { userAuth,adminAuth}=require('../middlewares/auth')
+
 const userController =require("../controllers/userController");
 const productController = require('../controllers/productController')
 const addressController = require('../controllers/addressController')
 const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderController')
 const paymentController = require('../controllers/paymentController');
+const couponController = require('../controllers/couponController');
+const wishlistController = require('../controllers/wishlistController');
+
 
 const User = require('../models/userSchema')
 
@@ -97,6 +101,16 @@ user_route.post('/order/return/:orderId',userAuth,orderController.returnOrder)
 //Payment
 user_route.post('/create-order', userAuth, paymentController.createOrder);
 user_route.post('/verify-payment', userAuth, paymentController.verifyPayment);
+
+//Coupon
+user_route.post('/apply-coupon', couponController.applyCoupon);
+user_route.post('/remove-coupon', couponController.removeCoupon);
+
+//Wishlist
+user_route.get('/wishlist', userAuth, wishlistController.getWishlist);
+user_route.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
+user_route.post('/wishlist/remove', userAuth, wishlistController.removeFromWishlist);
+user_route.get('/wishlist/check/:productId', userAuth, wishlistController.checkWishlist);
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 

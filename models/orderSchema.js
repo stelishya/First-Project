@@ -119,16 +119,25 @@ const orderSchema=new Schema({
     // couponApplied: {
     //     type: Boolean,
     //     default: false
-    // }
+    // },
+    couponApplied: {
+        code: String,
+        discountAmount: Number
+    },
     deliveredOn: { type: Date, default: null },
     cancelledOn: { type: Date, default: null },
     returnDetails: {
+        returnRequested: {
+            type: Boolean,
+            default: false
+        },
         returnStatus: {
             type: String,
-            enum: ['Pending', 'Accepted', 'Rejected'],
+            enum: ['Pending', 'Approved', 'Rejected'],
             default: 'Pending'
         },
         returnReason: String,
+        returnRequestedAt: Date,
         returnDate: Date
     }
 },{timestamps:true})

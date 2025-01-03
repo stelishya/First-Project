@@ -141,7 +141,11 @@
                     <!-- Order Status -->
                     <div class="text-right">
                         <p class="text-sm">
-                            <% if(order.status === "Delivered" || order.status === "Out for delivery"){ %>
+                            <% if(order.returnDetails && order.returnDetails.returnRequested) { %>
+                                <span class="inline-flex bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
+                                    Return <%= order.returnDetails.returnStatus %>
+                                </span>
+                            <% } else if(order.status === "Delivered" || order.status === "Out for delivery"){ %>
                                 <span class="inline-flex bg-green-100 text-green-600 px-2 py-1 rounded-md">
                                     <%= order.status %>
                                 </span>
@@ -165,14 +169,14 @@
                              on <%= new Date(order.updatedAt).toLocaleDateString() %></p>
                     </div>
                     <a href="/user/order/details/<%= order._id %>" 
-                        class="inline-flex items-center justify-center px-4 py-2 bg-orange-100 text-orange-600 rounded-md hover:bg-orange-200 transition-colors duration-200">
+                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 transition-colors duration-200">
                          <i class="fas fa-info-circle mr-2"></i>View Details
                      </a>
                     <% if(order.status !== "Cancelled" && order.status !== "Returned" && order.status !== "Out for delivery" && order.status !== "Delivered" && order.status !== "Payment failed"){ %>
                         <button id="cancelBtn" class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                     <% } %>
-                    <% if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000) && order.returnDetails.returnStatus !== 'Rejected'){ %>
-                        <button class="btn btn-primary" data-order-id="<%= order._id %>" onclick="returnOrder('<%= order.orderId %>','<%= order._id %>')">Return Order</button>
+                    <% if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000) && !order.returnDetails.returnRequested){ %>
+                        <button class="btn btn-primary" onclick="returnOrder('<%= order._id %>')">Return Order</button>
                     <% } %>
                 </div>
             </div>
@@ -193,7 +197,7 @@
                     <% } %>
             
                     <% for (let i = 1; i <= totalPages; i++) { %>
-                        <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-orange-400 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                        <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-gray-400 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
                     <% } %>
             
                     <% if (page < totalPages) { %>
@@ -217,7 +221,7 @@
                     Please tell us why you want to return this order
                 </label>
                 <textarea id="returnReason" 
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
                     rows="4"
                     placeholder="Enter your reason for return..."></textarea>
             </div>
@@ -235,7 +239,7 @@
                     Cancel
                 </button>
                 <button onclick="submitReturn()" 
-                    class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700">
+                    class="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700">
                     Submit Return
                 </button>
             </div>
@@ -247,6 +251,9 @@
     <h1 class="text-4xl">CAlliope</h1>
     <h2 class="text-2xl">Inc</h2>
 </div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-minimal@5/minimal.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     let currentOrderId = null;
@@ -352,50 +359,55 @@
 
     async function cancelOrder(orderId){
         try {
-            const response = await axios.patch(`/user/order/cancel/${orderId}`)
-            if(response.status === 200){
-                // Find the order's status span and cancel button
-                const orderDiv = document.querySelector(`button[onclick="cancelOrder('${orderId}')"]`).closest('.flex.justify-between');
-                const statusDiv = orderDiv.querySelector('.text-right p span');
-                const cancelBtn = orderDiv.querySelector('#cancelBtn');
+            // Show confirmation dialog
+            const result = await Swal.fire({
+                title: 'Cancel Order',
+                text: 'Are you sure you want to cancel this order?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            });
 
-                // Update the status display
-                statusDiv.className = 'inline-flex bg-red-100 text-red-600 px-2 py-1 rounded-md';
-                statusDiv.textContent = 'Cancelled';
+            // If user confirms
+            if (result.isConfirmed) {
+                const response = await axios.patch(`/user/order/cancel/${orderId}`);
+                if (response.status === 200) {
+                    // Show success message
+                    await Swal.fire({
+                        title: 'Cancelled!',
+                        text: 'Your order has been cancelled.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
 
-                // Hide the cancel button
-                if(cancelBtn) {
-                    cancelBtn.classList.add('hidden');
+                    // Update UI
+                    const orderDiv = document.querySelector(`button[onclick="cancelOrder('${orderId}')"]`).closest('.flex.justify-between');
+                    const statusSpan = orderDiv.querySelector('.inline-flex');
+                    
+                    // Update status display
+                    statusSpan.className = 'inline-flex bg-red-100 text-red-600 px-2 py-1 rounded-md';
+                    statusSpan.textContent = 'Cancelled';
+
+                    // Hide cancel button
+                    const cancelBtn = orderDiv.querySelector(`button[onclick="cancelOrder('${orderId}')"]`);
+                    if (cancelBtn) {
+                        cancelBtn.style.display = 'none';
+                    }
                 }
-
-                // Show success message
-                Toastify({
-                    text: response.data.message,
-                    duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    style: {
-                    backgroundColor:"linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))"
-                    },
-                    // backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
-                    stopOnFocus: true,
-                    className: "toast_style"
-                }).showToast();
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "An unexpected error occurred";
-            Toastify({
-                text: errorMessage,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                style: {
-                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))"
-                },
-                stopOnFocus: true,
-                className: "toast_style"
-            }).showToast();
-            console.error(error)
+            console.error(error);
+            // Show error message
+            Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.message || 'Failed to cancel order',
+                icon: 'error',
+                confirmButtonColor: '#3085d6'
+            });
         }
     }
 </script>

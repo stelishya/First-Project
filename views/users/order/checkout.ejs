@@ -125,15 +125,18 @@
                                     </tfoot>
                                 </table>
                             </div>
-
-                            <hr class="my-4 border-gray-200" <!-- Discount Breakdown -->
+                            <button onclick="openCouponModal()" class="bg-gray-300 text-gray-600 px-4 py-2 rounded hover:bg-gray-400">
+                                Apply Coupon
+                            </button>
+                            <!-- Discount Breakdown -->
+                            <hr class="my-4 border-gray-200" >
                             <div class="space-y-2 mb-4">
                                 <div class="flex justify-between text-gray-600">
                                     <span class="flex items-center">
                                         <i class="fas fa-minus-circle text-red-500 mr-2"></i>
                                         Total Discount
                                     </span>
-                                    <!-- <span class="text-red-500">-₹%= totalDiscount.toFixed(2) %></span> -->
+                                    <span class="text-red-500">-₹<%= totalDiscount.toFixed(2) %></span>
                                 </div>
                                 <!-- <div id="couponDiscount" class="flex hidden justify-between text-gray-600">
                                 <span>Coupon Discount</span>
@@ -144,8 +147,8 @@
                                     <span class="text-green-600">Free</span>
                                 </div>
                             </div>
-
-                            <hr class="my-4 border-gray-200" <!-- Final Amount -->
+                            <!-- Final Amount -->
+                            <hr class="my-4 border-gray-200" >
                             <div class="flex justify-between font-bold text-lg">
                                 <span>Final Amount</span>
                                 <span id="totalAmount" class="text-orange-500">₹<%= finalAmount.toFixed(2) %></span>
@@ -179,6 +182,7 @@
                                 style="background-color: #716f6e;">
                                 Place Order
                             </button>
+                            
                         </div>
                     </div>
                 </div>
@@ -369,6 +373,41 @@
             </form>
         </div>
     </div>
+
+    <!-- Coupon Modal -->
+    <div id="couponModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Apply Coupon</h3>
+                <button onclick="closeCouponModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mt-2">
+                <input type="text" 
+                       id="couponCode" 
+                       class="w-full border rounded px-3 py-2 mb-3" 
+                       placeholder="Enter coupon code">
+                
+                <div id="couponMessage" class="text-sm mb-3"></div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button onclick="closeCouponModal()" 
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button onclick="applyCoupon()" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
 
@@ -881,6 +920,31 @@
             }
         });
 
+        // Wishlist functionality
+        document.querySelectorAll('.add-to-wishlist').forEach(button => {
+            button.addEventListener('click', async function() {
+                const productId = this.dataset.product;
+                try {
+                    const response = await fetch('/wishlist/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert('Product added to wishlist!');
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error adding to wishlist');
+                }
+            });
+        });
+
         // Razorpay
         function initiatePayment(amount) {
             fetch('/user/create-order', {
@@ -937,4 +1001,51 @@
                 .catch(error => console.error('Error:', error));
         }
         
+        function openCouponModal() {
+            document.getElementById('couponModal').classList.remove('hidden');
+        }
+
+        function closeCouponModal() {
+            document.getElementById('couponModal').classList.add('hidden');
+            document.getElementById('couponMessage').textContent = '';
+            document.getElementById('couponCode').value = '';
+        }
+
+        async function applyCoupon() {
+            const couponCode = document.getElementById('couponCode').value;
+            const messageDiv = document.getElementById('couponMessage');
+            const cartTotal = parseFloat(document.getElementById('cartTotal').textContent);
+
+            try {
+                const response = await axios.post('/user/apply-coupon', {
+                    code: couponCode,
+                    cartTotal
+                });
+
+                if (response.status === 200) {
+                    messageDiv.className = 'text-sm text-green-600 mb-3';
+                    messageDiv.textContent = 'Coupon applied successfully!';
+                    
+                    // Update cart totals
+                    document.getElementById('discount').textContent = response.data.discount;
+                    document.getElementById('finalAmount').textContent = response.data.finalAmount;
+                    
+                    // Close modal after short delay
+                    setTimeout(() => {
+                        closeCouponModal();
+                    }, 1500);
+                }
+            } catch (error) {
+                messageDiv.className = 'text-sm text-red-600 mb-3';
+                messageDiv.textContent = error.response?.data?.message || 'Error applying coupon';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('couponModal');
+            if (event.target === modal) {
+                closeCouponModal();
+            }
+        }
     </script>

@@ -347,7 +347,7 @@ exports.showProductsPage = async (req, res) => {
         if(req.query.page){
             page = parseInt(req.query.page);
         }
-        const limit = 8;
+        const limit = 9;
 
         let sortField = 'createdAt'; // Default sort field
         let sortOrder = -1; // Default sort order (descending)
@@ -412,79 +412,74 @@ exports.showProductsPage = async (req, res) => {
 // Dynamic product update
 exports.fetchProducts = async (req, res) => {
     try {
-        console.log("fetchProducts called")
+        console.log("fetchProducts called with params:", req.query);
 
-        const sortOption = req.query.sortBy || 'new';
-        let sortCriteria;
-        let collationOptions = null;
-        switch (sortOption) {
-            case 'price-low-high':
-                sortCriteria = { mrp: 1 };
-                break;
-            case 'price-high-low':
-                sortCriteria = { mrp: -1 };
-                break;
-            case 'new':
-                sortCriteria = { createdAt: -1 };
-                break;
-            case 'a-z':
-                sortCriteria = { productName: 1 };
-                collationOptions = { locale: 'en', strength: 2 };
-                break;
-            case 'z-a':
-                sortCriteria = { productName: -1 };
-                collationOptions = { locale: 'en', strength: 2 };
-                break;
-            default:
-                sortCriteria = { createdAt: -1 };
-        }      
+        const sortOption = req.query.sortBy || '';
+        let sortCriteria = { createdAt: -1 }; // Default sort by newest
+
+        if (sortOption) {
+            switch (sortOption) {
+                case 'price-low-high':
+                    sortCriteria = { mrp: 1 };
+                    break;
+                case 'price-high-low':
+                    sortCriteria = { mrp: -1 };
+                    break;
+                case 'new':
+                    sortCriteria = { createdAt: -1 };
+                    break;
+                case 'a-z':
+                    sortCriteria = { productName: 1 };
+                    break;
+                case 'z-a':
+                    sortCriteria = { productName: -1 };
+                    break;
+            }
+        }
 
         let search = req.query.search || '';
         let categoryId = req.query.category || '';
 
         const minPrice = parseInt(req.query.min, 10) || 0;
         const maxPrice = parseInt(req.query.max, 10) || Infinity;
-        const categories = await Category.find({},{name:1});
+        const categories = await Category.find({}, { name: 1 });
 
         const page = parseInt(req.query.page) || 1;
-        const limit = 8;
+        const limit = 9;
         const skip = (page - 1) * limit;
-        
-        let products;
-        let totalProducts;
 
-            let query = {
-                productName: { $regex: search, $options: 'i' },
-                isListed: true,
-                mrp: { $gte: minPrice, $lte: maxPrice}
-            };
-            
-            if (categoryId) {
-                query.category = categoryId;
-            }
-            
-            products = await Products.find(query)
-                .sort(sortCriteria)
-                .collation(collationOptions)
-                .skip(skip)
-                .limit(limit)
-                .populate('category', 'name');
-            totalProducts = await Products.countDocuments(query);
-            // totalProducts = products.length;
-            
-        
-        // const totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' } });
+        let query = {
+            productName: { $regex: search, $options: 'i' },
+            isListed: true,
+            mrp: { $gte: minPrice, $lte: maxPrice }
+        };
+
+        if (categoryId) {
+            query.category = categoryId;
+        }
+
+        const products = await Products.find(query)
+            .sort(sortCriteria)
+            .skip(skip)
+            .limit(limit)
+            .populate('category', 'name');
+
+        const totalProducts = await Products.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
-            console.log("rendering details : ",products,totalProducts,totalPages,page,limit,sortOption,!!req.session.user,search,
-                categories,
-                minPrice,
-                maxPrice)
-        res.json( {
-            products: products,
-            totalProducts: totalProducts,
-            totalPages: totalPages,
+
+        console.log("Sending response:", {
+            products: products.length,
+            totalProducts,
+            totalPages,
+            currentPage: page
+        });
+
+        res.json({
+            products,
+            totalProducts,
+            totalPages,
             currentPage: page,
-            limit: limit,
+            limit,
             sortOption,
             isLoggedIn: !!req.session.user,
             search,
@@ -494,7 +489,10 @@ exports.fetchProducts = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching products:', error);
-        res.status(500).json({ message: 'An error occurred while fetching products.' });
+        res.status(500).json({ 
+            error: 'An error occurred while fetching products.',
+            details: error.message
+        });
     }
 };
 

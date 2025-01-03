@@ -353,7 +353,7 @@ exports.getOrdersAdmin = async (req,res)=>{
             .populate({
                 path: 'orderedItems.product',
                 model: 'Product',
-                select: 'name image priceAtPurchase'
+                select: 'productName productImage  priceAtPurchase'
             })
             .sort({ createdAt: -1 }).skip(skip).limit(limit)
         const totalOrders = await Orders.countDocuments();
@@ -560,11 +560,46 @@ exports.returnOrder = async (req,res)=>{
     try {
         const orderId = req.params.orderId;
         const returnReason = req.body.returnReason;
-        await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnRequested': true, 'returnDetails.returnReason': returnReason })
-        res.status(200).json({ message: "Return request sent" })
+
+        // Validate inputs
+        if (!orderId || !returnReason) {
+            return res.status(400).json({ message: "Order ID and return reason are required" });
+        }
+
+        // Find the order first
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Check if order is eligible for return
+        if (order.status !== "Delivered") {
+            return res.status(400).json({ message: "Only delivered orders can be returned" });
+        }
+
+        // Check if return window is still open (7 days)
+        const returnWindow = new Date(order.deliveredOn).getTime() + (7 * 24 * 60 * 60 * 1000);
+        if (Date.now() > returnWindow) {
+            return res.status(400).json({ message: "Return window has expired" });
+        }
+
+        // Check if return is already requested
+        if (order.returnDetails?.returnRequested) {
+            return res.status(400).json({ message: "Return already requested for this order" });
+        }
+
+        // Update order with return details
+        await Orders.findByIdAndUpdate(orderId, {
+            'returnDetails.returnRequested': true,
+            'returnDetails.returnReason': returnReason,
+            'returnDetails.returnRequestedAt': new Date(),
+            'returnDetails.returnStatus': 'Pending'
+        });
+
+        res.status(200).json({ message: "Return request sent successfully" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message:"Server error" })
+        console.error("Error in returnOrder:", error);
+        res.status(500).json({ message: "Failed to process return request" });
     }
 }
 
@@ -636,8 +671,8 @@ exports.downloadInvoice = async (req, res) => {
         // Add the invoice header
         doc.fontSize(20).text('INVOICE', { align: 'center' });
         doc.moveDown();
-        doc.fontSize(10).text('Craftora', { align: 'center' });
-        doc.fontSize(10).text('www.craftora.com', { align: 'center' });
+        doc.fontSize(10).text('CAlliope', { align: 'center' });
+        doc.fontSize(10).text('www.calliope.com', { align: 'center' });
         doc.moveDown();
 
         // Add a horizontal line

@@ -6,6 +6,8 @@ const customerController = require("../controllers/customerController");
 const categoryController = require("../controllers/categoryController")
 const productController = require("../controllers/productController")
 const orderController = require("../controllers/orderController")
+const couponController = require('../controllers/couponController');
+const Coupon = require('../models/couponSchema');
 
 const bodyParser = require("body-parser");
 const Category = require("../models/categorySchema");
@@ -55,5 +57,12 @@ admin_route.get('/products/view/:id', productController.productDetails);
 admin_route.get('/orders',orderController.getOrdersAdmin)
 admin_route.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin_route.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
+
+//Coupon Management
+admin_route.get('/coupons',couponController.getAllCoupons);
+admin_route.post('/coupons', couponController.createCoupon);
+admin_route.patch('/coupons/:id/toggle-status',couponController.couponStatus);
+admin_route.post('/admin/coupon/edit/:id', couponController.editCoupon);
+
 
 module.exports = admin_route;

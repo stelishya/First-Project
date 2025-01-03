@@ -187,23 +187,33 @@
         font-weight: bold;
     }
 
-    .wishlist-btn {
+    .wishlist-icon {
         position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        padding: 0.5rem;
-        border-radius: 50%;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
         cursor: pointer;
-        transition: transform 0.3s;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        padding: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .wishlist-icon i {
+        color: #666;
+        font-size: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .wishlist-icon.active i {
+        color: #ff4444;
+    }
+    
+    .wishlist-icon:hover i {
+        color: #ff4444;
     }
 
-    .wishlist-btn:hover {
-        transform: scale(1.1);
-    }
-
-    .pagination {
+    /* .pagination {
         display: flex;
         justify-content: center;
         gap: 0.5rem;
@@ -217,9 +227,9 @@
         border-radius: 4px;
         cursor: pointer;
         transition: background-color 0.3s;
-    }
+    } */
 
-    .pagination button.active {
+    /* .pagination button.active {
         background: var(--accent-color);
         color: var(--white);
         border-color: var(--accent-color);
@@ -227,7 +237,7 @@
 
     .pagination button:hover:not(.active) {
         background: #f0f0f0;
-    }
+    } */
 
     @media (max-width: 968px) {
         .main-content {
@@ -253,6 +263,9 @@
 <head>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <%- include ('../../partials/user/header', { search: search })%>
@@ -272,32 +285,20 @@
                     <div class="filter-section">
                         <h3 class="text-lg font-semibold mb-2">Categories</h3>
                         <div class="space-y-2">
+                            <button onclick="showAllProducts()" 
+                                   class="filter-option category-item w-full text-left px-1 py-1 rounded-md transition duration-300 bg-gray-400
+                                   hover:bg-gray-300 text-grey-100 font-small md:text-sm lg:text-base">
+                                Show All Products
+                            </button>
                             <% categories.forEach((category)=> { %>
-                                <button id="category-<%= category._id %>" class="filter-option category-item w-full text-left px-1 py-1 rounded-md transition duration-300 bg-gray-400
-                            hover:bg-gray-300 text-grey-100 font-small md:text-sm lg:text-base"
-                                    onclick="categoryFilter('<%= category._id %>')">
+                                <button id="category-<%= category._id %>" 
+                                        class="filter-option category-item w-full text-left px-1 py-1 rounded-md transition duration-300 bg-gray-400
+                                        hover:bg-gray-300 text-grey-100 font-small md:text-sm lg:text-base"
+                                        onclick="categoryFilter('<%= category._id %>')">
                                     <%= category.name %>
                                 </button>
-                                <% }); %>
+                            <% }); %>
                         </div>
-                        <!-- <h3 class="filter-title">Categories</h3>
-                    <div class="filter-options">
-                        <label class="filter-option">
-                            <input type="checkbox"> Framed Art Prints
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> Canvas Prints
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> Metal Prints
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> Wall Hangings
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> Wall Murals
-                        </label>
-                    </div> -->
                     </div>
 
                     <div class="filter-section">
@@ -307,66 +308,17 @@
                             </h3>
                             <div id="price-slider" class="mb-4"></div>
                         </div>
-                        <!-- <h3 class="filter-title">Price Range</h3>
-                    <input type="range" class="price-range" min="0" max="1000" step="10">
-                    <div class="price-labels">
-                        <span>$50</span>
-                        <span>$399+</span>
-                    </div> -->
                     </div>
-
-                    <!-- <div class="filter-section">
-                    <h3 class="filter-title">Colors</h3>
-                    <div class="filter-options">
-                        <div class="filter-option">
-                            <span class="color-option" style="background: orange;"></span>
-                            Orange
-                        </div>
-                        <div class="filter-option">
-                            <span class="color-option" style="background: green;"></span>
-                            Green
-                        </div>
-                        <div class="filter-option">
-                            <span class="color-option" style="background: blue;"></span>
-                            Blue
-                        </div>
-                        <div class="filter-option">
-                            <span class="color-option" style="background: red;"></span>
-                            Red
-                        </div>
-                        <div class="filter-option">
-                            <span class="color-option" style="background: white;"></span>
-                            White
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filter-section">
-                    <h3 class="filter-title">Offers</h3>
-                    <div class="filter-options">
-                        <label class="filter-option">
-                            <input type="checkbox"> 10% and above
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> 20% and above
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> 30% and above
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox"> 40% and above
-                        </label>
-                    </div>
-                </div> -->
                 </aside>
 
                 <section class="products-section">
-                    <div class="sort-controls">
-                        <div>Showing <%= products.length %> products</div>
+                    <div class="sort-controls " style="margin-left: 78%;">
+                        <!-- <div>Showing <%= products.length %> products</div> -->
                         <select id="sortSelection" class="sort-dropdown">
+                            <option value="">Sort by</option>
+                            <option value="new">Sort by: New Arrivals</option>
                             <option value="price-low-high">Price: Low to High</option>
                             <option value="price-high-low">Price: High to Low</option>
-                            <option value="new">Sort by: New Arrivals</option>
                             <option value="a-z">Sort by: Name (A-Z)</option>
                             <option value="z-a">Sort by: Name (Z-A)</option>
                         </select>
@@ -374,8 +326,11 @@
 
                     <div id="productsContainer" class="products-grid ">
                         <% products.forEach(product=> { %>
-                            <a href="/user/product/details/<%= product._id %>">
-                                <div class="product-card">
+                            <div class="product-card" onclick="window.location.href='/user/product/details/<%= product._id %>'">
+                                <div class="wishlist-icon" data-product="<%= product._id %>" onclick="toggleWishlist(event, '<%= product._id %>')">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <a href="/user/product/details/<%= product._id %>">
                                     <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
                                         <img src="/uploads/product-images/<%= product.productImage[0] %>"
                                             alt="<%= product.productName %>" class="product-image">
@@ -386,7 +341,7 @@
                                         </h3>
                                         <div class="product-price">
                                             <div>
-                                                <span class="price">₹<%= product.mrp %></span>
+                                                <span class="price">₹<%= product.discountedPrice %></span>
                                                 <% if(product.productOffer) { %>
                                                     <span class="original-price">₹<%= product.mrp %></span>
                                                     <span class="discount">
@@ -396,16 +351,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="wishlist-btn">
-                                        <i class="far fa-heart"></i>
-                                    </button>
-                                </div>
-                            </a>
+                                </a>
+                            </div>
                             <% }); %>
                     </div>
-
-                    <!-- <div id="paginationContainer"></div> -->
-                    <div id="rangeInfo"></div>
 
                     <div class="mt-4 flex justify-between items-center">
                         <div class="flex space-x-2">
@@ -441,252 +390,376 @@
 
     <%- include ('../../partials/user/footer')%>
 
-        <script>
-            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    console.log('Filter changed:', this.checked);
-                });
-            });
+    <script>
+        let currentPage = 1;
+        let currentSort = '';
+        let currentSearch = '';
+        let currentCategory = '';
+        let currentPriceRange = { min: 0, max: Infinity };
 
-            const zoomFactor = 1.5;
-
-            function zoomIn(event) {
-                const container = event.currentTarget;
-                const image = container.querySelector('.product-image');
-
-                // Get the bounding rectangle of the container
-                const rect = container.getBoundingClientRect();
-
-                // Calculate the mouse position relative to the container
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-
-                // Calculate the transform origin to keep the zoom centered on the cursor
-                const originX = (x / rect.width) * 100;
-                const originY = (y / rect.height) * 100;
-
-                // Apply transform with scale and origin
-                image.style.transformOrigin = `${originX}% ${originY}%`;
-                image.style.transform = `scale(${zoomFactor})`;
-            }
-
-            function resetZoom() {
-                const images = document.querySelectorAll('.product-image');
-                images.forEach(image => {
-                    image.style.transform = 'scale(1)';
-                });
-            }
-            
-        function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        sidebar.classList.toggle('show');
-        overlay.classList.toggle('show');
-        if (sidebar.style.display === 'none' || sidebar.style.display === '') {
-            sidebar.style.display = 'block'; // Show the sidebar
-        } else {
-            sidebar.style.display = 'none'; // Hide the sidebar
-        }
-    }
-
-    // Initialize the noUiSlider
-    var priceSlider = document.getElementById('price-slider');
-
-    noUiSlider.create(priceSlider, {
-        start: [Number(parseInt('<%= minPrice %>')), Number(parseInt('<%= maxPrice %>'))], // Initial min and max values
-        connect: true,
-        range: {
-            'min': 0,
-            'max': Number(parseInt('<%= maxPrice %>'))
-        },
-        tooltips: true,
-        format: {
-            to: function (value) {
-                return value.toFixed(0);
+        // Initialize the noUiSlider
+        var priceSlider = document.getElementById('price-slider');
+        noUiSlider.create(priceSlider, {
+            start: [Number(parseInt('<%= minPrice %>')), Number(parseInt('<%= maxPrice %>'))],
+            connect: true,
+            range: {
+                'min': 0,
+                'max': Number(parseInt('<%= maxPrice %>'))
             },
-            from: function (value) {
-                return Number(value);
+            tooltips: true,
+            format: {
+                to: function (value) {
+                    return value.toFixed(0);
+                },
+                from: function (value) {
+                    return Number(value);
+                }
             }
-        }
-    });
-    
-    // Debouncing
-    function debounce(func, delay) {
-        let debounceTimeout;
-        return function(...args) {
-            const context = this;
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => func.apply(context, args), delay);
-        };
-    }
-    // Listen for changes on the slider
-    priceSlider.noUiSlider.on('update', debounce(function (values, handle) {
-        var minPrice = parseInt(values[0], 10);
-        var maxPrice = parseInt(values[1], 10);
-        // Call a function to fetch products based on the price range
-        fetchProductsByPriceRange(minPrice, maxPrice);
-    },1000));
-
-    function fetchProductsByPriceRange(minPrice, maxPrice) {
-        // Implement the logic to fetch products based on the price range
-        fetchProducts(document.getElementById('searchInput').value, 1, document.getElementById('sortSelection').value, '', { max: maxPrice, min: minPrice });
-        console.log('Fetching products with price between ' + minPrice + ' and ' + maxPrice);
-    }
-    
-    function categoryFilter(categoryId) {
-        const categoryElements = document.querySelectorAll('.category-item');
-        categoryElements.forEach(el => {
-            el.classList.remove('bg-gray-500', 'text-white');
-            el.classList.add('bg-gray-300', 'hover:bg-gray-200', 'text-grey-100');
         });
-    
-        // Add active class to selected category
-        const selectedCategory = document.getElementById(`category-${categoryId}`);
-        if (selectedCategory) {
-            selectedCategory.classList.remove('bg-gray-300', 'hover:bg-gray-200', 'text-grey-100');
-            selectedCategory.classList.add('bg-gray-500', 'text-white');
-        }
-    
-        // Fetch products for the selected category
-        currentPage = 1;
-        const searchQuery = document.getElementById('searchInput').value;
-        const selectedSort = document.getElementById('sortSelection').value;
-        fetchProducts(searchQuery, currentPage, selectedSort, categoryId);
-    }
 
-    // Event listener for sorting
-    document.getElementById('sortSelection').addEventListener('change', async (e) => {
-        const searchQuery = document.getElementById('searchInput').value;
-        const selectedSort = e.target.value;
-        currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort);
-    });
+        // Listen for changes on the slider with debouncing
+        priceSlider.noUiSlider.on('update', debounce(function (values) {
+            currentPriceRange.min = parseInt(values[0], 10);
+            currentPriceRange.max = parseInt(values[1], 10);
+            fetchProducts(currentSearch, 1, currentSort, currentCategory, currentPriceRange);
+        }, 500));
 
-    let currentPage = 1;
-    let totalPages = 1;
-
-    async function searchProducts() {
-        const searchQuery = document.getElementById('searchInput').value;
-        const selectedSort = document.getElementById('sortSelection').value;
-        currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort);
-    }
-
-    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new', categoryId = '', priceRange = {}) {
-        try {
-            console.log("fetchProducts called")
-            console.log("searchQuery", searchQuery)
-            console.log("page", page)
-            console.log("sortBy", sortBy)
-            console.log("categoryId", categoryId)
-            console.log("priceRange", priceRange)
-            const response = await axios.get(`/user/api/products`, {
-                params: { search: searchQuery, page: page, sortBy: sortBy, category: categoryId, ...priceRange },
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        function showAllProducts() {
+            // Reset category selection UI
+            const categoryElements = document.querySelectorAll('.category-item');
+            categoryElements.forEach(el => {
+                el.classList.remove('bg-gray-500', 'text-white');
+                el.classList.add('bg-gray-400', 'hover:bg-gray-300', 'text-grey-100');
             });
 
-            if (response.data.products) {
-                displayProducts(response.data.products);
-                updatePagination(response.data.totalPages, page, response.data.totalProducts, response.data.limit);
-                setSortSelection(response.data.sortOption);
+            // Reset category filter and fetch products
+            currentCategory = '';
+            fetchProducts(currentSearch, 1, currentSort, '', currentPriceRange);
+        }
+
+        function categoryFilter(categoryId) {
+            const categoryElements = document.querySelectorAll('.category-item');
+            categoryElements.forEach(el => {
+                el.classList.remove('bg-gray-500', 'text-white');
+                el.classList.add('bg-gray-400', 'hover:bg-gray-300', 'text-grey-100');
+            });
+
+            // Add active class to selected category
+            const selectedCategory = document.getElementById(`category-${categoryId}`);
+            if (selectedCategory) {
+                selectedCategory.classList.remove('bg-gray-400', 'hover:bg-gray-300', 'text-grey-100');
+                selectedCategory.classList.add('bg-gray-500', 'text-white');
             }
-        } catch (error) {
-            console.error("Error fetching products:", error);
-        }
-    }
 
-    function displayProducts(products) {
-        const productsContainer = document.getElementById('productsContainer');
-        productsContainer.innerHTML = ''; // Clear previous results
-
-        if (!products || products.length === 0) {
-            productsContainer.innerHTML = '<p>No products found.</p>';
-            return;
+            currentCategory = categoryId;
+            fetchProducts(currentSearch, 1, currentSort, categoryId, currentPriceRange);
         }
 
-        products.forEach(product => {
-            const productHtml = `
-                <div class="product-card">
-                    <a href="/user/product/details/${product._id}">
-                        <img src="/uploads/product-images/${product.productImage[0]}" alt="${product.productName}" class="product-image">
-                        <h1 class="product-title p-2">${product.productName}</h1>
-                        <div class="product-price p-3">
-                            <span class="price">₹${product.mrp}</span>
-                            ${product.productOffer ? `<span class="original-price">₹${product.mrp}</span><span class="discount">${product.productOffer}% OFF</span>` : ''}
+        // Event listener for sorting
+        document.getElementById('sortSelection').addEventListener('change', function(e) {
+            const selectedSort = e.target.value;
+            currentSort = selectedSort;
+            fetchProducts(currentSearch, 1, selectedSort, currentCategory, currentPriceRange);
+        });
+
+        async function fetchProducts(searchQuery = '', page = 1, sortBy = '', categoryId = '', priceRange = currentPriceRange) {
+            try {
+                // Update current state
+                currentPage = page;
+                currentSort = sortBy;
+                currentSearch = searchQuery;
+                currentCategory = categoryId;
+                currentPriceRange = priceRange;
+
+                const params = new URLSearchParams({
+                    page: page,
+                    search: searchQuery || '',
+                    sortBy: sortBy || '',
+                    min: priceRange.min,
+                    max: priceRange.max
+                });
+
+                if (categoryId) {
+                    params.append('category', categoryId);
+                }
+
+                const response = await fetch(`/user/api/products?${params.toString()}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Update products grid
+                const productsGrid = document.querySelector('.products-grid');
+                if (!productsGrid) {
+                    console.error('Products grid element not found');
+                    return;
+                }
+
+                if (data.products.length === 0) {
+                    productsGrid.innerHTML = '<div class="no-products">No products found</div>';
+                    // Hide pagination when no products
+                    const paginationContainer = document.querySelector('.mt-4.flex.justify-between.items-center .flex.space-x-2');
+                    if (paginationContainer) {
+                        paginationContainer.innerHTML = '';
+                    }
+                    return;
+                }
+
+                productsGrid.innerHTML = data.products.map(product => `
+                    <div class="product-card" onclick="window.location.href='/user/product/details/${product._id}'">
+                        <div class="zoom-container">
+                            <img src="/uploads/product-images/${product.productImage[0]}" alt="${product.productName}" class="product-image">
                         </div>
-                    </a>
-                </div>
-            `;
-            productsContainer.insertAdjacentHTML('beforeend', productHtml);
-        });
-    }
+                        <div class="product-info">
+                            <h3 class="product-title">${product.productName}</h3>
+                            <div class="product-price">
+                                <div>
+                                    <span class="price">₹${product.discountedPrice || product.mrp}</span>
+                                    ${product.productOffer ? `
+                                        <span class="original-price">₹${product.mrp}</span>
+                                        <span class="discount">${product.productOffer}% OFF</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="wishlist-icon" data-product="${product._id}" onclick="toggleWishlist(event, '${product._id}')">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
+                `).join('');
 
-    function updatePagination(totalPages, currentPage, totalProducts, limit) {
-        const paginationContainer = document.getElementById('paginationContainer');
-        paginationContainer.innerHTML = ''; // Clear previous pagination buttons
+                // Update pagination
+                const paginationContainer = document.querySelector('.mt-4.flex.justify-between.items-center .flex.space-x-2');
+                if (paginationContainer) {
+                    // Only show pagination if there are more than 9 products and there are products to show
+                    if (data.totalProducts <= 9 || data.products.length === 0) {
+                        paginationContainer.innerHTML = '';
+                        return;
+                    }
 
-        // Display range information
-        const rangeInfo = document.getElementById('rangeInfo');
-        const start = (currentPage - 1) * limit + 1;
-        const end = Math.min(currentPage * limit, totalProducts);
-        rangeInfo.innerHTML = `Showing ${start}-${end} of ${totalProducts}`;
+                    let paginationHTML = '';
+                    
+                    // Previous button
+                    paginationHTML += `
+                        <button onclick="changePage(${currentPage - 1})" 
+                                class="px-3 py-1 rounded ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-gray-300' : 'bg-gray-400 hover:bg-gray-500 text-white'}"
+                                ${currentPage === 1 ? 'disabled' : ''}>
+                            Previous
+                        </button>
+                    `;
 
-        // Previous button
-        if (currentPage > 1) {
-            const prevButton = document.createElement('button');
-            prevButton.classList.add('bg-gray-200', 'text-gray-700', 'px-3', 'py-1', 'rounded-md');
-            prevButton.innerText = '<';
-            prevButton.addEventListener('click', () => {
-                currentPage -= 1;
-                // fetchProducts(document.getElementById('searchInput').value, currentPage);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
-            });
-            paginationContainer.appendChild(prevButton);
+                    // Page numbers
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        paginationHTML += `
+                            <button onclick="changePage(${i})" 
+                                    class="px-3 py-1 rounded ${currentPage === i ? 'bg-gray-500 text-white' : 'bg-gray-400 hover:bg-gray-500 text-white'}">
+                                ${i}
+                            </button>
+                        `;
+                    }
+
+                    // Next button
+                    paginationHTML += `
+                        <button onclick="changePage(${currentPage + 1})" 
+                                class="px-3 py-1 rounded ${currentPage === data.totalPages ? 'opacity-50 cursor-not-allowed bg-gray-300' : 'bg-gray-400 hover:bg-gray-500 text-white'}"
+                                ${currentPage === data.totalPages ? 'disabled' : ''}>
+                            Next
+                        </button>
+                    `;
+
+                    paginationContainer.innerHTML = paginationHTML;
+                }
+
+                // Initialize wishlist icons
+                if (typeof checkWishlistStatus === 'function') {
+                    document.querySelectorAll('.wishlist-icon').forEach(icon => {
+                        const productId = icon.getAttribute('data-product');
+                        if (productId) {
+                            checkWishlistStatus(productId);
+                        }
+                    });
+                }
+
+                // Update URL with current state without reloading the page
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('page', page);
+                if (sortBy) newUrl.searchParams.set('sortBy', sortBy);
+                if (searchQuery) newUrl.searchParams.set('search', searchQuery);
+                if (categoryId) newUrl.searchParams.set('category', categoryId);
+                if (priceRange.min !== 0) newUrl.searchParams.set('min', priceRange.min);
+                if (priceRange.max !== Infinity) newUrl.searchParams.set('max', priceRange.max);
+                window.history.pushState({}, '', newUrl);
+
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                const productsGrid = document.querySelector('.products-grid');
+                if (productsGrid) {
+                    productsGrid.innerHTML = '<div class="error">Error loading products. Please try again.</div>';
+                }
+            }
         }
 
-        // Page buttons
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.classList.add('px-3', 'py-1', 'rounded-md', 'text-gray-700');
+        function changePage(page) {
+            if (page < 1) return;
+            fetchProducts(currentSearch, page, currentSort, currentCategory, currentPriceRange);
+        }
 
-            if (i === currentPage) {
-                pageButton.classList.add('bg-gray-500', 'text-white');
-            } else {
-                pageButton.classList.add('bg-gray-200');
+        // Event listener for search
+        document.getElementById('searchInput')?.addEventListener('input', debounce(function(e) {
+            const searchQuery = e.target.value;
+            fetchProducts(searchQuery, 1, currentSort, currentCategory, currentPriceRange);
+        }, 300));
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get initial values from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialPage = parseInt(urlParams.get('page')) || 1;
+            const initialSort = urlParams.get('sortBy') || '';
+            const initialSearch = urlParams.get('search') || '';
+            const initialCategory = urlParams.get('category') || '';
+            const initialMin = parseInt(urlParams.get('min')) || 0;
+            const initialMax = parseInt(urlParams.get('max')) || Infinity;
+
+            // Set the initial values in the UI
+            if (initialSort) {
+                document.getElementById('sortSelection').value = initialSort;
+            }
+            if (initialSearch) {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = initialSearch;
+            }
+            if (initialMin !== 0 || initialMax !== Infinity) {
+                priceSlider.noUiSlider.set([initialMin, initialMax]);
+            }
+            if (initialCategory) {
+                const categoryElement = document.getElementById(`category-${initialCategory}`);
+                if (categoryElement) {
+                    categoryElement.classList.remove('bg-gray-400', 'hover:bg-gray-300', 'text-grey-100');
+                    categoryElement.classList.add('bg-gray-500', 'text-white');
+                }
             }
 
-            pageButton.innerText = i;
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                // fetchProducts(document.getElementById('searchInput').value, i);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
-            });
-            paginationContainer.appendChild(pageButton);
+            // Fetch products with initial values
+            fetchProducts(
+                initialSearch, 
+                initialPage, 
+                initialSort, 
+                initialCategory, 
+                { min: initialMin, max: initialMax }
+            );
+        });
+
+        // Zoom functionality
+        function zoomIn(event) {
+            const container = event.currentTarget;
+            const image = container.querySelector('.product-image');
+            const rect = container.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const originX = (x / rect.width) * 100;
+            const originY = (y / rect.height) * 100;
+            image.style.transformOrigin = `${originX}% ${originY}%`;
+            image.style.transform = `scale(1.5)`;
         }
 
-
-        // Next button
-        if (currentPage < totalPages) {
-            const nextButton = document.createElement('button');
-            nextButton.classList.add('bg-gray-200', 'text-gray-700', 'px-3', 'py-1', 'rounded-md');
-            nextButton.innerText = '>';
-            nextButton.addEventListener('click', () => {
-                currentPage += 1;
-                // fetchProducts(document.getElementById('searchInput').value, currentPage);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
+        function resetZoom() {
+            const images = document.querySelectorAll('.product-image');
+            images.forEach(image => {
+                image.style.transform = 'scale(1)';
             });
-            paginationContainer.appendChild(nextButton);
         }
-    }
 
-    function setSortSelection(selectedSort) {
-        const sortDropdown = document.getElementById('sortSelection');
-        sortDropdown.value = selectedSort;
-    }
+        // Wishlist functions
+        
+        async function toggleWishlist(event, productId) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const icon = event.currentTarget;
+            
+            try {
+                const response = await fetch('/user/wishlist/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Toggle the heart icon
+                    if (data.inWishlist) {
+                        icon.classList.add('active');
+                    } else {
+                        icon.classList.remove('active');
+                    }
+                    
+                    // Show success message
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message || 'Error updating wishlist', 'error');
+                }
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    window.location.href = '/user/login';
+                    return;
+                }
+                showToast('Error updating wishlist', 'error');
+                console.error('Error:', error);
+            }
+        }
 
-    
+        async function checkWishlistStatus(productId) {
+            try {
+                const response = await fetch(`/user/wishlist/check/${productId}`);
+                const data = await response.json();
+                if (data.success && data.inWishlist) {
+                    const icon = document.querySelector(`[data-product="${productId}"]`);
+                    if (icon) {
+                        icon.classList.add('active');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking wishlist status:', error);
+            }
+        }
 
-    // Initial load
-    document.addEventListener('DOMContentLoaded', () => fetchProducts());
-
-        </script>
+        function showToast(message, type) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                className: "toastify-custom",
+                style: {
+                    background: type === 'success' ? "#4CAF50" : "#ff4444",
+                    position: "fixed",
+                    top: "20px",
+                    right: "20px",
+                    zIndex: "9999",
+                    padding: "12px 24px",
+                    minWidth: "200px",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: "500"
+                }
+            }).showToast();
+        }
+    </script>

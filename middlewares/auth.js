@@ -21,7 +21,8 @@ const userAuth = (req, res, next) => {
         return res.status(500).send('Internal Server Error');
       });
   } else {
-    next()
+    // User is not authenticated, redirect to login
+    res.redirect('/user/login');
   }
 };
 
