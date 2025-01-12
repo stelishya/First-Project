@@ -4,6 +4,7 @@ const config = require('./config/config')
 const path = require('path')
 const session = require('express-session')
 const passport = require('./config/passport')
+const nocache = require('nocache')
 const db = require('./config/db')
 const expressLayouts = require('express-ejs-layouts')
 const userRoute = require('./routes/userRoute');// Import user routes
@@ -42,7 +43,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(nocache())
 app.use((req,res,next)=>{
     res.set('cache-control','no-store');
     next();

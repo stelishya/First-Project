@@ -10,6 +10,7 @@ const orderController = require('../controllers/orderController')
 const paymentController = require('../controllers/paymentController');
 const couponController = require('../controllers/couponController');
 const wishlistController = require('../controllers/wishlistController');
+const walletController = require('../controllers/walletController');
 
 
 const User = require('../models/userSchema')
@@ -91,6 +92,7 @@ user_route.delete('/cart/removeProduct', userAuth, cartController.removeProduct)
 
 // Orders
 user_route.get('/checkout', userAuth, orderController.checkout)
+user_route.post('/checkout', userAuth, orderController.checkout)
 user_route.post('/order/creation',orderController.orderCreation)
 user_route.get('/orders',userAuth,orderController.showOrdersUser)
 user_route.get('/order/details/:orderId',userAuth,orderController.orderDetailsUser)
@@ -98,19 +100,25 @@ user_route.get('/order/invoice/:orderId',userAuth,orderController.downloadInvoic
 user_route.patch('/order/cancel/:orderId',userAuth,orderController.cancelOrder)
 user_route.post('/order/return/:orderId',userAuth,orderController.returnOrder)
 
-//Payment
+//RazorPay Payment
 user_route.post('/create-order', userAuth, paymentController.createOrder);
 user_route.post('/verify-payment', userAuth, paymentController.verifyPayment);
 
 //Coupon
-user_route.post('/apply-coupon', couponController.applyCoupon);
-user_route.post('/remove-coupon', couponController.removeCoupon);
+user_route.get('/available-coupons', userAuth, couponController.getAvailableCoupons);
+user_route.post('/apply-coupon', userAuth, couponController.applyCoupon);
+user_route.post('/remove-coupon', userAuth, couponController.removeCoupon);
 
 //Wishlist
 user_route.get('/wishlist', userAuth, wishlistController.getWishlist);
 user_route.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
 user_route.post('/wishlist/remove', userAuth, wishlistController.removeFromWishlist);
 user_route.get('/wishlist/check/:productId', userAuth, wishlistController.checkWishlist);
+
+// Wallet
+user_route.get('/wallet',userAuth, walletController.walletPage);
+user_route.post('/wallet/add-money',userAuth, walletController.addMoneyToWallet);
+user_route.get('/wallet/balance',userAuth, walletController.getWalletBalance);
 
 user_route.get('/pageNotFound',userController.pageNotFound);
 

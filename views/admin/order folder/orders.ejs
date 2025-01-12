@@ -17,6 +17,54 @@
         background-color: #d1cfcf;
     }
 
+    .search-container {
+        width: 350px;
+        display: flex;
+        align-items: center;
+        border: 2px solid #5c5a5a;
+        border-radius: 50px;
+        padding: 2px;
+        background-color: #fff;
+    }
+    .search-container input {
+        border: none;
+        outline: none;
+        padding: 2px;
+        font-size: 14px;
+        border-radius: 50px;
+        flex-grow: 1;
+    }
+
+    .search-container button {
+        background-color: #bdb6b1;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .search-container button i {
+        color: #434141;
+        font-size: 18px;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+    .user-info img {
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .user-info .name {
+        margin-right: 10px;
+    }
+    .user-info .role {
+        color: #888;
+    }
     .toast_style {
         width: fit-content !important;
         max-width: 300px !important;
@@ -120,8 +168,25 @@
     <!-- Main Content -->
     <!-- <div class="flex-1 p-6"> -->
     <main class="content">
+
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold">Order</h2>
+            <h2 class="text-2xl font-semibold">Orders</h2>
+            <div class="search-container">
+                <form action="/admin/orders" method="GET"
+                    style="display: flex; justify-content: flex-end;">
+                    <input class="p-2 " type="text" placeholder="Search Orders" name="search" value="<%= search %>"
+                        style="flex-grow: 1;">
+                    <button type="submit" style="margin-left: 150px;"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <div class="user-info">
+                <div class="name">Selin Steilshya Oliver<br>
+                    <div class="role">Admin</div>
+                </div>
+                <img alt="User Avatar" height="40"
+                    src="https://storage.googleapis.com/a1aa/image/6Frmd66qfz37V6OkvJHOKto7rafaEUORfStf9uiesPYqTb5eE.jpg"
+                    width="40">
+            </div>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <div class="mt-4 text-sm text-gray-500">
@@ -174,7 +239,7 @@
                                     </span> -->
                             </td>
                             <td class="py-2">
-                                <%= order.finalAmount %>
+                                <%= order.finalAmount.toFixed(0) %>
                             </td>
                             <td class="py-2">
                                 <%= order.paymentMethod %>
@@ -214,7 +279,7 @@
                             </td>
                             <td>
                                 <a href="/user/order/details/<%= order._id %>"
-                                    class="inline-flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                                    class="inline-flex items-center justify-center p-2 bg-gray-300 text-gray-600 rounded-md hover:bg-gray-200 transition-colors duration-200">
                                     <i class="fas fa-info-circle mr-2"></i>View Details
                                 </a>
                             </td>

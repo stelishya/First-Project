@@ -102,56 +102,124 @@
                                     <thead class="text-gray-600 border-b">
                                         <tr>
                                             <th class="text-left py-2">Product</th>
-                                            <th class="text-right py-2">MRP × Qty</th>
+                                            <th class="text-right py-2">Price Details</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-gray-600">
                                         <% products.forEach(product=> { %>
                                             <tr>
                                                 <td class="py-2">
-                                                    <%= product.productId.productName %>
+                                                    <!-- <%= product.productId.productName %> -->
+                                                    <div class="flex items-center">
+                                                        <!-- <img src="<%= product.productId.productImage %>" alt="<%= product.productId.productName %>" class="w-12 h-12 object-cover rounded mr-2"> -->
+                                                        <div>
+                                                            <div class="font-medium">
+                                                                <%= product.productId.productName %>
+                                                            </div>
+                                                            <div class="text-xs text-gray-500">Qty: <%= product.quantity
+                                                                    %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </td>
-                                                <td class="text-right">₹<%= product.productId.mrp %> × <%=
-                                                            product.quantity %>
+
+                                                <td class="text-right">
+                                                    <div class="text-sm">
+                                                        <div>MRP: ₹<%= totalMRP.toFixed(0) %>
+                                                        </div>
+                                                        <% if (product.prices.totalDiscount> 0) { %>
+                                                            <div class="text-red-500">-₹<%=
+                                                                    product.prices.totalDiscount.toFixed(0) %>
+                                                            </div>
+                                                            <% } %>
+                                                                <div class="font-semibold">₹<%=
+                                                                        product.prices.totalPrice.toFixed(0) %>
+                                                                </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             <% }); %>
                                     </tbody>
-                                    <tfoot class="border-t">
+
+                                    <!-- <tfoot class="border-t mt-4">
                                         <tr class="font-semibold">
+                                            
                                             <td class="py-2">Total MRP</td>
-                                            <!-- <td class="text-right">₹%= totalMRP.toFixed(2) %></td> -->
+                                            <td class="text-right">₹<%= totalMRP.toFixed(0) %></td>
                                         </tr>
-                                    </tfoot>
+                                        
+                                        <% if (totalDiscount > 0) { %>
+                                            <tr>
+                                               
+                                                <td class="py-2 text-red-500">Total Discount</td>
+                                                <td class="text-right text-red-500">-₹<%= totalDiscount.toFixed(0) %></td>
+                                            </tr>
+                                        <% } %>
+                                        <tr class="font-bold text-lg">
+                                            <td class="py-2">Final Amount</td>
+                                            <td class="text-right">₹<%= totalAmount.toFixed(0) %></td>
+                                        </tr>
+                                    </tfoot> -->
                                 </table>
                             </div>
-                            <button onclick="openCouponModal()" class="bg-gray-300 text-gray-600 px-4 py-2 rounded hover:bg-gray-400">
-                                Apply Coupon
-                            </button>
-                            <!-- Discount Breakdown -->
-                            <hr class="my-4 border-gray-200" >
-                            <div class="space-y-2 mb-4">
-                                <div class="flex justify-between text-gray-600">
-                                    <span class="flex items-center">
-                                        <i class="fas fa-minus-circle text-red-500 mr-2"></i>
-                                        Total Discount
-                                    </span>
-                                    <span class="text-red-500">-₹<%= totalDiscount.toFixed(2) %></span>
-                                </div>
-                                <!-- <div id="couponDiscount" class="flex hidden justify-between text-gray-600">
-                                <span>Coupon Discount</span>
-                                <span id="couponDiscountValue" class="text-red-600">-₹0</span>
-                            </div> -->
-                                <div class="flex justify-between text-gray-600">
-                                    <span>Shipping</span>
-                                    <span class="text-green-600">Free</span>
+                            <!-- Coupon Section -->
+                            <div class="flex items-center justify-between mb-4">
+                                <button onclick="openCouponModal()"
+                                    class="bg-gray-300 text-gray-600 px-4 py-2 rounded hover:bg-gray-400">
+                                    View Available Coupons
+                                </button>
+                            </div>
+                            <div id="appliedCouponSection" class="hidden">
+                                <div class="flex items-center">
+                                    <span id="appliedCouponCode" class="text-green-600 mr-2"></span>
+                                    <button onclick="removeCoupon()" id="couponRemoveBtn"
+                                        class="px-3 py-1 bg-red-400 text-white text-sm rounded hover:bg-red-500 transition-colors">
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
-                            <!-- Final Amount -->
-                            <hr class="my-4 border-gray-200" >
+                            <!-- <button onclick="removeCoupon()" id="couponRemoveBtn"
+                                    class="hidden px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">
+                                    Remove
+                            </button> -->
+                            <p id="couponMessage" class="text-sm mt-2"></p>
+                            <!-- Discount Breakdown -->
+                            <hr class="my-4 border-gray-200">
+                            <div class="flex pb-2">
+                                <div class="">
+                                    <h3>Total MRP</h3>
+                                </div>
+                                <div style="margin-left:67%">₹<%= totalMRP.toFixed(0) %>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mb-4">
+                                <% if (totalDiscount> 0) { %>
+                                    <div class="flex justify-between text-gray-600 pb-2">
+                                        <span class="flex items-center">
+                                            <i class="fas fa-minus-circle text-red-500 mr-2"></i>
+                                            Product Discount
+                                        </span>
+                                        <span class="text-red-500">-₹<%= totalDiscount.toFixed(0) %></span>
+                                        <!-- .toFixed(2) -->
+                                    </div>
+                                    <% } %>
+                                        <div id="couponDiscount" class="flex hidden justify-between text-gray-600">
+                                            <span><i class="fas fa-minus-circle text-red-500 mr-2"></i>Coupon
+                                                Discount</span>
+                                            <span id="couponDiscountValue" class="text-red-600">-₹0</span>
+                                        </div>
+                                        <!-- <span>Total Discount</span>
+                                <span class="text-red-600"></span> -->
+                                        <div class="flex justify-between text-gray-600">
+                                            <span>Shipping</span>
+                                            <span class="text-green-600">Free</span>
+                                        </div>
+                            </div>
+                            <!-- Total Amount -->
+                            <hr class="my-4 border-gray-200">
                             <div class="flex justify-between font-bold text-lg">
-                                <span>Final Amount</span>
-                                <span id="totalAmount" class="text-orange-500">₹<%= finalAmount.toFixed(2) %></span>
+                                <span>Total Amount</span>
+                                <span id="totalAmount" class="text-gray-500">₹<%= totalAmount.toFixed(0) ||0 %></span>
                             </div>
 
                             <!-- Payment Options -->
@@ -165,11 +233,11 @@
                                             <input type="radio" name="payment" value="<%= method %>"
                                                 class="text-gray-500 focus:ring-gray-500"
                                                 id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" <% if
-                                                (method==='COD' && finalAmount> 3000) { %>disabled<% } %>>
+                                                (method==='COD' && totalAmount> 3000) { %>disabled<% } %>>
                                                 <span>
                                                     <%= method %>
                                                 </span>
-                                                <!-- % if (method === 'COD' && finalAmount > 1000) { %>
+                                                <!-- % if (method === 'COD' && totalAmount > 1000) { %>
                                             <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
                                         % } %> -->
                                         </label>
@@ -177,12 +245,21 @@
                                 </div>
                             </div>
 
-                            <button onclick="placeOrder('<%= finalAmount %>','<%= products[0].productId._id %>')"
+                            <% if (isBuyNow) { %>
+                                <button onclick="placeOrder('<%= totalAmount %>', '<%= products[0].productId._id %>')"
+                                    class="w-full py-3 text-white rounded-lg hover:bg-gray-500 transition-colors mt-6"
+                                    style="background-color: #716f6e;">
+                                    Place Order
+                                </button>
+                            <% } else { %>
+                            <button onclick="placeOrder('<%= totalAmount %>')"
+                                // ,'%= products[0].productId._id %>')"
                                 class="w-full py-3  text-white rounded-lg hover:bg-gray-500 transition-colors mt-6"
                                 style="background-color: #716f6e;">
                                 Place Order
                             </button>
-                            
+                            <% } %>
+
                         </div>
                     </div>
                 </div>
@@ -281,9 +358,9 @@
     <!-- Address Modal -->
     <div id="addressModal" class="modal">
         <div class="modal-content w-full max-w-xl bg-white rounded-lg shadow-lg relative">
-            <div class="bg-orange-400 text-white p-4 rounded-t-lg">
+            <div class="bg-gray-400 text-white p-4 rounded-t-lg">
                 <h2 class="text-xl font-semibold" id="modalTitle">Add New Address</h2>
-                <button onclick="closeModal()" class="absolute top-3 right-3 text-white hover:text-yellow-200">
+                <button onclick="closeModal()" class="absolute top-3 right-3 text-white hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
@@ -291,44 +368,54 @@
             <form id="addressForm" class="p-6">
                 <input type="hidden" id="addressId" name="addressId">
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Type of Address</label>
-                        <select name="typeOfAddress" id="typeInput"
-                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
-                            <option value="Home">Home</option>
-                            <option value="Work">Work</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Full Name</label>
-                        <input name="name" type="text" id="nameInput"
-                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                            placeholder="Enter your full name">
-                        <span id="nameError" class="text-red-500 text-sm"></span>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Street Address</label>
-                        <input name="streetAddress" type="text" id="streetInput"
-                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                            placeholder="Enter street address">
-                        <span id="streetError" class="text-red-500 text-sm"></span>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+                            <input name="name" type="text" id="nameInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
+                                placeholder="Enter your full name">
+                            <span id="nameError" class="text-red-500 text-sm"></span>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">Type of Address</label>
+                            <select name="typeOfAddress" id="typeInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                                <option value="Home">Home</option>
+                                <option value="Work">Work</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
+                            <label class="block text-gray-700 font-medium mb-1">Street Address</label>
+                            <input name="streetAddress" type="text" id="streetInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
+                                placeholder="Enter street address">
+                            <span id="streetError" class="text-red-500 text-sm"></span>
+                        </div>
+                        <div>
                             <label class="block text-gray-700 font-medium mb-1">City</label>
                             <input name="city" type="text" id="cityInput"
-                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
                                 placeholder="Enter city">
                             <span id="cityError" class="text-red-500 text-sm"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1">Pincode</label>
+                            <input name="pincode" type="text" id="pincodeInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
+                                placeholder="Enter pincode">
+                            <span id="pincodeError" class="text-red-500 text-sm"></span>
                         </div>
                         <div>
                             <label class="block text-gray-700 font-medium mb-1">State</label>
                             <input name="state" type="text" id="stateInput"
-                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
                                 placeholder="Enter state">
                             <span id="stateError" class="text-red-500 text-sm"></span>
                         </div>
@@ -338,26 +425,19 @@
                         <div>
                             <label class="block text-gray-700 font-medium mb-1">Country</label>
                             <input name="country" type="text" id="countryInput"
-                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
                                 placeholder="Enter country">
                             <span id="countryError" class="text-red-500 text-sm"></span>
                         </div>
                         <div>
-                            <label class="block text-gray-700 font-medium mb-1">Pincode</label>
-                            <input name="pincode" type="text" id="pincodeInput"
-                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                                placeholder="Enter pincode">
-                            <span id="pincodeError" class="text-red-500 text-sm"></span>
+                            <label class="block text-gray-700 font-medium mb-1">Phone Number</label>
+                            <input name="mobile" type="tel" id="phoneInput"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
+                                placeholder="Enter phone number">
+                            <span id="phoneError" class="text-red-500 text-sm"></span>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Phone Number</label>
-                        <input name="mobile" type="tel" id="phoneInput"
-                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                            placeholder="Enter phone number">
-                        <span id="phoneError" class="text-red-500 text-sm"></span>
-                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
@@ -366,7 +446,7 @@
                         Cancel
                     </button>
                     <button type="submit"
-                        class="px-6 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors">
+                        class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors">
                         Save Address
                     </button>
                 </div>
@@ -376,33 +456,41 @@
 
     <!-- Coupon Modal -->
     <div id="couponModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-5 border w-[500px] shadow-lg rounded-md bg-white">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Apply Coupon</h3>
+                <h3 class="text-lg font-semibold text-gray-900">Available Coupons</h3>
                 <button onclick="closeCouponModal()" class="text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            
+
             <div class="mt-2">
-                <input type="text" 
-                       id="couponCode" 
-                       class="w-full border rounded px-3 py-2 mb-3" 
-                       placeholder="Enter coupon code">
-                
-                <div id="couponMessage" class="text-sm mb-3"></div>
-                
-                <div class="flex justify-end space-x-2">
-                    <button onclick="closeCouponModal()" 
+                <!-- Available Coupons List -->
+                <div id="availableCoupons" class="mb-4 space-y-3 max-h-[300px] overflow-y-auto">
+                    <!-- Coupons will be loaded here -->
+                </div>
+
+                <!-- Manual Coupon Input -->
+                <div class="border-t pt-4">
+                    <p class="text-sm text-gray-600 mb-2">Have a different coupon?</p>
+                    <input type="text" id="couponCode" class="w-full border rounded px-3 py-2 mb-3"
+                        placeholder="Enter coupon code">
+
+                    <div id="couponMessage" class="text-sm mb-3"></div>
+
+                    <div class="flex justify-end space-x-2">
+                        <button onclick="closeCouponModal()"
                             class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                        Cancel
-                    </button>
-                    <button onclick="applyCoupon()" 
+                            Cancel
+                        </button>
+                        <button onclick="applyCoupon()"
                             class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                        Apply
-                    </button>
+                            Apply
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -600,7 +688,8 @@
 
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
-            toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg z-50 ${isError ? 'bg-red-100 text-red-700 border border-red-500' : 'bg-green-100 text-green-700 border border-green-500'}`;
+            // toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
             toast.style.zIndex = '1100';
             toast.textContent = message;
             document.body.appendChild(toast);
@@ -651,61 +740,101 @@
             }
 
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            console.log('Selected Payment:', selectedPayment.value);
+            
             if (!selectedPayment) {
                 showToast('Please select a payment method', true);
                 return;
             }
+            console.log('Selected Payment:', selectedPayment.value);
 
             try {
                 const urlParams = new URLSearchParams(window.location.search);
-                const isBuyNow = urlParams.get('buyNow') === 'true';
+                // const isBuyNow = urlParams.get('buyNow') === 'true';
+                const quantity = urlParams.get('quantity') || 1;
+
+                // Determine if this is a single product order or cart order
+                // const isSingleProduct = Boolean(productId);
+                // console.log("Order type:", isSingleProduct ? "Single Product" : "Cart");
+
                 let orderData = {
                     addressId: selectedAddressId,
                     total: parseFloat(finalAmount),
                     paymentType: selectedPayment.value,
-                    buyNow: false
+                    // buyNow: false,
+                    quantity: parseInt(quantity)
                 };
-                console.log("orderData.buyNow", orderData.buyNow)
-                if (isBuyNow && productId) {
-                    orderData.singleProductId = productId;
-                    orderData.quantity = parseInt(urlParams.get('quantity')) || 1;
+                // Set buyNow based on whether productId is provided
+                if (productId) {
                     orderData.buyNow = true;
+                    orderData.singleProductId = productId;
+                    console.log("Single product order:", productId);
+                } else {
+                    orderData.buyNow = false;
+                    console.log("Cart order");
                 }
+                // console.log("orderData.buyNow", orderData.buyNow)
+                // if (isBuyNow && productId) {
+                // if (productId) {
+                //     orderData.singleProductId = productId;
+                //     orderData.buyNow = true;
+                //     console.log("Setting buyNow to true for product:", productId); 
+                // }
+
+                console.log("Placing order with data:", orderData);
 
                 if (selectedPayment.value === 'Online Payment') {
                     try {
+                        const totalAmount = document.getElementById('totalAmount').textContent.replace('₹', '').trim();
                         // Create Razorpay order
-                        const response = await axios.post('/user/create-order', { amount: finalAmount });
+                        const response = await axios.post('/user/create-order', {
+                            amount: totalAmount,
+                            // totalDiscount: discount,
+                            couponDiscount: currentCouponDiscount 
+                        });
                         console.log("Razorpay order response:", response.data);
-                        
+
                         if (!response.data.id) {
                             showToast('Failed to create payment order', true);
                             return;
                         }
+                        // Create Razorpay order with the same data
+                        const razorpayOrderData = { ...orderData };
+                        console.log("Preparing Razorpay order with data:", razorpayOrderData);
 
-                        // Store order data for later use
-                        const currentOrderData = {
-                            addressId: selectedAddressId,
-                            total: parseFloat(finalAmount),
-                            paymentType: 'Online Payment',
-                            buyNow: true, // Since this is a buy now flow
-                            singleProductId: productId,
-                            quantity: parseInt(urlParams.get('quantity')) || 1
-                        };
+                        // // Create order data for Razorpay
+                        // const currentOrderData = {
+                        //     addressId: selectedAddressId,
+                        //     total: parseFloat(finalAmount),
+                        //     paymentType: 'Online Payment',
+                        //     // buyNow: true, // Since this is a buy now flow
+                        //     // singleProductId: productId,
+                        //     quantity: parseInt(quantity)
+                        // };
 
-                        console.log("Preparing order with data:", currentOrderData);
+                        // // Set appropriate flags for Razorpay order
+                        // if (isSingleProduct) {
+                        //     currentOrderData.buyNow = true;
+                        //     currentOrderData.singleProductId = productId;
+                        //     console.log("Razorpay: Single product order for:", productId);
+                        // } else {
+                        //     currentOrderData.buyNow = false;
+                        //     console.log("Razorpay: Cart order");
+                        // }
+
+                        // console.log("Preparing Razorpay order with data:", currentOrderData);
 
                         // Initialize Razorpay payment
                         const options = {
-                            key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                            key: response.data.key_id,
+                            // key: "%= process.env.RAZORPAY_KEY_ID %>",
                             amount: response.data.amount,
                             currency: "INR",
                             name: "CAlliope",
-                            description: "Product Purchase",
+                            // description: "Product Purchase",
+                            description: orderData.buyNow ? "Single Product Purchase" : "Cart Order",
                             order_id: response.data.id,
                             handler: function (response) {
-                                handlePaymentSuccess(response, currentOrderData);
+                                handlePaymentSuccess(response, razorpayOrderData);
                             },
                             theme: {
                                 color: "#3399cc"
@@ -713,16 +842,18 @@
                         };
 
                         const rzp = new Razorpay(options);
-                        rzp.on('payment.failed', function (response){
-                            console.error("Payment failed:", response.error);
-                            showToast(response.error.description || 'Payment failed', true);
-                        });
+                        // rzp.on('payment.failed', function (response) {
+                        //     console.error("Payment failed:", response.error);
+                        //     showToast(response.error.description || 'Payment failed', true);
+                        // });
                         rzp.open();
                     } catch (error) {
                         console.error('Razorpay initialization error:', error);
                         showToast('Failed to initialize payment', true);
                     }
-                } else {
+                } else if(selectedPayment.value === 'Cash on Delivery') {
+                try{
+                    console.log("Placing COD order");
                     // For COD and other payment methods
                     const response = await axios.post('/user/order/creation', orderData);
                     if (response.data.success) {
@@ -734,11 +865,17 @@
                             confirmButtonColor: '#f97316'
                         });
                         window.location.href = '/user/orders';
+                    }else{
+                        showToast(response.data.message || 'Failed to place order', true);
                     }
+                }catch(error){
+                    console.error('Error placing COD order:', error);
+                    showToast(error.response?.data?.message || 'Failed to place order - catch', true);
+                }
                 }
             } catch (error) {
-                console.error('Error placing order:', error);
-                showToast(error.response?.data?.message || 'Failed to place order', true);
+                console.error('Error in order placement:', error);
+                showToast(error.response?.data?.message || 'Failed to place order. Please try again.', true);
             }
         }
 
@@ -922,7 +1059,7 @@
 
         // Wishlist functionality
         document.querySelectorAll('.add-to-wishlist').forEach(button => {
-            button.addEventListener('click', async function() {
+            button.addEventListener('click', async function () {
                 const productId = this.dataset.product;
                 try {
                     const response = await fetch('/wishlist/add', {
@@ -978,7 +1115,7 @@
                     };
                     var rzp1 = new Razorpay(options);
                     rzp1.open();
-                    
+
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -1000,49 +1137,243 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
-        
-        function openCouponModal() {
-            document.getElementById('couponModal').classList.remove('hidden');
+
+        async function openCouponModal() {
+            try {
+                console.log("coupon modal........")
+                const response = await axios.get('/user/available-coupons');
+                const coupons = response.data;
+
+                const couponsHtml = coupons.map(coupon => `
+                    <div class="p-3 border rounded-lg hover:bg-gray-50">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h4 class="font-semibold text-lg">${coupon.name}</h4>
+                                    <button onclick="applySelectedCoupon('${coupon.code}')" 
+                                            class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 ml-2">
+                                        Apply
+                                    </button>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">Code: ${coupon.code}</span>
+                                    <span class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">${coupon.offerPercentage}% off</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    <p>Min Purchase: ₹${coupon.minimumPurchase}</p>
+                                    ${coupon.maximumDiscount ? `<p>Max Discount: ₹${coupon.maximumDiscount}</p>` : ''}
+                                    <p class="text-gray-500 mt-1">${coupon.expiryText}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('availableCoupons').innerHTML = couponsHtml || '<p class="text-center text-gray-500">No active coupons available</p>';
+                document.getElementById('couponModal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading coupons:', error);
+                showToast('Error loading coupons. Please try again.', 'error');
+            }
         }
 
         function closeCouponModal() {
             document.getElementById('couponModal').classList.add('hidden');
-            document.getElementById('couponMessage').textContent = '';
             document.getElementById('couponCode').value = '';
+            document.getElementById('couponMessage').textContent = '';
         }
 
+        async function applySelectedCoupon(code) {
+            document.getElementById('couponCode').value = code;
+            await applyCoupon();
+        }
+        let currentCouponDiscount = 0;
+
         async function applyCoupon() {
-            const couponCode = document.getElementById('couponCode').value;
+            const code = document.getElementById('couponCode').value;
             const messageDiv = document.getElementById('couponMessage');
-            const cartTotal = parseFloat(document.getElementById('cartTotal').textContent);
+
+            if (!code) {
+                messageDiv.textContent = 'Please enter a coupon code';
+                messageDiv.className = 'text-sm text-red-500 mb-3';
+                return;
+            }
 
             try {
-                const response = await axios.post('/user/apply-coupon', {
-                    code: couponCode,
-                    cartTotal
-                });
+                const totalAmountElement = document.getElementById('totalAmount');
+                if (!totalAmountElement) {
+                    throw new Error('Total amount element not found');
+                }
+                const total = parseFloat(totalAmountElement.textContent.replace('₹', '').trim());
+                if (isNaN(total)) {
+                    console.error('Total is NaN. Original value:', totalAmountElement.textContent);
+                    throw new Error('Invalid total amount');
+                }
+                console.log('Applying coupon with total:', total);
+                // Check if this is a cart purchase or direct buy
+                // const cartTotalElement = document.getElementById('cartTotal');
+                // const totalMRPElement = document.getElementById('totalMRP');
 
-                if (response.status === 200) {
-                    messageDiv.className = 'text-sm text-green-600 mb-3';
-                    messageDiv.textContent = 'Coupon applied successfully!';
-                    
-                    // Update cart totals
-                    document.getElementById('discount').textContent = response.data.discount;
-                    document.getElementById('finalAmount').textContent = response.data.finalAmount;
-                    
-                    // Close modal after short delay
-                    setTimeout(() => {
-                        closeCouponModal();
-                    }, 1500);
+                // let total;
+                // if (cartTotalElement) {
+                //     // Cart purchase
+                //     total = parseFloat(cartTotalElement.textContent.replace('₹', '').trim());
+                //     console.log('Cart total:', total);
+                // } else if (totalMRPElement) {
+                //     // Direct buy
+                //     total = parseFloat(totalMRPElement.textContent.replace('₹', '').trim());
+                //     console.log('MRP total:', total);
+                // } else {
+                //     console.log("coupon apply..error");
+                //     console.error('Neither cartTotal nor totalMRP elements found');
+                //     throw new Error('Unable to determine total amount');
+                // }
+                // if (isNaN(total)) {
+                //     console.error('Total is NaN. Original value:', cartTotalElement?.textContent || totalMRPElement?.textContent);
+                //     throw new Error('Invalid total amount');
+                // }
+                console.log('Sending request with code:', code, 'and total:', total);
+
+                const response = await axios.post('/user/apply-coupon', {
+                    code: code,
+                    cartTotal: total
+                });
+                console.log('Coupon response:', response.data);
+
+                // const cartTotal = parseFloat(document.getElementById('cartTotal').textContent);
+                // const response = await axios.post('/user/apply-coupon', { 
+                //     code: code,
+                //     cartTotal: cartTotal
+                // });
+
+                if (response.data.success) {
+                    currentCouponDiscount = response.data.discount || 0; // Store the discount amount
+
+                    // showToast(response.data.message, 'success');
+                    // closeCouponModal();
+                    // // Reload to update prices
+                    // location.reload();
+
+                    // Update coupon discount display
+                    const couponDiscountDiv = document.getElementById('couponDiscount');
+                    const couponDiscountValue = document.getElementById('couponDiscountValue');
+                    if (couponDiscountDiv && couponDiscountValue) {
+                        couponDiscountDiv.classList.remove('hidden');
+                        couponDiscountValue.textContent = `-₹${currentCouponDiscount.toFixed(0)}`;
+                    }
+                    // Update total amount
+                    // const totalAmountElement = document.getElementById('totalAmount');
+                    // if (totalAmountElement) {
+                        totalAmountElement.textContent = `₹${response.data.totalAmount.toFixed(0)}`;
+                    // }
+
+                    // Show applied coupon section with details
+                    const appliedSection = document.getElementById('appliedCouponSection');
+                    const appliedCode = document.getElementById('appliedCouponCode');
+                    if (appliedSection && appliedCode && response.data.couponDetails) {
+                        appliedSection.classList.remove('hidden');
+                        appliedCode.textContent = `Applied: ${code} - ${response.data.couponDetails.name} (${response.data.couponDetails.offerPercentage}% OFF)`;
+                    }
+                    // document.getElementById('appliedCouponSection').classList.remove('hidden');
+                    // const couponDetails = response.data.couponDetails;
+                    // document.getElementById('appliedCouponCode').textContent = `Applied: ${code} - ${couponDetails.name} (${couponDetails.offerPercentage}% OFF)`;
+
+                    messageDiv.textContent = `Coupon ${code} applied successfully!`;
+                    messageDiv.className = 'text-sm text-green-500 mt-2';
+                    showToast('Coupon applied successfully!', 'success');
+                    closeCouponModal();
+                }else{
+                    throw new Error(response.data.message || 'Failed to apply coupon');
                 }
             } catch (error) {
-                messageDiv.className = 'text-sm text-red-600 mb-3';
-                messageDiv.textContent = error.response?.data?.message || 'Error applying coupon';
+                console.error('Coupon error:', error);
+                const errorMessage = error.response?.data?.message || error.message || 'Error applying coupon';
+                messageDiv.textContent = errorMessage;
+                messageDiv.className = 'text-sm text-red-500 mb-3';
+                showToast(errorMessage, 'error');
+            }
+        }
+
+        async function removeCoupon() {
+            try {
+                //hi hello
+                const appliedCouponText = document.getElementById('appliedCouponCode').textContent;
+                const code = appliedCouponText.split(' ')[1]; // Extract code from "Applied: CODE - Name"
+
+                if (!code) {
+                    throw new Error('No coupon code found');
+                }
+                const totalAmountElement = document.getElementById('totalAmount');
+                const currentTotal = parseFloat(totalAmountElement.textContent.replace('₹', '').trim());
+
+                const response = await axios.post('/user/remove-coupon',{code,currentTotal });
+                if (response.data.success) {
+                    currentCouponDiscount = 0; // Reset the discount amount
+
+                    // Hide coupon discount
+                    const couponDiscountDiv = document.getElementById('couponDiscount');
+                    if (couponDiscountDiv) {
+                        couponDiscountDiv.classList.add('hidden');
+                        document.getElementById('couponDiscountValue').textContent = '-₹0';
+                    }
+                     // Update total amount with the original amount from backend
+                     if (totalAmountElement && response.data.originalAmount) {
+                        totalAmountElement.textContent = `₹${response.data.originalAmount}`;
+                    }
+                    // Get the current discount amount
+                    // const discountText = document.getElementById('couponDiscountValue').textContent;
+                    // const currentDiscount = Math.abs(parseFloat(discountText.replace('₹', '').trim())) || 0;
+
+                    // Get current total and add back the discount
+                    // const totalAmountElement = document.getElementById('totalAmount');
+                    // if (totalAmountElement) {
+                    //     const currentTotal = parseFloat(totalAmountElement.textContent.replace('₹', '').trim());
+                    //     const originalTotal = currentTotal + currentDiscount;
+                    //     totalAmountElement.textContent = `₹${originalTotal.toFixed(0)}`;
+                    // }
+
+                    //  // Reset total to original amount
+                    // const totalMRPElement = document.getElementById('totalMRP');
+                    // const totalAmountElement = document.getElementById('totalAmount');
+                    // if (totalMRPElement && totalAmountElement) {
+                    //     const originalTotal = parseFloat(totalMRPElement.textContent.replace('₹', '').trim());
+                    //     totalAmountElement.textContent = `₹${originalTotal.toFixed(0)}`;
+                    // }
+                     // Hide applied coupon section
+                     const appliedSection = document.getElementById('appliedCouponSection');
+                    const appliedCode = document.getElementById('appliedCouponCode');
+                    if (appliedSection && appliedCode) {
+                        appliedSection.classList.add('hidden');
+                        appliedCode.textContent = '';
+                    }
+                    // document.getElementById('couponDiscount').classList.add('hidden');
+
+                    // Reset total to original amount
+                    // const cartTotalElement = document.getElementById('cartTotal');
+                    // const totalMRPElement = document.getElementById('totalMRP');
+                    // const originalTotal = cartTotalElement ? cartTotalElement.textContent : totalMRPElement.textContent;
+                    // document.getElementById('totalAmount').textContent = originalTotal;
+
+                    // Hide applied coupon section
+                    // document.getElementById('appliedCouponSection').classList.add('hidden');
+                    // document.getElementById('appliedCouponCode').textContent = '';
+
+                    // Clear message
+                    document.getElementById('couponMessage').textContent = '';
+
+                    showToast('Coupon removed successfully','success');
+                }else {
+                    throw new Error(response.data.message || 'Failed to remove coupon');
+                }
+            } catch (error) {
+                console.error('Error removing coupon:', error);
+                const errorMessage = error.response?.data?.message || error.message || 'Error removing coupon';
+                showToast(errorMessage, 'error');
             }
         }
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('couponModal');
             if (event.target === modal) {
                 closeCouponModal();

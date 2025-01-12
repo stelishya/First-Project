@@ -122,7 +122,7 @@
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 2rem;
+        gap: 2rem; 
     }
 
     .product-card {
@@ -170,21 +170,23 @@
     }
 
     .price {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         font-weight: bold;
-        color: var(--primary-color);
+        color: #2c3e50;
     }
 
     .original-price {
+        font-size: 1rem;
+        color: #7f8c8d;
         text-decoration: line-through;
-        color: var(--secondary-color);
-        font-size: 0.9rem;
+        margin-left: 0.5rem;
     }
 
     .discount {
-        color: #e44d26;
-        font-size: 0.9rem;
-        font-weight: bold;
+        font-size: 0.875rem;
+        color: #27ae60;
+        margin-left: 0.5rem;
+        font-weight: 500;
     }
 
     .wishlist-icon {
@@ -280,9 +282,11 @@
                 </ol>
             </div>
 
-            <div class="main-content">
+            <div class="main-content"> 
                 <aside class="filters">
                     <div class="filter-section">
+                        <h3 class="text-lg font-bold mb-2 " style="font-size: x-large;"><u>Filters</u></h3>
+                        <button class="mb-2"><a class="bg-gray-500 rounded p-2 mb-2" href="/user/products">Reset</a></button>
                         <h3 class="text-lg font-semibold mb-2">Categories</h3>
                         <div class="space-y-2">
                             <button onclick="showAllProducts()" 
@@ -313,7 +317,6 @@
 
                 <section class="products-section">
                     <div class="sort-controls " style="margin-left: 78%;">
-                        <!-- <div>Showing <%= products.length %> products</div> -->
                         <select id="sortSelection" class="sort-dropdown">
                             <option value="">Sort by</option>
                             <option value="new">Sort by: New Arrivals</option>
@@ -325,36 +328,70 @@
                     </div>
 
                     <div id="productsContainer" class="products-grid ">
-                        <% products.forEach(product=> { %>
-                            <div class="product-card" onclick="window.location.href='/user/product/details/<%= product._id %>'">
-                                <div class="wishlist-icon" data-product="<%= product._id %>" onclick="toggleWishlist(event, '<%= product._id %>')">
-                                    <i class="fas fa-heart"></i>
-                                </div>
-                                <a href="/user/product/details/<%= product._id %>">
-                                    <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
-                                        <img src="/uploads/product-images/<%= product.productImage[0] %>"
-                                            alt="<%= product.productName %>" class="product-image">
+                        
+                    </div>
+
+                    <!-- <script>
+                    async function fetchProducts(page = 1) {
+                        try {
+                            const productsGrid = document.getElementById('productsContainer');
+                            if (!productsGrid) {
+                                console.error('Products container not found');
+                                return;
+                            }
+
+                            // Build query parameters
+                            const params = new URLSearchParams();
+                            params.append('page', page);
+                            
+                            const selectedCategory = document.querySelector('.category-item.active')?.dataset?.categoryId;
+                            if (selectedCategory) {
+                                params.append('category', selectedCategory);
+                            }
+
+                            const sortSelection = document.getElementById('sortSelection').value;
+                            if (sortSelection) {
+                                params.append('sort', sortSelection);
+                            }
+
+                            const response = await fetch(`/user/products/fetch?${params.toString()}`);
+                            if (!response.ok) throw new Error('Failed to fetch products');
+                            
+                            const data = await response.json();
+                            
+                            productsGrid.innerHTML = data.products.map(product => `
+                                <div class="product-card" onclick="window.location.href='/user/product/details/${product._id}'">
+                                    <div class="zoom-container">
+                                        <img src="/uploads/product-images/${product.productImage[0]}" 
+                                             alt="${product.productName}" class="product-image">
                                     </div>
-                                    <div class="product-info p-8">
-                                        <h3 class="product-title p-8">
-                                            <%= product.productName %>
-                                        </h3>
+                                    <div class="product-info">
+                                        <h3 class="product-title">${product.productName}</h3>
                                         <div class="product-price">
                                             <div>
-                                                <span class="price">₹<%= product.discountedPrice %></span>
-                                                <% if(product.productOffer) { %>
-                                                    <span class="original-price">₹<%= product.mrp %></span>
-                                                    <span class="discount">
-                                                        <%= product.productOffer %>% OFF
-                                                    </span>
-                                                    <% } %>
+                                                <span class="price">₹${product.finalAmount || product.mrp} </span>
+                                                // ${product.offer > 0 ? `
+                                                <span class="original-price">₹${product.mrp}</span>
+                                                <span class="discount">${product.offer}% OFF</span>
+                                                // ` : ''}
                                             </div>
                                         </div>
                                     </div>
-                                </a>
-                            </div>
-                            <% }); %>
-                    </div>
+                                    <div class="wishlist-icon" data-product="${product._id}" 
+                                         onclick="toggleWishlist(event, '${product._id}')">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                </div>
+                            `).join('');
+
+                            // update pagination
+                            updatePagination(data.currentPage, data.totalPages);
+                        } catch (error) {
+                            console.error('Error fetching products:', error);
+                            showToast('Error loading products', 'error');
+                        }
+                    }
+                    </script> -->
 
                     <div class="mt-4 flex justify-between items-center">
                         <div class="flex space-x-2">
@@ -397,6 +434,51 @@
         let currentCategory = '';
         let currentPriceRange = { min: 0, max: Infinity };
 
+    //     document.addEventListener('DOMContentLoaded', function() {
+    //     // Initialize variables
+    //     const urlParams = new URLSearchParams(window.location.search);
+    //     let currentPriceRange = {
+    //         min: <%= minPrice %>,
+    //         max: <%= maxPrice %>
+    //     };
+    //     function initializePriceSlider(minPrice, maxPrice) {
+    //         const priceSlider = document.getElementById('price-slider');
+    //         if (!priceSlider) return;
+
+    //         // Create the slider
+    //         noUiSlider.create(priceSlider, {
+    //             start: [minPrice, maxPrice],
+    //             connect: true,
+    //             range: {
+    //                 'min': minPrice,
+    //                 'max': maxPrice
+    //             },
+    //             tooltips: true,
+    //             format: {
+    //                 to: function(value) {
+    //                     return '₹' + parseInt(value).toLocaleString();
+    //                 },
+    //                 from: function(value) {
+    //                     return Number(value.replace('₹', '').replace(',', ''));
+    //                 }
+    //             }
+    //         });
+
+    //         // Listen for changes on the slider with debouncing
+    //         priceSlider.noUiSlider.on('update', debounce(function(values) {
+    //             const min = parseInt(values[0].replace('₹', '').replace(',', ''), 10);
+    //             const max = parseInt(values[1].replace('₹', '').replace(',', ''), 10);
+                
+    //             currentPriceRange = { min, max };
+    //             fetchProducts(1); // Reset to first page when price range changes
+    //         }, 500));
+
+    //         return priceSlider;
+    //     }
+
+    //     // Initialize the price slider with values from backend
+    //     const slider = initializePriceSlider(<%= minPrice %>, <%= maxPrice %>);
+    // })  
         // Initialize the noUiSlider
         var priceSlider = document.getElementById('price-slider');
         noUiSlider.create(priceSlider, {
@@ -509,21 +591,22 @@
                 productsGrid.innerHTML = data.products.map(product => `
                     <div class="product-card" onclick="window.location.href='/user/product/details/${product._id}'">
                         <div class="zoom-container">
-                            <img src="/uploads/product-images/${product.productImage[0]}" alt="${product.productName}" class="product-image">
+                            <img src="/uploads/product-images/${product.productImage[0]}" 
+                                 alt="${product.productName}" class="product-image">
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">${product.productName}</h3>
                             <div class="product-price">
                                 <div>
-                                    <span class="price">₹${product.discountedPrice || product.mrp}</span>
-                                    ${product.productOffer ? `
-                                        <span class="original-price">₹${product.mrp}</span>
-                                        <span class="discount">${product.productOffer}% OFF</span>
-                                    ` : ''}
+                                    <span class="price">₹${product.finalAmount.toFixed(0)}</span>
+                                     
+                                    <span class="original-price">₹${product.mrp.toFixed(0)}</span>
+                                    <span class="discount">₹${product.discount.toFixed(0)} Discount</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="wishlist-icon" data-product="${product._id}" onclick="toggleWishlist(event, '${product._id}')">
+                        <div class="wishlist-icon" data-product="${product._id}" 
+                             onclick="toggleWishlist(event, '${product._id}')">
                             <i class="fas fa-heart"></i>
                         </div>
                     </div>

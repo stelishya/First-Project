@@ -26,8 +26,6 @@ admin_route.use(bodyParser.urlencoded({ extended: true }));
 admin_route.get('/pageError', adminController.pageError);
 admin_route.get('/login', adminController.loadLogin);
 admin_route.post('/login', adminController.login)
-admin_route.get('/dashboard', adminController.loadDashboard);
-// adminAuth,
 admin_route.get('/logout', adminController.logout);
 
 //Customer Management
@@ -63,6 +61,12 @@ admin_route.get('/coupons',couponController.getAllCoupons);
 admin_route.post('/coupons', couponController.createCoupon);
 admin_route.patch('/coupons/:id/toggle-status',couponController.couponStatus);
 admin_route.post('/admin/coupon/edit/:id', couponController.editCoupon);
+admin_route.delete('/coupon/:id', couponController.deleteCoupon);
 
+
+// Sales Report
+admin_route.get('/dashboard', adminController.loadDashboard);
+// admin_route.get('/sales-report', adminController.getSalesReport);
+admin_route.get('/download-report', adminController.downloadReport);
 
 module.exports = admin_route;

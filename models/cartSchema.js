@@ -24,14 +24,6 @@ const cartSchema = new Schema({
     totalPrice: {
         type: Number,
         required: true
-    },
-    status: {
-        type: String,
-        default: 'placed'
-    },
-    cancellationReason: {
-        type: String,
-        default: "none"
     }
   }]
 })

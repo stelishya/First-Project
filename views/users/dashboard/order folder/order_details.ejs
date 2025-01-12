@@ -95,11 +95,17 @@
                                 <h3 class="text-lg font-semibold"><%= item.product.productName %></h3>
                                 <div class="text-sm text-gray-600">Quantity: <%= item.quantity %></div>
                                 <div class="mt-2">
-                                    <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp %></span>
-                                    <span class="ml-2 text-lg font-semibold text-gray-900">₹<%= item.priceAtPurchase %></span>
+                                    <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp.toFixed(0) %></span>
+                                    <span class="ml-2 text-lg font-semibold text-gray-900">₹<%= item.priceAtPurchase.toFixed(0)  %></span>
+                                    <!-- <% if(item.discountPercentage > 0) { %>
+                                        <span class="ml-2 text-green-600 text-sm">
+                                            (<%= item.discountPercentage %>% off)
+                                        </span>
+                                    <% } %> -->
                                     <% if(item.product.mrp > item.priceAtPurchase) { %>
                                         <span class="ml-2 text-green-600 text-sm">
-                                            (<%= Math.round(((item.product.mrp - item.priceAtPurchase) / item.product.mrp) * 100) %>% off)
+                                            (<%= (item.product.mrp - item.priceAtPurchase).toFixed(0) %> Discount)
+                                            <!-- (<%= Math.round(((item.product.mrp - item.priceAtPurchase) / item.product.mrp) * 100) %>% off) -->
                                         </span>
                                     <% } %>
                                 </div>
@@ -155,22 +161,22 @@
                 <div class="space-y-2">
                     <div class="flex justify-between text-gray-600">
                         <span>Items Total (MRP)</span>
-                        <span>₹<%= order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0) %></span>
+                        <span>₹<%= order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0).toFixed(0) %></span>
                     </div>
                     <div class="flex justify-between text-gray-600">
-                        <span>Discount</span>
-                        <span class="text-green-600">-₹<%= order.totalDiscount || 0 %></span>
+                        <span>Product Discount</span>
+                        <span class="text-green-600">-₹<%= order.totalDiscount.toFixed(0) %></span>
                     </div>
-                    <!-- <% if(order.coupon && order.coupon.couponCode) { %>
+                    <% if(order.coupon && order.coupon.couponCode) { %>
                         <div class="flex justify-between text-gray-600">
                             <span>Coupon Applied (<%= order.coupon.couponCode %>)</span>
-                            <span class="text-green-600">-₹<%= order.coupon.discountAmount || 0 %></span>
+                            <span class="text-green-600">-₹<%= order.coupon.discountAmount.toFixed(0)  || 0 %></span>
                         </div>
-                    <% } %> -->
+                    <% } %>
                     <div class="border-t pt-2 mt-2">
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total Amount</span>
-                            <span class="text-brown-600">₹<%= order.finalAmount %></span>
+                            <span class="text-brown-600">₹<%= order.finalAmount.toFixed(0)  %></span>
                         </div>
                     </div>
                 </div>

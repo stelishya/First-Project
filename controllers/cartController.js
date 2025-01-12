@@ -1,5 +1,6 @@
 const Carts = require('../models/cartSchema')
 const Products = require('../models/productSchema')
+const { calculateOrderItemPrices } = require('../helpers/priceCalculator');
 
 exports.getCart = async (req,res)=>{
     const search = req.query.search || ''; 
@@ -12,10 +13,10 @@ exports.getCart = async (req,res)=>{
         const cart = await Carts.findOne({ userId }).populate({
             path: 'items.productId',
             model: 'Product',
-            select: 'productName description productImage mrp offer fixedAmount category',
+            select: 'productName description productImage mrp productOffer maxDiscount  category',
             populate: { 
                 path: 'category',
-                select: 'name offer fixedAmount'
+                select: 'name categoryOffer '
             }
         });
 
@@ -29,52 +30,51 @@ exports.getCart = async (req,res)=>{
             });
         }
 
+        let totalAmount = 0;
+        let totalDiscount = 0;
+        let subtotal = 0;
+
         const products = cart.items.map(item => {
             const product = item.productId;
             if (!product) return null;
 
-            // Calculate discounts
-            const productPercentageDiscount = product.offer || 0;
-            const categoryPercentageDiscount = product.category?.offer || 0;
-            const percentageDiscount = Math.max(productPercentageDiscount, categoryPercentageDiscount);
+            const itemPrices = calculateOrderItemPrices({
+                product: product,
+                quantity: item.quantity
+            });
 
-            // Calculate price after percentage discounts
-            const discountAmount = Math.round((product.mrp * (percentageDiscount / 100)) * 100) / 100;
-            const priceAfterPercentageDiscount = Math.round((product.mrp - discountAmount) * 100) / 100;
+            totalAmount += itemPrices.totalPrice;
+            totalDiscount += itemPrices.totalDiscount;
+            subtotal += itemPrices.originalPrice * item.quantity;
 
-            // Fixed amount discounts
-            const productFixedDiscount = product.fixedAmount || 0;
-            const categoryFixedDiscount = product.category?.fixedAmount || 0;
-
-            // Determine best discount
-            const priceAfterFixedDiscount = Math.round(Math.max(product.mrp - productFixedDiscount, product.mrp - categoryFixedDiscount) * 100) / 100;
-            const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
-            const discountedPrice = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
-
-            let bestDiscountType = '';
-            if (percentageDiscount > 0 && priceAfterPercentageDiscount <= priceAfterFixedDiscount) {
-                bestDiscountType = `${percentageDiscount}% off`;
-            } else if (productFixedDiscount > categoryFixedDiscount) {
-                bestDiscountType = `₹${productFixedDiscount} off`;
-            } else if (categoryPercentageDiscount > 0) {
-                bestDiscountType = `Category Offer: ${categoryPercentageDiscount}% off`;
-            }
+            console.log(`Product: ${product.productName}`);
+            console.log(`Original Price: ${itemPrices.originalPrice}`);
+            console.log(`Discount: ${itemPrices.totalDiscount}`);
+            console.log(`Final Price: ${itemPrices.totalPrice}`);
 
             return {
                 ...item.toObject(),
-                discountedPrice,
-                bestDiscountType
+                mrp: itemPrices.originalPrice,
+                discountedPrice:itemPrices.pricePerUnit,
+                totalDiscount: itemPrices.totalDiscount,
+                bestDiscountType: `${itemPrices.discountPercentage} Discount`,
+                finalAmount: itemPrices.totalPrice
             };
         }).filter(Boolean); // Remove any null items
         
-        const totalAmount = products.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
         const countOfProducts = products.length;
         console.log("Hi i'm rendering cart page")
+        console.log('Cart Totals:');
+        console.log(`Subtotal: ${subtotal}`);
+        console.log(`Total Discount: ${totalDiscount}`);
+        console.log(`Final Amount: ${totalAmount}`);
         res.render('users/cart/cart', {
             session: req.session.user,
             products,
             countOfProducts,
             totalAmount: totalAmount.toFixed(2),
+            subtotal: subtotal.toFixed(2),
+            totalDiscount: totalDiscount.toFixed(2),
             search
         });
         
@@ -108,7 +108,7 @@ exports.addToCart = async (req,res)=>{
         }
 
         // Check inventory and max quantity
-        const maxAllowedQuantity = Math.min(product.quantity, 5);
+        const maxAllowedQuantity = Math.min(product.stock, 5);
         if (quantity > maxAllowedQuantity) {
             return res.status(400).json({
                 success: false,

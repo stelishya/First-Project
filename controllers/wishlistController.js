@@ -1,4 +1,5 @@
 const Wishlist = require('../models/wishlistSchema');
+const { calculateOrderItemPrices } = require('../helpers/priceCalculator');
 
 // Add product to wishlist
 exports.addToWishlist = async (req, res) => {
@@ -114,7 +115,11 @@ exports.getWishlist = async (req, res) => {
         const wishlist = await Wishlist.findOne({ user: userId })
             .populate({
                 path: 'products.product',
-                select: 'productName productImage mrp productOffer discountedPrice'
+                select: 'productName productImage mrp price productOffer discountedPrice',
+                populate: {
+                    path: 'category',
+                    select: 'name categoryOffer'
+                }
             });
             
         if (!wishlist) {
@@ -125,9 +130,24 @@ exports.getWishlist = async (req, res) => {
                 search
             });
         }
-        
+        // Calculate prices for each wishlist item
+        const wishlistItems = wishlist.products.map(item => {
+            const prices = calculateOrderItemPrices({
+                product: item.product,
+                quantity: 1
+            });
+            return {
+                ...item.toObject(),
+                product: {
+                    ...item.product.toObject(),
+                    finalPrice: prices.pricePerUnit,
+                    discountPercentage: prices.discountPercentage
+                }
+            };
+        });
         res.render('users/wishlist', {
-            wishlistItems: wishlist.products,
+            wishlistItems,
+            // : wishlist.products,
             user: req.session.user,
             session: req.session,
             search

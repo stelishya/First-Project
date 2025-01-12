@@ -36,11 +36,11 @@
                                 <%= item.product.productName %>
                             </h3>
                             <div class="mt-2 flex items-baseline space-x-2">
-                                <span class="text-xl font-bold text-green-600">₹<%= item.product.discountedPrice %>
+                                <span class="text-xl font-bold text-green-600">₹<%= item.product.finalPrice.toFixed(0)%>
                                         </span>
-                                <% if (item.product.productOffer> 0) { %>
-                                    <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp %></span>
-                                    <span class="text-sm text-red-500">(<%= item.product.productOffer %>% off)</span>
+                                <% if (item.product.discountPercentage> 0) { %>
+                                    <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp.toFixed(0) %></span>
+                                    <span class="text-sm text-red-500">(<%= item.product.discountPercentage.toFixed(0) %> Discount)</span>
                                     <% } %>
                             </div>
                             <div class="mt-4 text-sm text-gray-500">

@@ -119,18 +119,18 @@
         .header .search-bar button i {
             font-size: 20px;
         } */
-        .header .user-info {
+        .user-info {
             display: flex;
             align-items: center;
         }
-        .header .user-info img {
+        .user-info img {
             border-radius: 50%;
             margin-right: 10px;
         }
-        .header .user-info .name {
+        .user-info .name {
             margin-right: 10px;
         }
-        .header .user-info .role {
+        .user-info .role {
             color: #888;
         }
         .col-md-3 {

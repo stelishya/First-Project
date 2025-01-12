@@ -23,7 +23,7 @@ const productSchema = new Schema({
         type: Number,
         default: 0,
     },
-    quantity: {
+    stock: {
         type: Number,
         default: 0,
         required:true,

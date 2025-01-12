@@ -134,7 +134,7 @@
                                     <div class="text-sm text-gray-900">₹<%= product.mrp.toLocaleString('en-IN') %></div>
                                     <% if (product.productOffer) { %>
                                         <div class="text-xs text-gray-500">
-                                            Final: ₹<%= (product.mrp * (1 - product.productOffer/100)).toLocaleString('en-IN') %>
+                                            Final: ₹<%= (product.mrp * (1 - product.productOffer/100)).toFixed(0)%>
                                         </div>
                                     <% } %>
                                 </td>
@@ -148,10 +148,10 @@
                                     <% } %>
                                 </td>
                                 <td class="px-8 py-4 whitespace-nowrap">
-                                    <% if (product.quantity > 10) { %>
-                                        <span class="text-sm text-green-600 font-medium"><%= product.quantity %></span>
-                                    <% } else if (product.quantity > 0) { %>
-                                        <span class="text-sm text-orange-600 font-medium">Low: <%= product.quantity %></span>
+                                    <% if (product.stock  > 10) { %>
+                                        <span class="text-sm text-green-600 font-medium"><%= product.stock  %></span>
+                                    <% } else if (product.stock  > 0) { %>
+                                        <span class="text-sm text-orange-600 font-medium">Low: <%= product.stock  %></span>
                                     <% } else { %>
                                         <span class="text-sm text-red-600 font-medium">Out of stock</span>
                                     <% } %>
@@ -188,7 +188,7 @@
 
             <!-- Pagination -->
 
-            <div class="m-4  flex justify-between items-center" style="padding-left:750px;">
+            <div class="m-4  flex justify-between items-center" style="padding-left:700px;">
                 <div class="flex space-x-2">
                     <% if(currentPage > 1) {%>
                     <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>

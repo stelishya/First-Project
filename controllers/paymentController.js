@@ -4,6 +4,7 @@ const Orders = require('../models/orderSchema');
 const Products = require('../models/productSchema');
 const User = require('../models/userSchema');
 const Address = require('../models/addressSchema');
+const Carts = require('../models/cartSchema');
 require('dotenv').config();
 
 const razorpay = new Razorpay({
@@ -13,16 +14,22 @@ const razorpay = new Razorpay({
 
 exports.createOrder = async (req, res) => {
     try {
+        const { amount, couponDiscount = 0 } = req.body;
         const options = {
-            amount: req.body.amount * 100, // amount in smallest currency unit (paise)
+            amount: amount * 100, // amount in smallest currency unit (paise)
             currency: "INR",
             receipt: `order_${Date.now()}`
         };
 
         const order = await razorpay.orders.create(options);
         res.json({
+            success: true,
             id: order.id,
-            amount: order.amount
+            amount: order.amount,
+            // totalDiscount,
+            couponDiscount,
+            key_id: process.env.RAZORPAY_KEY_ID || 'your_razorpay_key_id'
+            // finalAmount: order.amount - totalDiscount - couponDiscount
         });
     } catch (error) {
         console.error('Error creating Razorpay order:', error);
@@ -41,7 +48,7 @@ exports.verifyPayment = async (req, res) => {
         } = req.body;
 
         console.log("Request body:", req.body);
-        console.log("Session user:", req.session.user);
+        // console.log("Session user:", req.session.user);
 
         // Verify signature
         const sign = razorpay_order_id + "|" + razorpay_payment_id;
@@ -61,13 +68,16 @@ exports.verifyPayment = async (req, res) => {
             // Get user details
             const user = await User.findById(req.session.user._id);
             console.log("Found user:", user._id);
+            if (!user) {
+                throw new Error('User not found');
+            }
 
             // Get address details
             const addressDoc = await Address.findOne({ 
                 userId: user._id,
                 'address._id': orderData.addressId 
             });
-            console.log("Found address document:", addressDoc);
+            // console.log("Found address document:", addressDoc);
 
             if (!addressDoc) {
                 throw new Error('Delivery address not found');
@@ -83,29 +93,92 @@ exports.verifyPayment = async (req, res) => {
                 throw new Error('Specific address not found in address document');
             }
 
-            // Get product details
-            console.log("Getting product details for:", orderData.singleProductId);
-            const product = await Products.findById(orderData.singleProductId);
-            console.log("Found product:", product);
+            let orderedItems = [];
 
-            if (!product) {
-                throw new Error('Product not found');
+            // let totalDiscount = 0;
+
+            if (orderData.buyNow) {
+                // Single product order
+                console.log("Processing single product order");
+                const product = await Products.findById(orderData.singleProductId);
+                if (!product) {
+                    throw new Error('Product not found');
+                }
+                if (product.stock < orderData.quantity) {
+                    throw new Error('Not enough stock available');
+                }
+                // Calculate discount for single product
+                // totalDiscount = (product.mrp - product.price) * orderData.quantity;
+                // console.log(`Single product discount: ${totalDiscount}`);
+
+            // Get product details
+            // console.log("Getting product details for:", orderData.singleProductId);
+            // const product = await Products.findById(orderData.singleProductId);
+            console.log("Found product:", product);
+            orderedItems = [{
+                product: product._id,
+                quantity: orderData.quantity,
+                priceAtPurchase: product.price
+            }];
+
+            // Update product stock
+            await Products.findByIdAndUpdate(product._id, {
+                $inc: { stock: -parseInt(orderData.quantity) }
+            });
+            console.log(`Updated stock for product ${product._id}, reduced by ${orderData.quantity}`);
+            }else{
+                // Cart order
+                console.log("Processing cart order");
+                const cart = await Carts.findOne({ userId: user._id }).populate('items.productId');
+                if (!cart || !cart.items || cart.items.length === 0) {
+                    throw new Error('Cart is empty');
+                }
+                 // Check stock availability for all items
+                 for (const item of cart.items) {
+                    const product = await Products.findById(item.productId._id);
+                    if (!product || product.stock < item.quantity) {
+                        throw new Error(`Not enough stock available for product ${product ? product.productName : item.productId._id}`);
+                    }
+                    // Calculate discount for each cart item
+                    // totalDiscount += (item.productId.mrp - item.productId.price) * item.quantity;
+                }
+                // console.log(`Cart total discount: ${totalDiscount}`);
+
+                 // Process each cart item
+                 orderedItems = cart.items.map(item => ({
+                    product: item.productId._id,
+                    quantity: item.quantity,
+                    priceAtPurchase: item.productId.price
+                }));
+
+                // Update product stock
+                for (const item of cart.items) {
+                    await Products.findByIdAndUpdate(item.productId._id, {
+                        $inc: { stock: -parseInt(item.quantity) }
+                    });
+                    console.log(`Updated stock for product ${item.productId._id}, reduced by ${item.quantity}`);
+                }
+                 // Clear the cart
+                 await Carts.findOneAndUpdate(
+                    { userId: user._id },
+                    { $set: { items: [] } }
+                );
+                console.log("Cart cleared after successful order");
             }
+
 
             // Create order object
             const orderDoc = {
                 userId: user._id,
                 orderId: razorpay_payment_id,
-                orderedItems: [{
-                    product: product._id,
-                    quantity: orderData.quantity,
-                    priceAtPurchase: product.price
-                }],
+                orderedItems:orderedItems,
                 status: 'Order Placed',
                 finalAmount: orderData.total,
+                // totalDiscount: totalDiscount,
+                // couponDiscount: orderData.couponDiscount,
                 address: {
                     name: selectedAddress.name,
-                    mobile: user.mobile, // Using user's mobile as it's not in address schema
+                    mobile: user.mobile, 
                     pincode: selectedAddress.pincode,
                     locality: selectedAddress.streetAddress,
                     address: selectedAddress.streetAddress,
