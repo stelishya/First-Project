@@ -37,60 +37,60 @@ const dashboard = async (req, res) => {
         const totalDiscountAmount = reportData.reduce((sum, order) => sum + order.discount, 0);
         const totalFinalAmount = reportData.reduce((sum, order) => sum + order.finalAmount, 0);
 
-        const productAggregation = await Orders.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
-            { $unwind: '$products' },
-            { $lookup: {
-                from: 'products',
-                localField: 'products.productId',
-                foreignField: '_id',
-                as: 'productDetails'
-            }},
-            { $unwind: '$productDetails'},
-            { $group: {
-                _id: '$products.productId',
-                totalSold: { $sum: '$products.quantity' },
-                name: { $first: '$productDetails.name' }
-            }},
-            { $sort: { totalSold: -1 } },
-            { $limit: 10 },
-            { $project: {
-                _id: 1,
-                totalSold: 1,
-                name: 1 // Project the name field
-            }}
-        ]);
+        // const productAggregation = await Orders.aggregate([
+        //     { $match: { status: { $ne: 'Cancelled' } } },
+        //     { $unwind: '$products' },
+        //     { $lookup: {
+        //         from: 'products',
+        //         localField: 'products.productId',
+        //         foreignField: '_id',
+        //         as: 'productDetails'
+        //     }},
+        //     { $unwind: '$productDetails'},
+        //     { $group: {
+        //         _id: '$products.productId',
+        //         totalSold: { $sum: '$products.quantity' },
+        //         name: { $first: '$productDetails.name' }
+        //     }},
+        //     { $sort: { totalSold: -1 } },
+        //     { $limit: 10 },
+        //     { $project: {
+        //         _id: 1,
+        //         totalSold: 1,
+        //         name: 1 // Project the name field
+        //     }}
+        // ]);
 
         // Aggregate to find top-selling categories
-        const categoryAggregation = await Orders.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
-            { $unwind: '$products' },
-            { $lookup: {
-                from: 'products',
-                localField: 'products.productId',
-                foreignField: '_id',
-                as: 'productDetails'
-            }},
-            { $unwind: '$productDetails' },
-            { $group: {
-                _id: '$productDetails.category',
-                totalSold: { $sum: '$products.quantity' }
-            }},
-            { $lookup: {
-                from: 'categories',
-                localField: '_id',
-                foreignField: '_id',
-                as: 'categoryDetails'
-            }},
-            { $unwind: '$categoryDetails' },
-            { $project: {
-                _id: 1,
-                totalSold: 1,
-                name: '$categoryDetails.name'
-            }},
-            { $sort: { totalSold: -1 } },
-            { $limit: 10 }
-        ]);
+        // const categoryAggregation = await Orders.aggregate([
+        //     { $match: { status: { $ne: 'Cancelled' } } },
+        //     { $unwind: '$products' },
+        //     { $lookup: {
+        //         from: 'products',
+        //         localField: 'products.productId',
+        //         foreignField: '_id',
+        //         as: 'productDetails'
+        //     }},
+        //     { $unwind: '$productDetails' },
+        //     { $group: {
+        //         _id: '$productDetails.category',
+        //         totalSold: { $sum: '$products.quantity' }
+        //     }},
+        //     { $lookup: {
+        //         from: 'categories',
+        //         localField: '_id',
+        //         foreignField: '_id',
+        //         as: 'categoryDetails'
+        //     }},
+        //     { $unwind: '$categoryDetails' },
+        //     { $project: {
+        //         _id: 1,
+        //         totalSold: 1,
+        //         name: '$categoryDetails.name'
+        //     }},
+        //     { $sort: { totalSold: -1 } },
+        //     { $limit: 10 }
+        // ]);
 
         res.render('admin/dashboard', {
             activeTab: "dashboard",
@@ -101,8 +101,8 @@ const dashboard = async (req, res) => {
             totalAmount,
             totalDiscountAmount,
             totalFinalAmount,
-            topProducts: productAggregation,
-            topCategories: categoryAggregation
+            // topProducts: productAggregation,
+            // topCategories: categoryAggregation
         });
     } catch (error) {
         console.error('Dashboard Error:', error);
@@ -148,7 +148,7 @@ const generateSalesReport = async (query) => {
             dateFilter = { createdAt: { $gte: start, $lte: end } };
         }
 
-        // Add status filter for completed orders only
+        
         dateFilter.status = { $in: ['Delivered', 'Completed'] };
 
         const orders = await Orders.find(dateFilter)
@@ -163,12 +163,14 @@ const generateSalesReport = async (query) => {
         const summary = orders.reduce((acc, order) => {
             // Calculate order totals
             const orderTotal = order.orderedItems.reduce((sum, item) => {
-                return sum + (item.priceAtPurchase * item.quantity);
+                return sum + (item.product?.mrp || 0) * item.quantity;
             }, 0);
 
             // Calculate discounts
             const productDiscount = order.orderedItems.reduce((sum, item) => {
-                return sum + (item.totalDiscount || 0);
+                const mrp = item.product?.mrp || 0;
+                const price = item.priceAtPurchase || mrp;
+                return sum + ((mrp - price) * item.quantity);
             }, 0);
 
             const couponDiscount = order.couponDiscount || 0;
@@ -193,8 +195,12 @@ const generateSalesReport = async (query) => {
             orderId: order._id,
             orderDate: order.createdAt.toLocaleDateString(),
             customerName: order.userId?.username || 'Unknown',
-            totalAmount: order.orderedItems.reduce((sum, item) => sum + (item.priceAtPurchase * item.quantity), 0),
-            discount: order.orderedItems.reduce((sum, item) => sum + (item.totalDiscount || 0), 0),
+            totalAmount: order.orderedItems.reduce((sum, item) => sum + ((item.product?.mrp || 0) * item.quantity), 0),
+            discount: order.orderedItems.reduce((sum, item) => {
+                const mrp = item.product?.mrp || 0;
+                const price = item.priceAtPurchase || mrp;
+                return sum + ((mrp - price) * item.quantity);
+            }, 0),
             couponDiscount: order.couponDiscount || 0,
             finalAmount: order.finalAmount,
             status: order.status,

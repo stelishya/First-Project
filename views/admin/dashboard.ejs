@@ -67,23 +67,23 @@
             
                     <% if (locals.reportData && locals.reportData.summary) { %>
                     <!-- Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 bg-gray-300 p-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-gray-300 p-3">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Total Orders</h3>
                             <p class="text-2xl font-bold"><%= reportData.summary.totalOrders %></p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Total Amount</h3>
-                            <p class="text-2xl font-bold">₹<%= reportData.summary.totalAmount.toFixed(2) %></p>
+                            <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(2) %></p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Total Discount</h3>
                             <p class="text-2xl font-bold">₹<%= reportData.summary.totalDiscount.toFixed(2) %></p>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <!-- <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Net Amount</h3>
                             <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(2) %></p>
-                        </div>
+                        </div> -->
                     </div>
             
                     <button type="button" onclick="downloadReport('pdf')" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
@@ -113,7 +113,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MRP</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coupon</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Amount</th>

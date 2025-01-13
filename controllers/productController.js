@@ -142,16 +142,24 @@ exports.addProduct = async (req, res) => {
 }
 
 exports.list_unlist = async (req, res) => {
-    const catId = req.body.id
-    const isListed = req.body.isListed === 'true'
+    // const catId = req.body.id
+    // const isListed = req.body.isListed === 'true'
     try {
-        await Products.findByIdAndUpdate(catId, { isListed: isListed });
-        req.session.successMessage = 'Successfully updated'
-        res.redirect('/admin/products')
+        const productId = req.params.id;
+        const action = req.params.action;
+        const isListed = action === 'list';
+
+        await Products.findByIdAndUpdate(productId, { isListed: isListed });
+        return res.status(200).json({ message: 'Product status updated successfully' });
+
+        // req.session.successMessage = 'Successfully updated'
+        // res.redirect('/admin/products')
     } catch (error) {
-        console.error(error);
-        req.session.errorMessage = 'Not updated'
-        res.redirect('/admin/products')
+        console.error('Error updating product status:',error);
+        return res.status(500).json({ message: 'Failed to update product status' });
+
+        // req.session.errorMessage = 'Not updated'
+        // res.redirect('/admin/products')
     }
 }
 
@@ -175,7 +183,7 @@ exports.deleteProduct = async (req, res) => {
 
 exports.editPage = async (req, res) => {
     try {
-        const productId = req.params.id; // Assuming the product ID is passed as a URL parameter
+        const productId = req.params.id; 
         const productDetails = await Products.findById(productId)
             .populate('category')
             .select('productName description mrp productOffer maxDiscount category stock isAvailable isListed productImage')
@@ -186,15 +194,18 @@ exports.editPage = async (req, res) => {
             return res.redirect('/admin/products');
         }
 
-        const categories = await Category.find({}, { name: 1 });
+        const categories = await Category.find({isListed: true}, { name: 1 }).lean();
         const isAvailable = Products.schema.path('isAvailable').enumValues;
 
+        console.log('Product Category:', productDetails.category);
+        console.log('Available Categories:', categories);
+
         res.render('admin/product folder/product-edit', {
-            product: productDetails, // Pass the product details here
+            product: productDetails, 
             successMessage: req.session.successMessage,
             errorMessage: req.session.errorMessage,
-            isAvailable,
-            categories,
+            isAvailable:isAvailable,
+            categories:categories,
             activeTab: "products"
         });
 
@@ -209,52 +220,70 @@ exports.editPage = async (req, res) => {
 };
 
 exports.edittingProduct = async (req, res) => {
-    const { productId, productName, description, mrp, offer, maxDiscount, category, stock, isAvailable, isListed, removedImages } = req.body;
     
-    // Log the request body to debug
-    console.log("Request body:", req.body);
-
     try {
+        const { productId, productName, description, mrp, productOffer, maxDiscount, category, stock, isAvailable } = req.body;
+        const isListed = req.body.isListed === 'true';
+        console.log("isListed value:", isListed);
+
+        const removedImages = req.body.removedImages ? JSON.parse(req.body.removedImages) : [];
+        const newImages = req.body.newImages ? JSON.parse(req.body.newImages) : [];
+
+        console.log("Request body:", req.body);
+
         const product = await Products.findById(productId).populate('category');
         if (!product) {
             req.session.errorMessage = "Product not found"
             return res.redirect("/admin/products")
             // throw new Error('Product not found');
         }
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+            req.session.errorMessage = "Invalid category selected";
+            return res.redirect("/admin/products");
+        }
 
-        // Get offers from both product and category
-        const productOffer = product.productOffer || 0;
-        const categoryOffer = product.category.categoryOffer || 0;  
-
-        let offer = Math.max(productOffer,categoryOffer)
-        const finalAmount = 0;
-         // Calculate prices using the helper
-         const prices = calculateProductPrices({
+        const prices = calculateProductPrices({
             mrp: Number(mrp),
             productOffer: Number(productOffer),
-            category: { categoryOffer: Number(categoryOffer) },
+            category: { categoryOffer: Number(categoryExists.categoryOffer || 0) },
             maxDiscount: Number(maxDiscount)
         });
-        console.log("prices in edit pro:",prices)
+
+        // // Get offers from both product and category
+        // const productOffer = product.productOffer || 0;
+        // const categoryOffer = product.category.categoryOffer || 0;  
+
+        // let offer = Math.max(productOffer,categoryOffer)
+        // const finalAmount = 0;
+        //  // Calculate prices using the helper
+        //  const prices = calculateProductPrices({
+        //     mrp: Number(mrp),
+        //     productOffer: Number(productOffer),
+        //     category: { categoryOffer: Number(categoryOffer) },
+        //     maxDiscount: Number(maxDiscount)
+        // });
+        // console.log("prices in edit pro:",prices)
         
-        product.productName = productName;
-        product.description = description;
-        product.mrp = mrp;
-        product.productOffer = productOffer;
-        product.offer = offer;
-        product.finalAmount = prices.finalAmount;
-        product.discount = prices.discount;
-        product.maxDiscount = prices.maxDiscount;
-        // product.category = category;
-        product.stock = stock;
-        product.isAvailable = isAvailable;
-        product.isListed = isListed;
+        // product.productName = productName;
+        // product.description = description;
+        // product.mrp = mrp;
+        // product.productOffer = productOffer;
+        // product.offer = offer;
+        // product.finalAmount = prices.finalAmount;
+        // product.discount = prices.discount;
+        // product.maxDiscount = prices.maxDiscount;
+        // // product.category = category;
+        // product.stock = stock;
+        // product.isAvailable = isAvailable;
+        // product.isListed = isListed;
 
         async function saveBase64Image(base64String, filename) {
             const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
             const buffer = Buffer.from(base64Data, 'base64');
             await fs.writeFile(`public/uploads/product-images/${filename}`, buffer);
         }
+        let productImages = [...product.productImage]; 
         const { images } = req.body;
 
         try {
@@ -262,7 +291,8 @@ exports.edittingProduct = async (req, res) => {
                 for (const [index, base64Image] of images.entries()) {
                     const filename = `product_${Date.now()}_${index}.png`;
                     await saveBase64Image(base64Image, filename);
-                    product.productImage.push(filename);
+                    // product.productImage.push(filename);
+                    productImages.push(filename);
                 }
             }
         } catch (saveError) {
@@ -276,28 +306,45 @@ exports.edittingProduct = async (req, res) => {
             for (const img of imagesToRemove) {
                 const index = product.productImage.indexOf(img);
                 if (index > -1) {
-                    product.productImage.splice(index, 1);
+                    // product.productImage.splice(index, 1);
+                    productImages.splice(index, 1);
                     const imagePath = path.join('public', 'uploads', 'product-images', img);
                     try {
                         await fs.access(imagePath);
                         await fs.unlink(imagePath);
                         console.log(`Deleted image: ${img}`);
                     } catch (err) {
-                        if (err.code === 'ENOENT') {
-                            console.log(`Image not found, skipping deletion: ${img}`);
-                        } else {
-                            console.error(`Error deleting image ${img}:`, err);
-                        }
+                        console.error(`Error deleting image ${img}:`, err);
+
+                        // if (err.code === 'ENOENT') {
+                        //     console.log(`Image not found, skipping deletion: ${img}`);
+                        // } else {
+                        //     console.error(`Error deleting image ${img}:`, err);
+                        // }
                     }
                 }
             }
         }
-        await Products.findOneAndUpdate({productName:productName},{
-            productName,description,offer,isListed,isAvailable,maxDiscount,mrp,category,finalAmount,stock,productImage:product.productImage
-        })
-        // await product.save();
+        // await Products.findOneAndUpdate({productName:productName},{
+        //     productName,description,offer,isListed,isAvailable,maxDiscount,mrp,category,finalAmount,stock,productImage:product.productImage
+        // })
+        const updatedProduct = await Products.findByIdAndUpdate(productId, {
+            productName,
+            description,
+            mrp: Number(mrp),
+            productOffer: Number(productOffer),
+            maxDiscount: Number(maxDiscount),
+            category: categoryExists._id,
+            stock: Number(stock),
+            isAvailable,
+            isListed: isListed,
+            productImage: productImages,
+            finalAmount: prices.finalAmount,
+            discount: prices.totalDiscount
+        },{new:true});
+        console.log("Updated product:", updatedProduct); 
         console.log("Product edited successfully");
-        req.session.successMessage = "Product Edited";
+        req.session.successMessage = "Product Edited Successfully";
         res.redirect('/admin/products');
     } catch (error) {
         console.error("Error during editing product:", error);
@@ -550,7 +597,7 @@ exports.fetchProducts = async (req, res) => {
             currentPage: page
         });
 
-        res.json({
+        res.json({ 
             products: productsWithPrices,
             totalProducts,
             totalPages,
