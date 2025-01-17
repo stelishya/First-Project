@@ -271,7 +271,28 @@
 </head>
 
 <%- include ('../../partials/user/header', { search: search })%>
-
+<nav>
+    <div class="nav-links">
+     <a href="/user/home">
+      Home
+     </a>
+     <span class="divider">
+     </span>
+     <a href="#">
+      Contact
+     </a>
+     <span class="divider">
+     </span>
+     <a href="#">
+      About
+     </a>
+     <span class="divider">
+     </span>
+     <a href="/user/products">
+      Products
+     </a>
+    </div>
+   </nav>
     <div class="con">
         <div class="container mx-auto px-4 py-8">
             <div class="breadcrumb">
@@ -601,7 +622,7 @@
                                     <span class="price">₹${product.finalAmount.toFixed(0)}</span>
                                      
                                     <span class="original-price">₹${product.mrp.toFixed(0)}</span>
-                                    <span class="discount">₹${product.discount.toFixed(0)} Discount</span>
+                                    <span class="discount">${((product.discount/product.mrp)*100).toFixed(0)} % Off</span>
                                 </div>
                             </div>
                         </div>

@@ -28,6 +28,17 @@ const orderSchema=new Schema({
             required: true
         }
     }],
+    // discount:[{
+    //     productDiscount:{
+    //         type:Number,
+    //     },
+    //     couponDiscount:{
+    //         type:Number
+    //     },
+    //     totalDiscount:{
+    //         type:Number
+    //     }
+    // }],
     status: {
         type: String,
         required: true,
@@ -61,7 +72,7 @@ const orderSchema=new Schema({
             // required: true
         },
         mobile:{
-            type:Number,
+            type:String,
             // required: true
         },
         typeOfAddress: {
@@ -90,11 +101,6 @@ const orderSchema=new Schema({
             // required: true
         }
     },
-    // address: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'User',
-    //     required: true
-    // },
     paymentMethod:{
         type: String,
         required: true,
@@ -110,7 +116,17 @@ const orderSchema=new Schema({
     invoiceDate: {
         type: Date
     },
-    
+    couponDiscount: {
+        type: Number,
+        default: 0
+    },
+    couponCode: {
+        type: String
+    },
+    coupon: {
+        type: Schema.Types.ObjectId,
+        ref: 'Coupon'
+    },
     // createdOn: {
     //     type: Date,
     //     default: Date.now,
@@ -120,10 +136,10 @@ const orderSchema=new Schema({
     //     type: Boolean,
     //     default: false
     // },
-    couponApplied: {
-        code: String,
-        discountAmount: Number
-    },
+    // couponApplied: {
+    //     code: String,
+    //     discountAmount: Number
+    // },
     deliveredOn: { type: Date, default: null },
     cancelledOn: { type: Date, default: null },
     returnDetails: {

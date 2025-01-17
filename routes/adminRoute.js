@@ -56,6 +56,11 @@ admin_route.get('/orders',orderController.getOrdersAdmin)
 admin_route.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin_route.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
 
+// Return Requests
+admin_route.get('/return-requests', orderController.getReturnRequests)
+admin_route.post('/approveReturn/:orderId', orderController.approveReturnRequest)
+admin_route.post('/rejectReturn/:orderId', orderController.rejectReturnRequest)
+
 //Coupon Management
 admin_route.get('/coupons',couponController.getAllCoupons);
 admin_route.post('/coupons', couponController.createCoupon);

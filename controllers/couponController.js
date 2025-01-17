@@ -52,13 +52,47 @@ exports.getAllCoupons = async (req,res) => {
 };
 exports.editCoupon = async (req, res) => {
     try {
+        console.log("editCoupon called ")
         const couponId = req.params.id;
-        const updates = req.body;
-        await Coupon.findByIdAndUpdate(couponId, updates);
+        const { name,code,offerPercentage,minimumPurchase,maximumDiscount,startDate,expiryDate,usageLimit}=req.body;
+        console.log("req.body from edit product : ",req.body)
+        if (!name || !code || !offerPercentage || !minimumPurchase || !startDate || !expiryDate) {
+            return res.status(400).json({
+                success: false,
+                message: 'All required fields must be filled'
+            });
+        }
+        const existingCoupon = await Coupon.findOne({
+            code: code.toUpperCase(),
+            _id: { $ne: couponId }
+        });
+        if (existingCoupon) {
+            return res.status(400).json({
+                success: false,
+                message: 'Coupon code already exists'
+            });
+        }
+        // const updates = req.body;
+        const updatedCoupon = await Coupon.findByIdAndUpdate(couponId, {
+            name,
+            code: code.toUpperCase(),
+            offerPercentage,
+            minimumPurchase,
+            maximumDiscount: maximumDiscount || undefined,
+            usageLimit: usageLimit || undefined,
+            startDate: new Date(startDate),
+            expiryDate: new Date(expiryDate)
+        },{ new: true });
+        if (!updatedCoupon) {
+            return res.status(404).json({
+                success: false,
+                message: 'Coupon not found'
+            });
+        }
         res.redirect('/admin/coupons');
     } catch (error) {
-        console.error('Error updating coupon:', error);
-        res.status(500).send('Error updating coupon');
+        console.error('Error in editCoupon:', error);
+        res.status(500).send({success:false,message:'Error updating coupon',error:error.message});
     }
 };
 
@@ -129,9 +163,10 @@ exports.getAvailableCoupons = async (req, res) => {
 // User Controllers
 exports.applyCoupon = async (req, res) => {
     try {
+        console.log("applyCoupon callled")
         const { code, cartTotal } = req.body;
         const userId = req.session.user._id;
-
+        console.log("code,cartTotal: ",code,cartTotal)
         if (!code || !cartTotal) {
             return res.status(400).json({ 
                 success: false,
@@ -144,7 +179,7 @@ exports.applyCoupon = async (req, res) => {
             startDate: { $lte: new Date() },
             expiryDate: { $gte: new Date() }
         });
-
+        console.log("coupon: ",coupon)
         if (!coupon) {
             return res.status(404).json({ success: false, message: 'Invalid or expired coupon' });
         }
@@ -185,7 +220,7 @@ exports.applyCoupon = async (req, res) => {
             $inc: { usedCount: 1 },
             $push: { usedBy: { userId } }
         });
-
+        req.session.user.appliedCoupon=coupon._id;
         res.status(200).json({
             success: true,
             message: 'Coupon applied successfully',
@@ -232,6 +267,7 @@ exports.removeCoupon = async (req, res) => {
                 $inc: { usedCount: -1 }
             }
         );
+        req.session.user.appliedCoupon=null;
 
         res.status(200).json({ success:true, message: 'Coupon removed successfully' ,originalAmount: Math.round(originalAmount)});
     } catch (error) {

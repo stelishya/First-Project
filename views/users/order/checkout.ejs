@@ -61,7 +61,7 @@
                                                     <p class="text-gray-600">
                                                         <%= address.country %> - <%= address.pincode %>
                                                     </p>
-                                                    <p class="text-gray-600">Phone: <%= address.phone %>
+                                                    <p class="text-gray-600">Phone: <%= address.mobile %>
                                                     </p>
                                                 </div>
                                                 <div class="flex space-x-2">
@@ -232,14 +232,14 @@
                                             id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
                                             <input type="radio" name="payment" value="<%= method %>"
                                                 class="text-gray-500 focus:ring-gray-500"
-                                                id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" <% if
-                                                (method==='COD' && totalAmount> 3000) { %>disabled<% } %>>
+                                                id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" 
+                                                <% if (method==='COD' && totalAmount> 3000) { %>disabled<% } %>>
                                                 <span>
                                                     <%= method %>
                                                 </span>
-                                                <!-- % if (method === 'COD' && totalAmount > 1000) { %>
+                                                <% if (method === 'COD' && totalAmount > 1000) { %>
                                             <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
-                                        % } %> -->
+                                        <% } %> 
                                         </label>
                                         <% }); %>
                                 </div>
@@ -756,12 +756,19 @@
                 // const isSingleProduct = Boolean(productId);
                 // console.log("Order type:", isSingleProduct ? "Single Product" : "Cart");
 
+                const appliedCouponText = document.getElementById('appliedCouponCode')?.textContent;
+                const couponCode = appliedCouponText?.split(' - ')[0]?.replace('Applied: ', '') || null;
+                console.log('Applied Coupon Text:', appliedCouponText);
+                console.log('Extracted Coupon Code:', couponCode);
+
                 let orderData = {
                     addressId: selectedAddressId,
                     total: parseFloat(finalAmount),
                     paymentType: selectedPayment.value,
                     // buyNow: false,
-                    quantity: parseInt(quantity)
+                    quantity: parseInt(quantity),
+                    couponCode: couponCode
+
                 };
                 // Set buyNow based on whether productId is provided
                 if (productId) {

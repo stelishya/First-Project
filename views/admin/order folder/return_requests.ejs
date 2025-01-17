@@ -1,0 +1,151 @@
+<!-- %- include('../../partials/admin/header') %> -->
+
+<div class="c_ontainer">
+    <aside class="sidebar">
+        <!-- %- include('../../partials/admin/sidebar') %> -->
+    </aside>
+
+    <main class="content">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold">Return Requests</h2>
+            <div class="search-container">
+                <form action="/admin/return-requests" method="GET" class="flex">
+                    <input class="p-2" type="text" placeholder="Search Orders" name="search" value="<%= search %>">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="mt-4 text-sm text-gray-500">
+                <a href="/admin/dashboard" class="text-blue-500">Dashboard</a>
+                &gt;
+                <span>Return Requests</span>
+            </div>
+
+            <% if (returnRequests && returnRequests.length > 0) { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                    <% returnRequests.forEach(order => { %>
+                        <div class="bg-white p-4 rounded-lg shadow border hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="font-semibold">Order #<%= order.orderId %></h3>
+                                <span class="px-2 py-1 rounded text-sm <%= order.returnDetails.returnStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.returnDetails.returnStatus === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                    <%= order.returnDetails.returnStatus %>
+                                </span>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm">
+                                <p><span class="font-medium">Customer:</span> <%= order.userId.username %></p>
+                                <p><span class="font-medium">Amount:</span> ₹<%= order.finalAmount.toFixed(0) %></p>
+                                <p><span class="font-medium">Requested on:</span> <%= new Date(order.returnDetails.returnRequestedAt).toLocaleDateString() %></p>
+                                <p class="text-gray-600 italic">"<%= order.returnDetails.returnReason %>"</p>
+                            </div>
+
+                            <% if (order.returnDetails.returnStatus === 'Pending') { %>
+                                <div class="flex gap-2 mt-4">
+                                    <button onclick="showReturnModal('<%= order._id %>', '<%= order.returnDetails.returnReason %>', <%= order.finalAmount %>)" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors">
+                                        View Details
+                                    </button>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-8">
+                    <p class="text-gray-500">No return requests found</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<!-- Return Request Modal -->
+<div id="returnModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+        <h3 class="text-xl font-semibold mb-4">Return Request Details</h3>
+        <div class="space-y-4">
+            <div>
+                <p class="font-medium">Return Reason:</p>
+                <p id="modalReturnReason" class="text-gray-600"></p>
+            </div>
+            <div>
+                <p class="font-medium">Refund Amount:</p>
+                <p id="modalRefundAmount" class="text-green-600"></p>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="handleReturn('approve')" class="flex-1 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                    Approve
+                </button>
+                <button onclick="handleReturn('reject')" class="flex-1 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                    Reject
+                </button>
+                <button onclick="closeReturnModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentOrderId = null;
+
+function showReturnModal(orderId, reason, amount) {
+    currentOrderId = orderId;
+    document.getElementById('modalReturnReason').textContent = reason;
+    document.getElementById('modalRefundAmount').textContent = `₹${amount.toFixed(0)}`;
+    document.getElementById('returnModal').classList.remove('hidden');
+    document.getElementById('returnModal').classList.add('flex');
+}
+
+function closeReturnModal() {
+    document.getElementById('returnModal').classList.add('hidden');
+    document.getElementById('returnModal').classList.remove('flex');
+    currentOrderId = null;
+}
+
+async function handleReturn(action) {
+    if (!currentOrderId) return;
+    
+    try {
+        const endpoint = action === 'approve' ? '/admin/approveReturn' : '/admin/rejectReturn';
+        const response = await axios.post(`${endpoint}/${currentOrderId}`);
+        
+        if (response.status === 200) {
+            Toastify({
+                text: `Return request ${action}ed successfully`,
+                className: "toast_style",
+                duration: 3000,
+                style: {
+                    background: action === 'approve' ? "linear-gradient(to right, #00b09b, #96c93d)" : "#ff6b6b",
+                }
+            }).showToast();
+            
+            // Close modal and refresh page
+            closeReturnModal();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+    } catch (error) {
+        Toastify({
+            text: `Failed to ${action} return request`,
+            className: "toast_style",
+            duration: 3000,
+            style: {
+                background: "#ff6b6b",
+            }
+        }).showToast();
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('returnModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeReturnModal();
+    }
+});
+</script>
+
+<%- include('../../partials/admin/footer') %>

@@ -74,15 +74,15 @@
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Total Amount</h3>
-                            <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(2) %></p>
+                            <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(0) %></p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Total Discount</h3>
-                            <p class="text-2xl font-bold">₹<%= reportData.summary.totalDiscount.toFixed(2) %></p>
+                            <p class="text-2xl font-bold">₹<%= reportData.summary.totalDiscount.toFixed(0) %></p>
                         </div>
                         <!-- <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-semibold">Net Amount</h3>
-                            <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(2) %></p>
+                            <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(0) %></p>
                         </div> -->
                     </div>
             
@@ -126,10 +126,10 @@
                                     <!-- <td class="px-6 py-4 whitespace-nowrap"><%= order.items.productName%></td> -->
                                     <td class="px-6 py-4 whitespace-nowrap"><%= order.customerName %></td>
                                     <td class="px-6 py-4 whitespace-nowrap"><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.totalAmount.toFixed(2) %></td>
-                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.discount.toFixed(2) %></td>
-                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.couponDiscount.toFixed(2) %></td>
-                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.finalAmount.toFixed(2) %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.totalAmount.toFixed(0) %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.discount.toFixed(0) %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.couponDiscount.toFixed(0) %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">₹<%= order.finalAmount.toFixed(0) %></td>
                                 </tr>
                                 <% }); %>
                             </tbody>

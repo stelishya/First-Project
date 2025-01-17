@@ -319,7 +319,7 @@ exports.loadDashboard=async (req,res)=>{
 exports.downloadReport = async (req, res) => {
     try {
         const { format } = req.query;
-        const reportData = await generateReportData(req.query); // Reuse logic from getSalesReport
+        const reportData = await generateSalesReport(req.query); // Reuse logic from getSalesReport
 
         if (format === 'pdf') {
             const doc = new PDFDocument();
@@ -335,10 +335,10 @@ exports.downloadReport = async (req, res) => {
             doc.fontSize(14).text('Summary');
             doc.fontSize(12)
                .text(`Total Orders: ${reportData.summary.totalOrders}`)
-               .text(`Total Amount: ₹${reportData.summary.totalAmount.toFixed(2)}`)
-               .text(`Total Discount: ₹${reportData.summary.totalDiscount.toFixed(2)}`)
-               .text(`Total Coupon Discount: ₹${reportData.summary.totalCouponDiscount.toFixed(2)}`)
-               .text(`Net Amount: ₹${reportData.summary.netAmount.toFixed(2)}`);
+               .text(`Total Amount: ₹${reportData.summary.totalAmount.toFixed(0)}`)
+               .text(`Total Discount: ₹${reportData.summary.totalDiscount.toFixed(0)}`)
+               .text(`Total Coupon Discount: ₹${reportData.summary.totalCouponDiscount.toFixed(0)}`)
+            //    .text(`Net Amount: ₹${reportData.summary.netAmount.toFixed(2)}`);
             
             doc.moveDown();
 

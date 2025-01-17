@@ -4,8 +4,9 @@ const Addresses = require('../models/addressSchema')
 const Users = require('../models/userSchema')
 const Products = require('../models/productSchema')
 const Wallets = require('../models/walletSchema')
+const Coupons = require('../models/couponSchema')
 const PDFDocument = require('pdfkit');
-const { calculateOrderItemPrices ,calculateTotals} = require('../helpers/priceCalculator');
+const { calculateOrderItemPrices, calculateTotals, calculateCouponDiscount  } = require('../helpers/priceCalculator');
 // const mongoose = require('mongoose');
 
 exports.checkout = async (req, res) => {
@@ -55,7 +56,7 @@ exports.checkout = async (req, res) => {
                 totalMRP,
                 totalDiscount,
                 totalAmount,
-                productId: productId, 
+                productId: productId,
                 quantity: Number(quantity) || 1,
                 // isBuyNow: true
             };
@@ -74,8 +75,8 @@ exports.checkout = async (req, res) => {
             if (!cart || !cart.items || cart.items.length === 0) {
                 return res.redirect('/user/cart');
             }
-            
-            // Calculate prices for each cart item
+
+
             products = cart.items.map(item => {
                 const itemPrices = calculateOrderItemPrices({
                     product: item.productId,
@@ -97,31 +98,13 @@ exports.checkout = async (req, res) => {
                 };
             });
         }
-        // // Fetch user's addresses
-        // const addressDoc = await Addresses.findOne({ userId });
-        // let addresses = [];
 
-        // if (addressDoc && addressDoc.address) {
-        //     addresses = addressDoc.address.map(addr => ({
-        //         _id: addr._id,
-        //         name: addr.name,
-        //         streetAddress: addr.streetAddress,
-        //         city: addr.city,
-        //         state: addr.state,
-        //         country: addr.country,
-        //         pincode: addr.pincode,
-        //         phone: addr.mobile,
-        //         typeOfAddress: addr.typeOfAddress
-        //     }));
-        // }
-        // Get user's addresses
         const addresses = await Addresses.findOne({ userId });
 
-        // Get available payment methods
+
         const wallet = await Wallets.findOne({ userId });
         const walletBalance = wallet ? wallet.balance : 0;
 
-        //const paymentMethods = Orders.schema.path('paymentMethod').enumValues;
         const paymentMethods = ['Online Payment', 'Cash on Delivery'];
         if (walletBalance > 0) {
             paymentMethods.push('Wallet');
@@ -135,7 +118,6 @@ exports.checkout = async (req, res) => {
             totalAmount,
             isBuyNow
         });
-
         res.render('users/order/checkout', {
             session,
             search,
@@ -167,15 +149,20 @@ exports.orderCreation = async (req, res) => {
 
         const userAddressDoc = await Addresses.findOne({ userId: userId });
         if (!userAddressDoc) {
-            return res.status(400).json({success:false, message: "No addresses found for user" });
+            return res.status(400).json({ success: false, message: "No addresses found for user" });
         }
 
         const selectedAddress = userAddressDoc.address.find(addr => addr._id.toString() === orderData.addressId);
         if (!selectedAddress) {
-            return res.status(400).json({success:false, message: "Invalid delivery address" });
+            return res.status(400).json({ success: false, message: "Invalid delivery address" });
         }
 
-        let subtotal, productsWithLatestPrices, totalDiscountAmount;
+        console.log("Selected address:", selectedAddress);
+        // console.log("Order Data:", orderData); 
+
+        let subtotal, productsWithLatestPrices, totalDiscountAmount, couponDiscount = 0;
+
+        // Calculate subtotal first for buy now or cart
         if (orderData.buyNow) {
             console.log("Processing Buy Now order");
             if (!orderData.singleProductId) {
@@ -234,7 +221,7 @@ exports.orderCreation = async (req, res) => {
             const totals = calculateTotals(cart.items);
             subtotal = totals.subtotal;
             totalDiscountAmount = totals.totalDiscount;
-            
+
             console.log("\nSubtotal:", subtotal);
             console.log("\nTotal Discount Amount:", totalDiscountAmount);
             console.log("Cart order details:", {
@@ -243,8 +230,56 @@ exports.orderCreation = async (req, res) => {
                 productsWithLatestPrices
             });
         }
+        console.log("orderData.couponCode :) ",orderData.couponCode)
+        let couponData = null;
+        // Calculate coupon discount if coupon is provided
+        if (orderData.couponCode) {
+            try {
+                const coupon = await Coupons.findOne({
+                    code: orderData.couponCode,
+                    startDate: { $lte: new Date() },
+                    expiryDate: { $gte: new Date() },
+                    usageLimit: { $gt: 0 }
+                });
 
-        // Non-wallet payment
+                if (!coupon) {
+                    return res.status(400).json({ success: false, message: "Invalid or expired coupon" });
+                }
+                console.log("coupon: ",coupon);
+                couponData = coupon; 
+
+                // Calculate coupon discount
+                if (subtotal >= coupon.minimumPurchase) {
+                    // couponDiscount = (subtotal * coupon.offerPercentage) / 100;
+
+                    // if (coupon.maximumDiscount) {
+                    //     couponDiscount = Math.min(couponDiscount, coupon.maximumDiscount);
+                    // }
+                    couponDiscount = calculateCouponDiscount(coupon, subtotal);
+                    console.log("couponDiscount : ",couponDiscount)
+                    if (couponDiscount === 0) {
+                        return res.status(400).json({
+                            success: false,
+                            message: `Minimum purchase amount of ₹${coupon.minimumPurchase} required for this coupon`
+                        });
+                    }
+                    // Update coupon usage
+                    await Coupons.findByIdAndUpdate(coupon._id, {
+                        $inc: { usedCount: 1 },
+                        $dec: { usageLimit: 1 }
+                    });
+                } else {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Minimum purchase amount of ₹${coupon.minimumPurchase} required for this coupon`
+                    });
+                }
+            } catch (error) {
+                console.error("Error applying coupon:", error);
+                return res.status(500).json({ success: false, message: "Error applying coupon" });
+            }
+        }
+
         try {
             const orderItems = productsWithLatestPrices.map(item => ({
                 product: item.productId,
@@ -257,14 +292,26 @@ exports.orderCreation = async (req, res) => {
             // totalDiscountAmount = isNaN(totalDiscountAmount) ? 0 : totalDiscountAmount;
             const newOrder = new Orders({
                 userId: userId,
-                address: selectedAddress._id || 'address',
+                address: {
+                    name: selectedAddress.name,
+                    mobile: selectedAddress.mobile,
+                    typeOfAddress: selectedAddress.typeOfAddress,
+                    streetAddress: selectedAddress.streetAddress,
+                    city: selectedAddress.city,
+                    state: selectedAddress.state,
+                    pincode: selectedAddress.pincode,
+                    country: selectedAddress.country
+                },
                 orderedItems: orderItems,
-                finalAmount: subtotal,
-                totalDiscount: totalDiscountAmount,
+                finalAmount: subtotal - couponDiscount,
+                totalDiscount: totalDiscountAmount + couponDiscount,
+                couponDiscount: couponDiscount,
+                couponCode: orderData.couponCode,
+                coupon: couponData ? couponData._id : null,
                 status: 'Order Placed',
                 paymentType: orderData.paymentType || 'Cash on Delivery'
             });
-            console.log("Creating order with data:", newOrder);
+            console.log("Creating order with data - newOrder :", newOrder);
             await newOrder.save();
             console.log("Order saved successfully.");
 
@@ -287,20 +334,7 @@ exports.orderCreation = async (req, res) => {
                         $inc: { stock: -item.quantity }
                     });
                 }
-                
-                // await Carts.findOneAndDelete({ userId });
-                // const cart = await Carts.findOne({ userId })
-                //     .populate('items.productId');
-                // console.log("Cart populated for user:", userId);
-                // if(cart){
-                //     for (const item of cart.items) {
-                //         await Products.findByIdAndUpdate(item.productId._id, {
-                //             $inc: { quantity: -item.quantity }
-                //         });
-                //         console.log(`Updated inventory for product ${item.productId._id}, reduced by ${item.quantity}`);
-                //     }
-                //     await Carts.findOneAndDelete({ userId });
-                // }
+
             }
             return res.status(200).json({
                 success: true,
@@ -323,14 +357,14 @@ exports.showOrdersUser = async (req, res) => {
         const search = req.query.search || '';
         const session = req.session.user
         const userId = session._id
-        console.log("userId:", userId)
+        // console.log("userId:", userId)
 
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
 
         const orderCount = await Orders.countDocuments({ userId });
-        console.log("orderCount:", orderCount);
+        console.log("user's orderCount:", orderCount);
 
         const orders = await Orders.find({ userId })
             .populate({
@@ -340,11 +374,11 @@ exports.showOrdersUser = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-        console.log("orders : ", orders)
+        // console.log("orders : ", orders)
         const totalOrders = await Orders.countDocuments({ userId });
-        console.log("totalOrders:", totalOrders);
+        // console.log("totalOrders:", totalOrders);
         const totalPages = Math.ceil(totalOrders / limit);
-        console.log("totalOrders : " + totalOrders + "\ntotalPages : " + totalPages)
+        // console.log("totalOrders : " + totalOrders + "\ntotalPages : " + totalPages)
         res.render('users/dashboard/order folder/orders', {
             orders,
             totalOrders,
@@ -373,23 +407,25 @@ exports.orderDetailsUser = async (req, res) => {
                 path: "category",
                 model: "Category"
             }
-        });
+        })
+        .populate('address')
+        .populate('coupon');
         if (!order) {
             console.error(`Order not found for ID: ${orderId}`);
             return res.status(404).render('page-404', { message: "Order not found." });
         }
-
+        console.log("order details order: ",order)
         order.orderedItems = order.orderedItems.map(item => {
             const prices = calculateOrderItemPrices(item);
-            console.log("prices:",prices.totalDiscount)
+            console.log("prices:", prices.totalDiscount)
             return {
                 ...item.toObject(),
                 priceAtPurchase: prices.pricePerUnit,
                 discountPercentage: prices.discountPercentage,
-                totalDiscount:prices.totalDiscount
+                totalDiscount: prices.totalDiscount
             };
         });
-        
+        console.log("Order address:", order.address);
         // console.log("orderId : ", orderId, "\nsession : ", session, "\norder : ", order);
         res.render('users/dashboard/order folder/order_details', {
             order, session, activeTab: 'orders', search
@@ -409,7 +445,7 @@ exports.getOrdersAdmin = async (req, res) => {
         const limit = 6;
         const skip = (page - 1) * limit;
 
-        const returnRequests = await Orders.find({ 'returnDetails.returnStatus': 'Requested' }).populate({
+        const returnRequests = await Orders.find({ 'returnDetails.returnRequested': true }).populate({
             path: 'orderedItems.product',
             select: 'name'
         }).populate('userId')
@@ -704,37 +740,95 @@ exports.returnOrder = async (req, res) => {
     }
 }
 
+exports.getReturnRequests = async (req, res) => {
+    try {
+        const search = req.query.search || '';
+        let query = {
+            'returnDetails.returnRequested': true
+        };
+
+        if (search) {
+            query = {
+                ...query,
+                $or: [
+                    { orderId: { $regex: search, $options: 'i' } },
+                    { 'userId.username': { $regex: search, $options: 'i' } },
+                    { 'returnDetails.returnStatus': { $regex: search, $options: 'i' } }
+                ]
+            };
+        }
+
+        const returnRequests = await Orders.find(query)
+            .populate('userId', 'username')
+            .sort({ 'returnDetails.returnRequestedAt': -1 });
+
+        res.render('admin/order folder/return_requests', {
+            returnRequests,
+            search
+        });
+    } catch (error) {
+        console.error('Error fetching return requests:', error);
+        res.status(500).render('admin/admin-error', { message: 'Error fetching return requests' });
+    }
+};
+
 exports.approveReturnRequest = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        const order = await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnStatus': 'Approved', status: 'Returned' })
-        await Wallets.findOneAndUpdate({ userId: order.userId }, {
-            $inc: { balance: order.totalAmount },
-            $push: {
-                transactions: {
-                    type: 'credit',
-                    amount: order.totalAmount,
-                    description: `Refund for returned order #${order.orderId}`
+        
+        // Find order and update status
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Update order status
+        order.status = 'Returned';
+        order.returnDetails.returnStatus = 'Approved';
+        order.returnDetails.returnDate = new Date();
+        await order.save();
+
+        // Process refund
+        await Wallets.findOneAndUpdate(
+            { userId: order.userId },
+            {
+                $inc: { balance: order.finalAmount },
+                $push: {
+                    transactions: {
+                        type: 'credit',
+                        amount: order.finalAmount,
+                        description: `Refund for returned order #${order.orderId}`
+                    }
                 }
             }
-        })
-        res.status(200).json({ message: "Return request approved" })
+        );
+
+        res.status(200).json({ message: "Return request approved and refund processed" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" })
+        console.error('Error approving return:', error);
+        res.status(500).json({ message: "Failed to approve return request" });
     }
-}
+};
 
 exports.rejectReturnRequest = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnStatus': 'Rejected' })
-        res.status(200).json({ message: "Return request rejected" })
+        
+        // Find and update order
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        order.returnDetails.returnStatus = 'Rejected';
+        await order.save();
+
+        res.status(200).json({ message: "Return request rejected" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" })
+        console.error('Error rejecting return:', error);
+        res.status(500).json({ message: "Failed to reject return request" });
     }
-}
+};
 
 exports.downloadInvoice = async (req, res) => {
     try {

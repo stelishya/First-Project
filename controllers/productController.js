@@ -237,6 +237,12 @@ exports.edittingProduct = async (req, res) => {
             return res.redirect("/admin/products")
             // throw new Error('Product not found');
         }
+        // Check for duplicate product name
+        const duplicateProduct = await Products.findOne({ productName, _id: { $ne: productId } });
+        if (duplicateProduct) {
+            req.session.errorMessage = "Product with same name exists";
+            return res.redirect(`/admin/products/edit/${productId}`);
+        }
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
             req.session.errorMessage = "Invalid category selected";
@@ -421,8 +427,8 @@ exports.showProductsPage = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
 
-        let sortField = 'createdAt'; // Default sort field
-        let sortOrder = -1; // Default sort order (descending)
+        let sortField = 'createdAt'; 
+        let sortOrder = -1; 
 
 
         const count = await Products.find({
@@ -505,7 +511,7 @@ exports.showProductsPage = async (req, res) => {
             maxPrice
         });
 
-        // Clear any flash messages
+        
         delete req.session.message;
     } catch (error) {
         console.error('Error in showProductsPage:', error);

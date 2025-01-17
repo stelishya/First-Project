@@ -74,8 +74,31 @@
         }, { subtotal: 0, totalDiscount: 0 });
     };
     
+    
+/**
+ * Calculate coupon discount based on coupon details and subtotal
+ * @param {Object} coupon - The coupon object with offerPercentage, minimumPurchase, and maximumDiscount
+ * @param {Number} subtotal - The subtotal amount before coupon discount
+ * @returns {Number} - The calculated coupon discount amount
+ */
+const calculateCouponDiscount = (coupon, subtotal) => {
+    if (!coupon || !subtotal || subtotal < coupon.minimumPurchase) {
+        return 0;
+    }
+
+    let discountAmount = (subtotal * coupon.offerPercentage) / 100;
+
+    // Apply maximum discount limit if set
+    if (coupon.maximumDiscount) {
+        discountAmount = Math.min(discountAmount, coupon.maximumDiscount);
+    }
+
+    return Math.round(discountAmount * 100) / 100;
+};
+
     module.exports = {
         calculateProductPrices,
         calculateOrderItemPrices,
-        calculateTotals
+        calculateTotals,
+        calculateCouponDiscount
     };

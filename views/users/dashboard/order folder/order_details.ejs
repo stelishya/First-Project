@@ -1,69 +1,81 @@
 <%- include('../../../partials/user/header') %>
-<nav>
-    <div class="nav-links">
-     <a href="/user/home">
-      Home
-     </a>
-     <span class="divider">
-     </span>
-     <a href="#">
-      Contact
-     </a>
-     <span class="divider">
-     </span>
-     <a href="#">
-      About
-     </a>
-     <span class="divider">
-     </span>
-     <a href="/user/products">
-      Products
-     </a>
-    </div>
-   </nav>
-<main class="flex bg-orange-50 min-h-screen">
-    <%- include('../../../partials/user/dashboard_sideBar',{search}) %>
+    <nav>
+        <div class="nav-links">
+            <a href="/user/home">
+                Home
+            </a>
+            <span class="divider">
+            </span>
+            <a href="#">
+                Contact
+            </a>
+            <span class="divider">
+            </span>
+            <a href="#">
+                About
+            </a>
+            <span class="divider">
+            </span>
+            <a href="/user/products">
+                Products
+            </a>
+        </div>
+    </nav>
+    <main class="flex bg-orange-50 min-h-screen">
+        <%- include('../../../partials/user/dashboard_sideBar',{search}) %>
 
-    <div class="flex-1 p-8" style="background-color: rgb(211, 208, 206);">
-        <div class="max-w-4xl mx-auto">
-            <nav class="flex mb-4 bg-gray-400 rounded" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                    <li class="inline-flex items-center">
-                        <a href="/user/dashboard" class="inline-flex items-center text-gray-700 hover:text-white-600">
-                            <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                            </svg>
-                            Account
-                        </a>
-                    </li>
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <a href="/user/orders" class="ml-1 text-gray-700 hover:text-gray-600 md:ml-2">Orders history </a>
-                        </div>
-                    </li>
-                    <li aria-current="page">
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="ml-1 text-gray-500 md:ml-2">Order Details</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-            <!-- Order Header -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6 transform hover:scale-[1.02] transition-transform duration-300">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Order #<%= order.orderId || order._id %></h1>
-                        <p class="text-gray-600">Ordered on <%= new Date(order.createdAt).toLocaleDateString() %></p>
-                    </div>
-                    <div class="text-left">
-                        <p class="text-lg ml-2 font-semibold text-gray-800">Status</p>
-                        <span class="px-3 py-1 rounded-full text-sm font-semibold
+            <div class="flex-1 p-8" style="background-color: rgb(211, 208, 206);">
+                <div class="max-w-4xl mx-auto">
+                    <nav class="flex mb-4 bg-gray-400 rounded" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="/user/dashboard"
+                                    class="inline-flex items-center text-gray-700 hover:text-white-600">
+                                    <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
+                                        </path>
+                                    </svg>
+                                    Account
+                                </a>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <a href="/user/orders" class="ml-1 text-gray-700 hover:text-gray-600 md:ml-2">Orders
+                                        history </a>
+                                </div>
+                            </li>
+                            <li aria-current="page">
+                                <div class="flex items-center">
+                                    <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="ml-1 text-gray-500 md:ml-2">Order Details</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </nav>
+                    <!-- Order Header -->
+                    <div
+                        class="bg-white rounded-lg shadow-md p-6 mb-6 transform hover:scale-[1.02] transition-transform duration-300">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">Order #<%= order.orderId || order._id %>
+                                </h1>
+                                <p class="text-gray-600">Ordered on <%= new Date(order.createdAt).toLocaleDateString()
+                                        %>
+                                </p>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-lg ml-2 font-semibold text-gray-800">Status</p>
+                                <span class="px-3 py-1 rounded-full text-sm font-semibold
                             <% if(order.status === 'Delivered') { %>
                                 bg-green-100 text-green-800
                             <% } else if(order.status === 'Cancelled') { %>
@@ -76,134 +88,214 @@
                                 bg-yellow-100 text-yellow-800
                             <% } %>
                         ">
-                            <%= order.status %>
-                        </span>
+                                    <%= order.status %>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Order Items -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Order Items</h2>
-                <div class="space-y-4">
-                    <% order.orderedItems.forEach(item => { %>
-                        <div class="flex items-center p-4 border rounded-lg hover:shadow-md transition-shadow duration-300">
-                            <img src="<%= item.product.productImage && item.product.productImage.length ? '/uploads/product-images/' + item.product.productImage[0] : '/images/no_productImage.png' %>" 
-                                alt="<%= item.product.productName %>" 
-                                class="w-24 h-24 object-cover rounded-md">
-                            <div class="ml-6 flex-1">
-                                <h3 class="text-lg font-semibold"><%= item.product.productName %></h3>
-                                <div class="text-sm text-gray-600">Quantity: <%= item.quantity %></div>
-                                <div class="mt-2">
-                                    <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp.toFixed(0) %></span>
-                                    <span class="ml-2 text-lg font-semibold text-gray-900">₹<%= item.priceAtPurchase.toFixed(0)  %></span>
-                                    <!-- <% if(item.discountPercentage > 0) { %>
+                    <!-- Order Items -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6 transform hover:scale-[1.02] transition-transform duration-300">
+                        <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+                        <div class="space-y-4">
+                            <% order.orderedItems.forEach(item=> { %>
+                                <div
+                                    class="flex items-center p-4 border rounded-lg hover:shadow-md transition-shadow duration-300">
+                                    <img src="<%= item.product.productImage && item.product.productImage.length ? '/uploads/product-images/' + item.product.productImage[0] : '/images/no_productImage.png' %>"
+                                        alt="<%= item.product.productName %>" class="w-24 h-24 object-cover rounded-md">
+                                    <div class="ml-6 flex-1">
+                                        <h3 class="text-lg font-semibold">
+                                            <%= item.product.productName %>
+                                        </h3>
+                                        <div class="text-sm text-gray-600">Quantity: <%= item.quantity %>
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="text-sm text-gray-500 line-through">₹<%=item.product.mrp.toFixed(0) %></span>
+                                            <span class="ml-2 text-lg font-semibold text-gray-900">₹<%=item.priceAtPurchase.toFixed(0) %></span>
+                                            <span class="text-md text-green-600"><%= (((item.product.mrp - item.priceAtPurchase)/item.product.mrp)*100).toFixed(0) %> % Off</span>
+                                            <!-- <% if(item.discountPercentage > 0) { %>
                                         <span class="ml-2 text-green-600 text-sm">
                                             (<%= item.discountPercentage %>% off)
                                         </span>
                                     <% } %> -->
-                                    <% if(item.product.mrp > item.priceAtPurchase) { %>
-                                        <span class="ml-2 text-green-600 text-sm">
-                                            (<%= (item.product.mrp - item.priceAtPurchase).toFixed(0) %> Discount)
-                                            <!-- (<%= Math.round(((item.product.mrp - item.priceAtPurchase) / item.product.mrp) * 100) %>% off) -->
-                                        </span>
-                                    <% } %>
+                                            <!-- <% if(item.product.mrp> item.priceAtPurchase) { %>
+                                                <span class="ml-2 text-green-600 text-sm">
+                                                    (<%= (item.product.mrp - item.priceAtPurchase).toFixed(0) %>
+                                                        Discount)
+                                                        (<%= Math.round(((item.product.mrp - item.priceAtPurchase) / item.product.mrp) * 100) %>% off)
+                                                </span>
+                                            <% } %> -->
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                                <% }) %>
                         </div>
-                    <% }) %>
-                </div>
-            </div>
-
-            <!-- Payment Info -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-gray-600">Payment Method</p>
-                        <p class="font-semibold"><%= order.paymentMethod %></p>
                     </div>
-                    <div>
-                        <p class="text-gray-600">Payment Status</p>
-                        <p class="font-semibold 
+
+                    <!-- Payment Info -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6 transform hover:scale-[1.02] transition-transform duration-300">
+                        <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600">Payment Method</p>
+                                <p class="font-semibold">
+                                    <%= order.paymentMethod %>
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Payment Status</p>
+                                <p class="font-semibold 
                             <%= order.paymentStatus === 'Success' ? 'text-green-600' : 
                                order.paymentStatus === 'Failed' ? 'text-red-600' : 'text-orange-600' %>">
-                            <%= order.paymentStatus %>
-                        </p>
-                    </div>
-                    <% if (order.paymentStatus === 'Failed' && order.paymentMethod === 'Online') { %>
-                        <div class="mt-4">
-                            <button onclick="retryPayment('<%= order._id %>', '<%= order.finalAmount %>')" 
-                                    class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg 
+                                    <%= order.paymentStatus %>
+                                </p>
+                            </div>
+                            <% if (order.paymentStatus==='Failed' && order.paymentMethod==='Online' ) { %>
+                                <div class="mt-4">
+                                    <button onclick="retryPayment('<%= order._id %>', '<%= order.finalAmount %>')"
+                                        class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg 
                                            flex items-center gap-2 transition duration-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Retry Payment
+                                    </button>
+                                </div>
+                                <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div
+                        class="bg-white rounded-lg shadow-md p-6 mb-6 transform hover:scale-[1.02] transition-transform duration-300">
+                        <div class="flex items-center mb-4">
+                            <svg class="w-6 h-6 mr-2 text-gray-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <h2 class="text-xl font-semibold">Delivery Address</h2>
+                        </div>
+                        <div class="text-gray-700 ml-8">
+                            <% if (order.address) { %>
+                                <p class="font-semibold text-lg mb-1">
+                                    <%= order.address.name %>
+                                </p>
+                                <p class="mb-1">
+                                    <%= order.address.streetAddress %>
+                                </p>
+                                <p class="mb-1">
+                                    <%= order.address.city %>, <%= order.address.state %>
+                                            <!-- <%= order.address.pincode %> -->
+                                </p>
+                                <p class="text-gray-600">
+                                    <%= order.address.country %> - <%= order.address.pincode %>
+                                </p>
+                                <p class="flex items-center mt-2">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <span class="text-gray-700">
+                                        <%= order.address.mobile %>
+                                    </span>
+                                </p>
+                                <% if (order.address.typeOfAddress) { %>
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        (<%= order.address.typeOfAddress %> Address)
+                                    </p>
+                                <% } %>
+                            <% } else { %>
+                                <div class="text-gray-500 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p>Address information not available</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                    <!-- Order Summary -->
+                    <div
+                        class="bg-white rounded-lg shadow-md p-6 sticky bottom-0 transform hover:scale-[1.01] transition-transform duration-300">
+                        <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                        <% if(order.status==='Delivered' ) { %>
+                            <a href="/user/order/invoice/<%= order._id %>"
+                                class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-300">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
                                 </svg>
-                                Retry Payment
-                            </button>
-                        </div>
-                    <% } %>
-                </div>
-            </div>
-
-            <!-- Order Summary -->
-            <div class="bg-white rounded-lg shadow-md p-6 sticky bottom-0 transform hover:scale-[1.01] transition-transform duration-300">
-                <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-                <% if(order.status === 'Delivered') { %>
-                    <a href="/user/order/invoice/<%= order._id %>" 
-                       class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-300">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Download Invoice
-                    </a>
-                <% } %>
-                <div class="space-y-2">
-                    <div class="flex justify-between text-gray-600">
-                        <span>Items Total (MRP)</span>
-                        <span>₹<%= order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0).toFixed(0) %></span>
-                    </div>
-                    <div class="flex justify-between text-gray-600">
-                        <span>Product Discount</span>
-                        <span class="text-green-600">-₹<%= order.totalDiscount.toFixed(0) %></span>
-                    </div>
-                    <% if(order.coupon && order.coupon.couponCode) { %>
-                        <div class="flex justify-between text-gray-600">
-                            <span>Coupon Applied (<%= order.coupon.couponCode %>)</span>
-                            <span class="text-green-600">-₹<%= order.coupon.discountAmount.toFixed(0)  || 0 %></span>
-                        </div>
-                    <% } %>
-                    <div class="border-t pt-2 mt-2">
-                        <div class="flex justify-between font-semibold text-lg">
-                            <span>Total Amount</span>
-                            <span class="text-brown-600">₹<%= order.finalAmount.toFixed(0)  %></span>
-                        </div>
+                                Download Invoice
+                            </a>
+                            <% } %>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>Items Total (MRP)</span>
+                                        <span>₹<%= order.orderedItems.reduce((total, item)=> total + (item.product.mrp *
+                                                item.quantity), 0).toFixed(0) %></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>Product Discount</span>
+                                        <span class="text-green-600">-₹<%= order.totalDiscount.toFixed(0) %></span>
+                                    </div>
+                                    <!-- % if(order.coupon && order.coupon.couponCode) { %> -->
+                                    <% if(order.couponDiscount && order.couponDiscount> 0) { %>
+                                        <div class="flex justify-between text-gray-600">
+                                            <!-- <span>Coupon Applied (%= order.coupon.couponCode %>)</span> -->
+                                            <span class="text-gray-600">Coupon Discount:</span>
+                                            <span class="text-green-600">-₹<%= order.couponDiscount.toFixed(0) %></span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-500">Applied Coupon:</span>
+                                            <span class="text-gray-500">
+                                                <!-- <%= order.coupon ? order.coupon.code : 'N/A' %> -->
+                                                <%= order.couponCode || 'N/A' %>
+                                                <%= order.coupon && order.coupon.name ? `(${order.coupon.name})` : '' %>
+                                            </span>
+                                        </div>
+                                    <% } %>
+                                    <div class="border-t pt-2 mt-2">
+                                        <div class="flex justify-between font-semibold text-lg">
+                                            <span>Total Amount</span>
+                                            <span class="text-brown-600">₹<%= order.finalAmount.toFixed(0) %>
+                                                    </span>
+                                        </div>
+                                    </div>
+                                </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</main>
+    </main>
 
-<%- include('../../../partials/user/footer') %>
+    <%- include('../../../partials/user/footer') %>
 
-<style>
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+        <style>
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
 
-    .animate-fade-in {
-        animation: fadeIn 0.5s ease-out forwards;
-    }
-</style>
-<!-- <script>
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .animate-fade-in {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+        </style>
+        <!-- <script>
     async function retryPayment(orderId, amount) {
         try {
             // Create new Razorpay order

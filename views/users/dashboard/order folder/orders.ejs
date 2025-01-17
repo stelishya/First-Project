@@ -114,12 +114,12 @@
                 <div class="flex items-center">
                     <% if (order.orderedItems && order.orderedItems.length > 0) { %>
                         <!-- Product Image and Name -->
-                        <a href="/user/product/<%= order.orderedItems[0].product._id %>">
+                        <!-- <a href="/user/product/<%= order.orderedItems[0].product._id %>"> -->
                             <img alt="Product Image" class="w-16 h-16 rounded mr-4" height="100" width="100" 
                                  src="<%= order.orderedItems[0].product.productImage && order.orderedItems[0].product.productImage.length 
                                         ? '/uploads/product-images/' + order.orderedItems[0].product.productImage[0] 
                                         : 'User/images/no_productImage.png' %>"/>
-                        </a>
+                        <!-- </a> -->
                         <div>
                             <p class="font-bold"><%= order.orderedItems[0].product.productName.substring(0, 15) || 'No Product Name' %></p>
                             <% if (order.orderedItems.length > 1) { %>

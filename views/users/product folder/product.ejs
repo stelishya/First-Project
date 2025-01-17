@@ -1,6 +1,27 @@
 <!-- Header -->
 <%- include ('../../partials/user/header' , { search: search })%>
-
+<nav>
+    <div class="nav-links">
+     <a href="/user/home">
+      Home
+     </a>
+     <span class="divider">
+     </span>
+     <a href="#">
+      Contact
+     </a>
+     <span class="divider">
+     </span>
+     <a href="#">
+      About
+     </a>
+     <span class="divider">
+     </span>
+     <a href="/user/products">
+      Products
+     </a>
+    </div>
+   </nav>
     <div class="bg-gray-50" style="background-color: rgb(216, 210, 205);">
         <main class="container mx-auto px-4 py-8">
             <!-- Breadcrumb -->
@@ -76,7 +97,8 @@
                             <% if (product.offer> 0) { %>
                                 <span class="text-xl text-gray-500"><s>₹<%= product.mrp %></s></span>
                                 <!-- <span class="text-lg text-red-500">(<%= product.offer %>% off)</span> -->
-                                <span class="text-lg text-red-500">(₹<%= product.discount.toFixed(0) %> Discount)</span>
+                                <span class="text-lg text-green-600"><%= ((product.discount/product.mrp)*100).toFixed(0) %> % Off</span>
+                                <!-- <span class="text-lg text-red-500">(₹<%= product.discount.toFixed(0) %> Discount)</span> -->
                                 <% } %>
                         </div>
                     </div>
