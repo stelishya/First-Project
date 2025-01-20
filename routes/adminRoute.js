@@ -7,6 +7,8 @@ const categoryController = require("../controllers/categoryController")
 const productController = require("../controllers/productController")
 const orderController = require("../controllers/orderController")
 const couponController = require('../controllers/couponController');
+const salesController = require('../controllers/salesController');
+
 const Coupon = require('../models/couponSchema');
 
 const bodyParser = require("body-parser");
@@ -55,11 +57,13 @@ admin_route.get('/products/view/:id', productController.productDetails);
 admin_route.get('/orders',orderController.getOrdersAdmin)
 admin_route.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin_route.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
+admin_route.get('/orders/:orderId/details', orderController.getOrderDetails);
 
-// Return Requests
-admin_route.get('/return-requests', orderController.getReturnRequests)
-admin_route.post('/approveReturn/:orderId', orderController.approveReturnRequest)
-admin_route.post('/rejectReturn/:orderId', orderController.rejectReturnRequest)
+// Return Management
+admin_route.get('/returns', adminController.getReturns);
+admin_route.get('/returns/:orderId', adminController.getReturnDetails);
+admin_route.post('/approveReturn/:orderId', adminController.approveReturn);
+admin_route.post('/rejectReturn/:orderId', adminController.rejectReturn);
 
 //Coupon Management
 admin_route.get('/coupons',couponController.getAllCoupons);
@@ -71,7 +75,7 @@ admin_route.delete('/coupon/:id', couponController.deleteCoupon);
 
 // Sales Report
 admin_route.get('/dashboard', adminController.loadDashboard);
-// admin_route.get('/sales-report', adminController.getSalesReport);
+admin_route.get('/sales-report', adminController.getSalesReport);
 admin_route.get('/download-report', adminController.downloadReport);
 
 module.exports = admin_route;

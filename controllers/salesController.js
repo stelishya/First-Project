@@ -2,12 +2,12 @@ const Orders = require('../models/orderSchema');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 
-const dashboard = async (req, res) => {
+exports.dashboard = async (req, res) => {
     try {
         console.log("dashboard called")
         // Get overall statistics
         const orders = await Orders.find().populate('userId').populate('products.productId');
-        
+
         const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalSales = orders.length;
         const totalDiscount = orders.reduce((sum, order) => sum + (order.totalDiscountAmount || 0), 0);
@@ -15,20 +15,20 @@ const dashboard = async (req, res) => {
         // Get default sales report (last 7 days)
         const last7Days = new Date();
         last7Days.setDate(last7Days.getDate() - 7);
-        
+
         const salesReport = await Orders.find({
             createdAt: { $gte: last7Days }
         })
-        .populate('userId')
-        .populate('products.productId')
-        .sort({ createdAt: -1 });
-        console.log("salesReport:",salesReport)
+            .populate('userId')
+            .populate('products.productId')
+            .sort({ createdAt: -1 });
+        console.log("salesReport:", salesReport)
         const reportData = salesReport.map(order => ({
-            orderId: order.orderId  || order._id,
+            orderId: order.orderId || order._id,
             date: order.createdAt.toLocaleDateString(),
             customerName: order.userId.fullname || order.userId.username,
             products: order.products.map(item => item.productId.name),
-            amount: order.products.reduce((sum,prod) => sum + (prod.productId.mrp * prod.quantity), 0),
+            amount: order.products.reduce((sum, prod) => sum + (prod.productId.mrp * prod.quantity), 0),
             discount: order.totalDiscountAmount || 0,    // This is the correct code don't delete
             finalAmount: order.totalAmount
         }));
@@ -40,54 +40,68 @@ const dashboard = async (req, res) => {
         const productAggregation = await Orders.aggregate([
             { $match: { status: { $ne: 'Cancelled' } } },
             { $unwind: '$products' },
-            { $lookup: {
-                from: 'products',
-                localField: 'products.productId',
-                foreignField: '_id',
-                as: 'productDetails'
-            }},
-            { $unwind: '$productDetails'},
-            { $group: {
-                _id: '$products.productId',
-                totalSold: { $sum: '$products.quantity' },
-                name: { $first: '$productDetails.name' }
-            }},
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'products.productId',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
+            { $unwind: '$productDetails' },
+            {
+                $group: {
+                    _id: '$products.productId',
+                    totalSold: { $sum: '$products.quantity' },
+                    name: { $first: '$productDetails.name' }
+                }
+            },
             { $sort: { totalSold: -1 } },
             { $limit: 10 },
-            { $project: {
-                _id: 1,
-                totalSold: 1,
-                name: 1 // Project the name field
-            }}
+            {
+                $project: {
+                    _id: 1,
+                    totalSold: 1,
+                    name: 1 // Project the name field
+                }
+            }
         ]);
 
         // Aggregate to find top-selling categories
         const categoryAggregation = await Orders.aggregate([
             { $match: { status: { $ne: 'Cancelled' } } },
             { $unwind: '$products' },
-            { $lookup: {
-                from: 'products',
-                localField: 'products.productId',
-                foreignField: '_id',
-                as: 'productDetails'
-            }},
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'products.productId',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
             { $unwind: '$productDetails' },
-            { $group: {
-                _id: '$productDetails.category',
-                totalSold: { $sum: '$products.quantity' }
-            }},
-            { $lookup: {
-                from: 'categories',
-                localField: '_id',
-                foreignField: '_id',
-                as: 'categoryDetails'
-            }},
+            {
+                $group: {
+                    _id: '$productDetails.category',
+                    totalSold: { $sum: '$products.quantity' }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'categoryDetails'
+                }
+            },
             { $unwind: '$categoryDetails' },
-            { $project: {
-                _id: 1,
-                totalSold: 1,
-                name: '$categoryDetails.name'
-            }},
+            {
+                $project: {
+                    _id: 1,
+                    totalSold: 1,
+                    name: '$categoryDetails.name'
+                }
+            },
             { $sort: { totalSold: -1 } },
             { $limit: 10 }
         ]);
@@ -110,47 +124,127 @@ const dashboard = async (req, res) => {
     }
 };
 
-const generateSalesReport = async (query) => {
+exports.generateSalesReport = async (query) => {
     try {
         const { period, startDate, endDate } = query;
         let dateFilter = {};
+        let groupBy;
 
-        if (period) {
-            const now = new Date();
-            switch (period) {
-                case 'daily':
-                    const today = new Date(now.setHours(0, 0, 0, 0));
-                    dateFilter = { createdAt: { $gte: today } };
-                    break;
-                case 'weekly':
-                    const weekStart = new Date(now);
-                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                    weekStart.setHours(0, 0, 0, 0);
-                    dateFilter = { createdAt: { $gte: weekStart } };
-                    break;
-                case 'monthly':
-                    const monthStart = new Date(now);
-                    monthStart.setDate(1);
-                    monthStart.setHours(0, 0, 0, 0);
-                    dateFilter = { createdAt: { $gte: monthStart } };
-                    break;
-                case 'yearly':
-                    const yearStart = new Date(now);
-                    yearStart.setMonth(0, 1);
-                    yearStart.setHours(0, 0, 0, 0);
-                    dateFilter = { createdAt: { $gte: yearStart } };
-                    break;
-            }
-        } else if (startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-            dateFilter = { createdAt: { $gte: start, $lte: end } };
+        // if (period) {
+        // Set date range based on period
+        const now = new Date();
+        switch (period) {
+            case 'daily':
+                const today = new Date(now.setHours(0, 0, 0, 0));
+                dateFilter = { createdAt: { $gte: today } };
+                groupBy = {
+                    year: { $year: '$createdAt' },
+                    month: { $month: '$createdAt' },
+                    day: { $dayOfMonth: '$createdAt' }
+                };
+                break;
+            case 'weekly':
+                const weekStart = new Date(now);
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                dateFilter = { createdAt: { $gte: weekStart } };
+                groupBy = {
+                    week: { $week: '$createdAt' },
+                    year: { $year: '$createdAt' }
+                };
+                break;
+            case 'monthly':
+                const monthStart = new Date(now);
+                monthStart.setDate(1);
+                monthStart.setHours(0, 0, 0, 0);
+                dateFilter = { createdAt: { $gte: monthStart } };
+                groupBy = {
+                    month: { $month: '$createdAt' },
+                    year: { $year: '$createdAt' }
+                };
+                break;
+            case 'yearly':
+                const yearStart = new Date(now);
+                yearStart.setMonth(0, 1);
+                yearStart.setHours(0, 0, 0, 0);
+                dateFilter = { createdAt: { $gte: yearStart } };
+                groupBy = {
+                    year: { $year: '$createdAt' }
+                };
+                break;
+            // }
+            // } else if (startDate && endDate) {
+            default:
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59, 999);
+                    dateFilter = { createdAt: { $gte: start, $lte: end } };
+                    // }
+                    groupBy = {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' },
+                        day: { $dayOfMonth: '$createdAt' }
+                    };
+                }
         }
 
-        
         dateFilter.status = { $in: ['Delivered', 'Completed'] };
+        // Fetch orders with aggregation for chart data
+        const chartData = await Orders.aggregate([
+            { $match: dateFilter },
+            {
+                $group: {
+                    _id: groupBy,
+                    totalSales: { $sum: '$finalAmount' },
+                    orderCount: { $sum: 1 },
+                    // createdAt: { $first: '$createdAt' } 
+                }
+            },
+            // { $sort: { 'createdAt': 1 } }
+            { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
+        ]);
 
+        // Format chart data
+        const formattedChartData = {
+            labels: [],
+            sales: [],
+            orders: []
+        };
+
+        chartData.forEach(item => {
+            let label;
+            switch (period) {
+                case 'daily':
+                    // label = new Date(item.createdAt)
+                    label = new Date(item._id.year, item._id.month - 1, item._id.day)
+                        .toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                    break;
+                case 'weekly':
+                    label = `Week ${item._id.week}`;
+                    break;
+                case 'monthly':
+                    // label = new Date(new Date().setMonth(item._id.month - 1))
+                    label = new Date(item._id.year, item._id.month - 1)
+                        .toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+                    break;
+                case 'yearly':
+                    label = item._id.year.toString();
+                    break;
+                default:
+                    if (startDate && endDate) {
+                        // label = new Date(item.createdAt)
+                        label = new Date(item._id.year, item._id.month - 1, item._id.day)
+                            .toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                    }
+            }
+
+            formattedChartData.labels.push(label);
+            formattedChartData.sales.push(item.totalSales);
+            formattedChartData.orders.push(item.orderCount);
+        });
+
+        // Fetch detailed order data
         const orders = await Orders.find(dateFilter)
             .populate('userId', 'username email')
             .populate({
@@ -159,27 +253,28 @@ const generateSalesReport = async (query) => {
             })
             .sort({ createdAt: -1 });
 
-        
+        // Calculate summary data
         const summary = orders.reduce((acc, order) => {
-            
+
             const orderTotal = order.orderedItems.reduce((sum, item) => {
                 return sum + (item.product?.mrp || 0) * item.quantity;
             }, 0);
 
-            
+
             const productDiscount = order.orderedItems.reduce((sum, item) => {
                 const mrp = item.product?.mrp || 0;
                 const price = item.priceAtPurchase || mrp;
                 return sum + ((mrp - price) * item.quantity);
             }, 0);
 
-            const couponDiscount = order.couponDiscount || 0;
+            // const couponDiscount = order.couponDiscount || 0;
 
             return {
                 totalOrders: acc.totalOrders + 1,
                 totalAmount: acc.totalAmount + orderTotal,
                 totalDiscount: acc.totalDiscount + productDiscount,
-                totalCouponDiscount: acc.totalCouponDiscount + couponDiscount,
+                // totalCouponDiscount: acc.totalCouponDiscount + couponDiscount,
+                totalCouponDiscount: acc.totalCouponDiscount + (order.couponDiscount || 0),
                 netAmount: acc.netAmount + order.finalAmount
             };
         }, {
@@ -190,12 +285,15 @@ const generateSalesReport = async (query) => {
             netAmount: 0
         });
 
-        
+        // Format order data
         const formattedOrders = orders.map(order => ({
             orderId: order._id,
-            orderDate: (order.createdAt ? new Date(order.createdAt) : new Date()).toLocaleDateString(),
+            // orderDate: (order.createdAt ? new Date(order.createdAt) : new Date()).toLocaleDateString(),
             customerName: order.userId?.username || 'Unknown',
-            totalAmount: order.orderedItems.reduce((sum, item) => sum + ((item.product?.mrp || 0) * item.quantity), 0),
+            // 
+            orderDate: order.createdAt.toLocaleDateString('en-IN'),
+            totalAmount: order.orderedItems.reduce((sum, item) => 
+                sum + ((item.product?.mrp || 0) * item.quantity), 0),
             discount: order.orderedItems.reduce((sum, item) => {
                 const mrp = item.product?.mrp || 0;
                 const price = item.priceAtPurchase || mrp;
@@ -204,17 +302,18 @@ const generateSalesReport = async (query) => {
             couponDiscount: order.couponDiscount || 0,
             finalAmount: order.finalAmount,
             status: order.status,
-            items: order.orderedItems.map(item => ({
-                productName: item.product?.productName || 'Unknown Product',
-                quantity: item.quantity,
-                price: item.priceAtPurchase,
-                discount: item.totalDiscount || 0
-            }))
+            // items: order.orderedItems.map(item => ({
+            //     productName: item.product?.productName || 'Unknown Product',
+            //     quantity: item.quantity,
+            //     price: item.priceAtPurchase,
+            //     discount: item.totalDiscount || 0
+            // }))
         }));
-
+        
         return {
             orders: formattedOrders,
-            summary
+            summary,
+            chartData: formattedChartData
         };
     } catch (error) {
         console.error('Error generating sales report:', error);
@@ -324,61 +423,61 @@ const generateSalesReport = async (query) => {
 //         res.status(500).json({ error: 'Server error' });
 //     }
 // };
+// down code needed...
+// async function getFilteredOrders(type, date, startDate, endDate) {
+//     let dateFilter = {};
 
-async function getFilteredOrders(type, date, startDate, endDate) {
-    let dateFilter = {};
+//     switch (type) {
+//         case 'today':
+//             const today = new Date();
+//             today.setHours(0, 0, 0, 0);
+//             dateFilter = { createdAt: { $gte: today } };
+//             break;
+//         case 'yesterday':
+//             const yesterday = new Date();
+//             yesterday.setDate(yesterday.getDate() - 1);
+//             yesterday.setHours(0, 0, 0, 0);
+//             const yesterdayEnd = new Date(yesterday);
+//             yesterdayEnd.setHours(23, 59, 59, 999);
+//             dateFilter = { createdAt: { $gte: yesterday, $lte: yesterdayEnd } };
+//             break;
+//         case 'thisWeek':
+//             const weekStart = new Date();
+//             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+//             weekStart.setHours(0, 0, 0, 0);
+//             dateFilter = { createdAt: { $gte: weekStart } };
+//             break;
+//         case 'thisMonth':
+//             const monthStart = new Date();
+//             monthStart.setDate(1);
+//             monthStart.setHours(0, 0, 0, 0);
+//             dateFilter = { createdAt: { $gte: monthStart } };
+//             break;
+//         case 'specificDate':
+//             const specificDate = new Date(date);
+//             const nextDate = new Date(date);
+//             nextDate.setDate(nextDate.getDate() + 1);
+//             dateFilter = { createdAt: { $gte: specificDate, $lt: nextDate } };
+//             break;
+//         case 'customRange':
+//             const startDateTime = new Date(startDate);
+//             const endDateTime = new Date(endDate);
+//             endDateTime.setHours(23, 59, 59, 999);
+//             dateFilter = { createdAt: { $gte: startDateTime, $lte: endDateTime } };
+//             break;
+//         default:
+//             break;
+//     }
 
-    switch(type) {
-        case 'today':
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            dateFilter = { createdAt: { $gte: today } };
-            break;
-        case 'yesterday':
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            yesterday.setHours(0, 0, 0, 0);
-            const yesterdayEnd = new Date(yesterday);
-            yesterdayEnd.setHours(23, 59, 59, 999);
-            dateFilter = { createdAt: { $gte: yesterday, $lte: yesterdayEnd } };
-            break;
-        case 'thisWeek':
-            const weekStart = new Date();
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            weekStart.setHours(0, 0, 0, 0);
-            dateFilter = { createdAt: { $gte: weekStart } };
-            break;
-        case 'thisMonth':
-            const monthStart = new Date();
-            monthStart.setDate(1);
-            monthStart.setHours(0, 0, 0, 0);
-            dateFilter = { createdAt: { $gte: monthStart } };
-            break;
-        case 'specificDate':
-            const specificDate = new Date(date);
-            const nextDate = new Date(date);
-            nextDate.setDate(nextDate.getDate() + 1);
-            dateFilter = { createdAt: { $gte: specificDate, $lt: nextDate } };
-            break;
-        case 'customRange':
-            const startDateTime = new Date(startDate);
-            const endDateTime = new Date(endDate);
-            endDateTime.setHours(23, 59, 59, 999);
-            dateFilter = { createdAt: { $gte: startDateTime, $lte: endDateTime } };
-            break;
-        default:
-            break;
-    }
+//     const orders = await Orders.find(dateFilter)
+//         .populate('userId')
+//         .populate('products.productId')
+//         .sort({ createdAt: -1 });
 
-    const orders = await Orders.find(dateFilter)
-        .populate('userId')
-        .populate('products.productId')
-        .sort({ createdAt: -1 });
+//     return orders;
+// }
 
-    return orders;
-}
-
-const downloadSalesReport = async (req, res) => {
+exports.downloadSalesReport = async (req, res) => {
     try {
         const { type, date, startDate, endDate, format } = req.query;
 
@@ -405,46 +504,46 @@ const downloadSalesReport = async (req, res) => {
 
             // Add header with modern styling
             doc.rect(0, 0, doc.page.width, 120)
-               .fill('#2196f3'); // Changed to a lighter blue
+                .fill('#2196f3'); // Changed to a lighter blue
 
             // Add a subtle accent line
             doc.rect(0, 120, doc.page.width, 3)
-               .fill('#1976d2');
+                .fill('#1976d2');
 
             // Add header text with shadow effect
             doc.fontSize(32)
-               .font('Helvetica-Bold')
-               .fillColor('#ffffff')
-               .text('Sales Report', 50, 45, { align: 'center' });
+                .font('Helvetica-Bold')
+                .fillColor('#ffffff')
+                .text('Sales Report', 50, 45, { align: 'center' });
 
             // Add date range info
             let dateRangeText = 'All Time';
             if (date) {
-                dateRangeText = new Date(date).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                dateRangeText = new Date(date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
             } else if (startDate && endDate) {
-                dateRangeText = `${new Date(startDate).toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    day: 'numeric' 
-                })} - ${new Date(endDate).toLocaleDateString('en-US', { 
-                    month: 'long', 
+                dateRangeText = `${new Date(startDate).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric'
+                })} - ${new Date(endDate).toLocaleDateString('en-US', {
+                    month: 'long',
                     day: 'numeric',
                     year: 'numeric'
                 })}`;
             }
 
             doc.fontSize(14)
-               .font('Helvetica')
-               .text(`Period: ${dateRangeText}`, 50, 85, { align: 'center' });
+                .font('Helvetica')
+                .text(`Period: ${dateRangeText}`, 50, 85, { align: 'center' });
 
             // Add metadata section with better visibility
             doc.fontSize(10)
-               .fillColor('#ffffff')  // Changed from #e8eaf6 to white for better visibility
-               .text(`Generated on: ${new Date().toLocaleString()}`, 50, 140, { align: 'right' })
-               .text(T`otal Orders: ${reportData.length}`, 50, 155, { align: 'right' });
+                .fillColor('#ffffff')  // Changed from #e8eaf6 to white for better visibility
+                .text(`Generated on: ${new Date().toLocaleString()}`, 50, 140, { align: 'right' })
+                .text(T`otal Orders: ${reportData.length}`, 50, 155, { align: 'right' });
 
             // Define table layout with modern styling and adjusted spacing
             const tableTop = 190;
@@ -462,27 +561,27 @@ const downloadSalesReport = async (req, res) => {
 
             // Add table headers with modern styling
             doc.fontSize(10)
-               .font('Helvetica-Bold');
-            
+                .font('Helvetica-Bold');
+
             // Draw header background with rounded corners
             doc.roundedRect(30, tableTop - 5, pageWidth - 80, 25, 3)  // Increased width to match table
-               .fill('#f3f4f6');
-            
+                .fill('#f3f4f6');
+
             // Draw headers with modern styling
             doc.fillColor('#1976d2')
-               .text('Sr.', columnSpacing.srNo, tableTop, { width: 30, align: 'center' })
-               .text('Order ID', columnSpacing.orderId, tableTop, { width: 130 })
-               .text('Date', columnSpacing.date, tableTop, { width: 70 })
-               .text('Customer', columnSpacing.customer, tableTop, { width: 60 })
-               .text('Amount', columnSpacing.amount, tableTop, { width: 55, align: 'right' })
-               .text('Discount', columnSpacing.discount, tableTop, { width: 55, align: 'right' })
-               .text('Final', columnSpacing.final, tableTop, { width: 55, align: 'right' });
+                .text('Sr.', columnSpacing.srNo, tableTop, { width: 30, align: 'center' })
+                .text('Order ID', columnSpacing.orderId, tableTop, { width: 130 })
+                .text('Date', columnSpacing.date, tableTop, { width: 70 })
+                .text('Customer', columnSpacing.customer, tableTop, { width: 60 })
+                .text('Amount', columnSpacing.amount, tableTop, { width: 55, align: 'right' })
+                .text('Discount', columnSpacing.discount, tableTop, { width: 55, align: 'right' })
+                .text('Final', columnSpacing.final, tableTop, { width: 55, align: 'right' });
 
             // Draw a subtle line under headers
             doc.moveTo(30, tableTop + 20)
-               .lineTo(pageWidth - 50, tableTop + 20)
-               .strokeColor('#e0e0e0')
-               .stroke();
+                .lineTo(pageWidth - 50, tableTop + 20)
+                .strokeColor('#e0e0e0')
+                .stroke();
 
             let position = tableTop + 30;
             doc.font('Helvetica');
@@ -492,67 +591,67 @@ const downloadSalesReport = async (req, res) => {
                     doc.addPage();
                     // Add header to new page with gradient
                     doc.rect(0, 0, doc.page.width, 50)
-                       .fill('#1a237e');
+                        .fill('#1a237e');
                     doc.rect(0, 50, doc.page.width, 2)
-                       .fill('#4527a0');
-                    
+                        .fill('#4527a0');
+
                     doc.fontSize(16)
-                       .font('Helvetica-Bold')
-                       .fillColor('#ffffff')
-                       .text('Sales Report (Continued)', 50, 20, { align: 'center' });
-                    
+                        .font('Helvetica-Bold')
+                        .fillColor('#ffffff')
+                        .text('Sales Report (Continued)', 50, 20, { align: 'center' });
+
                     // Reset position and redraw column headers
                     position = 70;
                     doc.fontSize(10)
-                       .font('Helvetica-Bold')
-                       .fillColor('#1a237e');
-                    
+                        .font('Helvetica-Bold')
+                        .fillColor('#1a237e');
+
                     // Redraw headers on new page with matching background width
                     doc.roundedRect(30, position - 5, pageWidth - 80, 25, 3)
-                       .fill('#f3f4f6');
-                    
+                        .fill('#f3f4f6');
+
                     doc.fillColor('#1a237e')
-                       .text('Sr.', columnSpacing.srNo, position, { width: 30, align: 'center' })
-                       .text('Order ID', columnSpacing.orderId, position, { width: 130 })
-                       .text('Date', columnSpacing.date, position, { width: 70 })
-                       .text('Customer', columnSpacing.customer, position, { width: 60 })
-                       .text('Amount', columnSpacing.amount, position, { width: 55, align: 'right' })
-                       .text('Discount', columnSpacing.discount, position, { width: 55, align: 'right' })
-                       .text('Final', columnSpacing.final, position, { width: 55, align: 'right' });
-                    
+                        .text('Sr.', columnSpacing.srNo, position, { width: 30, align: 'center' })
+                        .text('Order ID', columnSpacing.orderId, position, { width: 130 })
+                        .text('Date', columnSpacing.date, position, { width: 70 })
+                        .text('Customer', columnSpacing.customer, position, { width: 60 })
+                        .text('Amount', columnSpacing.amount, position, { width: 55, align: 'right' })
+                        .text('Discount', columnSpacing.discount, position, { width: 55, align: 'right' })
+                        .text('Final', columnSpacing.final, position, { width: 55, align: 'right' });
+
                     position += 30;
                 }
 
                 // Alternate row background with rounded corners
                 if (index % 2 === 0) {
                     doc.roundedRect(30, position - 5, pageWidth - (rightMargin + 30), 22, 2)
-                       .fill('#f8f9fa');
+                        .fill('#f8f9fa');
                 }
 
                 doc.fillColor('#333333')
-                   .fontSize(9)  // Slightly smaller font for data
-                   .text(index + 1, columnSpacing.srNo, position)
-                   .text(sale.orderId.toString(), columnSpacing.orderId, position, { width: 130 })
-                   .text(sale.date, columnSpacing.date, position)
-                   .text(sale.customerName.slice(0, 20), columnSpacing.customer, position)
-                   .text(`₹${sale.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.amount, position, { width: 55, align: 'right' })
-                   .text(`₹${sale.discount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.discount, position, { width: 55, align: 'right' })
-                   .text(`₹${sale.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.final, position, { width: 55, align: 'right' });
+                    .fontSize(9)  // Slightly smaller font for data
+                    .text(index + 1, columnSpacing.srNo, position)
+                    .text(sale.orderId.toString(), columnSpacing.orderId, position, { width: 130 })
+                    .text(sale.date, columnSpacing.date, position)
+                    .text(sale.customerName.slice(0, 20), columnSpacing.customer, position)
+                    .text(`₹${sale.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.amount, position, { width: 55, align: 'right' })
+                    .text(`₹${sale.discount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.discount, position, { width: 55, align: 'right' })
+                    .text(`₹${sale.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.final, position, { width: 55, align: 'right' });
 
                 position += 22;
             });
 
             // Add summary section with proper spacing
             const summaryTop = Math.min(position + 30, 750);
-            
+
             // Draw summary container with gradient and rounded corners
             doc.roundedRect(30, summaryTop, pageWidth - (rightMargin + 30), 100, 5)
-               .fill('#f8f9fa');
-            
+                .fill('#f8f9fa');
+
             // Add subtle border
             doc.roundedRect(30, summaryTop, pageWidth - (rightMargin + 30), 100, 5)
-               .strokeColor('#e0e0e0')
-               .stroke();
+                .strokeColor('#e0e0e0')
+                .stroke();
 
             const totalAmount = reportData.reduce((sum, sale) => sum + sale.amount, 0);
             const totalDiscount = reportData.reduce((sum, sale) => sum + sale.discount, 0);
@@ -560,9 +659,9 @@ const downloadSalesReport = async (req, res) => {
 
             // Add summary content with modern styling
             doc.font('Helvetica-Bold')
-               .fontSize(16)
-               .fillColor('#1976d2')
-               .text('Summary', 50, summaryTop + 15);
+                .fontSize(16)
+                .fillColor('#1976d2')
+                .text('Summary', 50, summaryTop + 15);
 
             // Add summary details with grid layout and improved typography
             const summaryLeftCol = 50;
@@ -571,18 +670,18 @@ const downloadSalesReport = async (req, res) => {
             const summaryRightValueCol = 380;
 
             doc.fontSize(11)
-               .font('Helvetica-Bold')
-               .fillColor('#333333')
-               .text('Total Orders:', summaryLeftCol, summaryTop + 45)
-               .text(`${reportData.length}`, summaryValueCol, summaryTop + 45)
-               .text('Total Amount:', summaryRightCol, summaryTop + 45)
-               .text(`₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryRightValueCol, summaryTop + 45);
+                .font('Helvetica-Bold')
+                .fillColor('#333333')
+                .text('Total Orders:', summaryLeftCol, summaryTop + 45)
+                .text(`${reportData.length}`, summaryValueCol, summaryTop + 45)
+                .text('Total Amount:', summaryRightCol, summaryTop + 45)
+                .text(`₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryRightValueCol, summaryTop + 45);
 
             doc.text('Total Discount:', summaryLeftCol, summaryTop + 65)
-               .text(`₹${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryValueCol, summaryTop + 65)
-               .text('Final Revenue:', summaryRightCol, summaryTop + 65)
-               .fillColor('#1976d2')
-               .text(`₹${totalFinal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryRightValueCol, summaryTop + 65);
+                .text(`₹${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryValueCol, summaryTop + 65)
+                .text('Final Revenue:', summaryRightCol, summaryTop + 65)
+                .fillColor('#1976d2')
+                .text(`₹${totalFinal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryRightValueCol, summaryTop + 65);
 
             doc.end();
 
@@ -592,17 +691,17 @@ const downloadSalesReport = async (req, res) => {
 
             let dateRangeText = 'All Time';
             if (date) {
-                dateRangeText = new Date(date).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                dateRangeText = new Date(date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
             } else if (startDate && endDate) {
-                dateRangeText = `${new Date(startDate).toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    day: 'numeric' 
-                })} - ${new Date(endDate).toLocaleDateString('en-US', { 
-                    month: 'long', 
+                dateRangeText = `${new Date(startDate).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric'
+                })} - ${new Date(endDate).toLocaleDateString('en-US', {
+                    month: 'long',
                     day: 'numeric',
                     year: 'numeric'
                 })}`;
@@ -706,7 +805,60 @@ const downloadSalesReport = async (req, res) => {
     }
 };
 
-const getAnalyticsData = async (req,res)=>{
+async function getFilteredOrders(type, date, startDate, endDate) {
+    let dateFilter = {};
+
+    switch(type) {
+        case 'today':
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            dateFilter = { createdAt: { $gte: today } };
+            break;
+        case 'yesterday':
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            yesterday.setHours(0, 0, 0, 0);
+            const yesterdayEnd = new Date(yesterday);
+            yesterdayEnd.setHours(23, 59, 59, 999);
+            dateFilter = { createdAt: { $gte: yesterday, $lte: yesterdayEnd } };
+            break;
+        case 'thisWeek':
+            const thisWeek = new Date();
+            thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay());
+            thisWeek.setHours(0, 0, 0, 0);
+            dateFilter = { createdAt: { $gte: thisWeek } };
+            break;
+        case 'thisMonth':
+            const thisMonth = new Date();
+            thisMonth.setDate(1);
+            thisMonth.setHours(0, 0, 0, 0);
+            dateFilter = { createdAt: { $gte: thisMonth } };
+            break;
+        case 'specificDate':
+            const specificDate = new Date(date);
+            const nextDate = new Date(date);
+            nextDate.setDate(nextDate.getDate() + 1);
+            dateFilter = { createdAt: { $gte: specificDate, $lt: nextDate } };
+            break;
+        case 'customRange':
+            const startDateTime = new Date(startDate);
+            const endDateTime = new Date(endDate);
+            endDateTime.setHours(23, 59, 59, 999);
+            dateFilter = { createdAt: { $gte: startDateTime, $lte: endDateTime } };
+            break;
+        default:
+            break;
+    }
+
+    const orders = await Orders.find(dateFilter)
+        .populate('userId')
+        .populate('products.productId')
+        .sort({ createdAt: -1 });
+
+    return orders;
+}
+
+exports.getAnalyticsData = async (req, res) => {
     const period = req.params.period;
     const { startDate: customStartDate, endDate: customEndDate } = req.query;
     try {
@@ -717,7 +869,7 @@ const getAnalyticsData = async (req,res)=>{
         if (customStartDate && customEndDate) {
             // Custom range
             startDate = new Date(customStartDate);
-            groupBy = { 
+            groupBy = {
                 year: { $year: '$createdAt' },
                 month: { $month: '$createdAt' },
                 day: { $dayOfMonth: '$createdAt' }
@@ -753,8 +905,8 @@ const getAnalyticsData = async (req,res)=>{
 
         // Add date filters
         if (customStartDate && customEndDate) {
-            matchStage.createdAt = { 
-                $gte: new Date(customStartDate), 
+            matchStage.createdAt = {
+                $gte: new Date(customStartDate),
                 $lte: new Date(customEndDate)
             };
         } else {
@@ -782,7 +934,7 @@ const getAnalyticsData = async (req,res)=>{
             },
             {
                 $sort: customStartDate && customEndDate
-                    ? { 
+                    ? {
                         '_id.year': 1,
                         '_id.month': 1,
                         '_id.day': 1
@@ -810,7 +962,7 @@ const getAnalyticsData = async (req,res)=>{
 
             // Create map of existing data
             analytics.forEach(item => {
-                const dateStr =` ${String(item._id.day).padStart(2, '0')}-${String(item._id.month).padStart(2, '0')}-${item._id.year}`;
+                const dateStr = ` ${String(item._id.day).padStart(2, '0')}-${String(item._id.month).padStart(2, '0')}-${item._id.year}`;
                 dateMap.set(dateStr, {
                     orders: item.orders,
                     revenue: item.revenue
@@ -819,9 +971,9 @@ const getAnalyticsData = async (req,res)=>{
 
             // Fill in all dates including those with no orders
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                const dateStr =` ${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+                const dateStr = ` ${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
                 const data = dateMap.get(dateStr) || { orders: 0, revenue: 0 };
-                
+
                 labels.push(dateStr);
                 orders.push(data.orders);
                 revenue.push(data.revenue);
@@ -846,7 +998,7 @@ const getAnalyticsData = async (req,res)=>{
                             break;
                     }
                 }
-                
+
                 labels.push(label);
                 orders.push(item.orders);
                 revenue.push(item.revenue);
@@ -862,11 +1014,4 @@ const getAnalyticsData = async (req,res)=>{
         console.error(error);
         res.status(500).json("Error getting analytics data");
     }
-}
-
-module.exports = {
-    dashboard,
-    generateSalesReport,
-    downloadSalesReport,
-    getAnalyticsData
 }

@@ -43,7 +43,6 @@
 
     .add-money-btn {
         background-color: #494847;
-        /* border: 2px solid #fb923c; */
         color: snow;
         transition: all 0.3s ease;
         font-weight: 600;
@@ -108,6 +107,7 @@
         background-color: #ffedd5;
     }
 </style>
+
 <nav>
     <div class="nav-links">
      <a href="/user/home">
@@ -130,6 +130,7 @@
      </a>
     </div>
    </nav>
+
 <!-- Main Content -->
 <main class="flex">
     <!-- Sidebar -->
@@ -137,13 +138,13 @@
 
     <!-- Main Section -->
     <section class="p-6 w-4/5" style="background-color: rgb(211, 208, 206);">
-        
-        <div class="wallet-card p-6">
+
+        <!-- <div class="wallet-card p-6">
             <nav class="flex mb-4 bg-gray-400 rounded" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                     <li class="inline-flex items-center">
                         <a href="/user/wallet" class="inline-flex items-center text-gray-700 hover:text-white-600">
-                            <!-- <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20"> -->
+                            <svg class="w-4 h-4 mr-2 " fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                             </svg>
                             Payments
@@ -155,73 +156,36 @@
                             <svg class="w-6 h-6 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                             </svg>
-                            <span class="ml-1 text-gray-500 md:ml-2">Wallet</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-700">My Wallet</h2>
-            </div>
+                            <span class="ml-1 text-gray-500 md:ml-2">Wallet</span> -->
 
-            <!-- Balance Display -->
-            <div class="balance-section">
-                <p class="text-lg mb-2 font-medium">Current Balance</p>
-                <!-- <h3 class="text-4xl font-bold">₹%= userWallet ? userWallet.balance.toFixed(2): '0' %></h3> -->
-            </div>
 
-            <!-- Add Money Section -->
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Add Money to Wallet</label>
-                    <input type="number" id="amount" class="input-amount w-full p-3" placeholder="Enter amount" min="1">
+        <div class="wallet-card p-8">
+            <div class="balance-section text-center">
+                <h2 class="text-2xl font-bold mb-2">Current Balance</h2>
+                <div class="text-4xl font-bold text-gray-800 mb-4" id="walletBalance">
+                    ₹<%= userWallet ? userWallet.balance.toFixed(2) : '0.00' %>
                 </div>
 
-                <!-- Quick Amount Buttons -->
-                <div class="flex gap-4 justify-center">
-                    <button onclick="setAmount(250)" class="amount-btn">₹250</button>
-                    <button onclick="setAmount(500)" class="amount-btn">₹500</button>
-                    <button onclick="setAmount(750)" class="amount-btn">₹750</button>
-                </div>
+            <!-- </li>
+        </ol>
+    </nav>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-700">My Wallet</h2> -->
 
-                <button onclick="addMoney()" class="add-money-btn w-full py-3 rounded-lg">
-                    Add Money
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <button onclick="addAmount(100)" class="amount-btn">₹100</button>
+                <button onclick="addAmount(500)" class="amount-btn">₹500</button>
+                <button onclick="addAmount(1000)" class="amount-btn">₹1000</button>
+            </div>
+            
+            <div class="text-center">
+                <input type="number" id="customAmount" placeholder="Enter amount" min="1" 
+                    class="p-2 border rounded-lg mb-4 w-48">
+                <button onclick="addCustomAmount()" class="add-money-btn px-6 py-3 rounded-lg">
+                    Add Money to Wallet
                 </button>
-            </div>
-
-            <!-- Transaction History -->
-            <div class="mt-8">
-                <h3 class="text-xl font-bold text-gray-700 mb-4">Recent Transactions</h3>
-                <div class="space-y-3">
-                    <% if (userWallet && userWallet.transactions && userWallet.transactions.length > 0) { %>
-                        <% userWallet.transactions.slice().reverse().forEach(transaction => { %>
-                            <div class="transaction-card p-4 rounded-lg flex justify-between items-center">
-                                <div>
-                                    <p class="font-medium text-gray-700">
-                                        <%= transaction.description %>
-                                        <!-- <%= transaction.type === 'credit' ? 'Money Added' : 'Money Spent' %> -->
-                                    </p>
-                                    <p class="text-sm text-gray-600">
-                                        <%= new Date(transaction.timestamp).toLocaleDateString('en-IN', { 
-                                            day: 'numeric', 
-                                            month: 'short', 
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        }) %>
-                                    </p>
-                                </div>
-                                <p class="font-bold <%= transaction.type === 'credit' ? 'text-green-600' : 'text-red-600' %>">
-                                    <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= transaction.amount %>
-                                </p>
-                            </div>
-                        <% }); %>
-                    <% } else { %>
-                        <div class="text-center py-4 text-gray-600">
-                            No transactions yet
-                        </div>
-                    <% } %>
-                </div>
             </div>
         </div>
     </section>
@@ -234,103 +198,46 @@
 <%- include('../../partials/user/footer') %>
 
 <script>
-    function setAmount(value) {
-        document.getElementById('amount').value = value;
-    }
+async function addAmount(amount) {
+    try {
+        const response = await fetch('/user/wallet/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount })
+        });
 
-    function showToast(message, type) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = toast `${type}`;
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 100);
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
-    }
-
-    async function addMoney() {
-        const amount = document.getElementById('amount').value;
-        if (!amount || amount <= 0) {
-            showToast('Please enter a valid amount', 'error');
-            return;
+        const data = await response.json();
+        if (data.success) {
+            // Update wallet balance display
+            document.getElementById('walletBalance').textContent = `₹${data.newBalance.toFixed(2)}`;
+            showToast('Amount added successfully', 'success');
+        } else {
+            showToast(data.message || 'Error adding amount', 'error');
         }
-
-        try {
-            const paymentResponse = await axios.post('/user/razorpay/order', {
-                amount: amount,
-            });
-            
-            const options = {
-                key: '<%= razorpayKey %>', 
-                amount: amount * 100,
-                currency: "INR",
-                name: "Craftora",
-                description: "Order Payment",
-                order_id: paymentResponse.data.order.id,
-                handler: async function (response) {
-                    try {
-                        console.log('Payment response from Razorpay:', response);
-                        if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
-                            showToast('Payment failed: Missing payment details', true);
-                            return;
-                        }
-                        // Verify payment
-                        const verifyResponse = await axios.post('/user/razorpay/verify', {
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
-                        });
-    
-                        if (verifyResponse.data.success) {
-                            const response = await axios.post('/user/wallet/add-money', { amount });
-
-                            if (response.status === 200) {
-                                console.log('Money added successfully');
-                                // Show success message with SweetAlert
-                                await Swal.fire({
-                                    title: 'Money Added Successfully!',
-                                    text: 'Thank you for using our Wallet service',
-                                    icon: 'success',
-                                    // confirmButtonText: 'View Orders',
-                                    // confirmButtonColor: '#f97316', // orange-500
-                                    allowOutsideClick: true
-                                });
-                                window.location.href = '/user/dashboard/wallet';
-                            } else {
-                                console.error('Failed to add money:', response.data);
-                                showToast(response.data.message || 'Failed to add money', 'error');
-                            }
-                        } else {
-                            showToast('Verification failed', true);
-                        }
-                    } catch (error) {
-                        console.error('Payment verification error:', error);
-                        showToast('Payment verification failed', true);
-                    }
-                },
-                modal: {
-                    ondismiss: function() {
-                        console.log('Payment modal closed');
-                        showToast('Payment cancelled by user', true);
-                    }
-                },
-                prefill: {
-                    name: "<%= session.fullname %>",
-                    email: "<%= session.email %>",
-                },
-                theme: {
-                    color: "#fb923c"
-                }
-            };
-    
-            const rzp1 = new Razorpay(options);
-            rzp1.open();
-        } catch (error) {
-            console.error('Error adding money:', error);
-            showToast('Something went wrong', 'error');
-        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Error adding amount', 'error');
     }
+}
+
+function addCustomAmount() {
+    const amount = document.getElementById('customAmount').value;
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+    addAmount(Number(amount));
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type}`;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
 </script>

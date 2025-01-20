@@ -42,7 +42,7 @@
             pricePerUnit: prices.finalAmount,
             totalPrice: prices.finalAmount * quantity,
             totalDiscount: prices.Discount * quantity,
-            discountPercentage: prices.discount,
+            discountPercentage: prices.Discount,
             originalPrice: prices.mrp
         };
     };

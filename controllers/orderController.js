@@ -400,11 +400,12 @@ exports.orderDetailsUser = async (req, res) => {
         console.log("orderDetailsUser called")
         const search = req.query.search || '';
         const orderId = req.params.orderId
-        const session = req.session.user
-        const order = await Orders.findById(orderId).populate({
+        const userId  = req.session.user_id
+        const order = await Orders.findById({ _id: orderId, userId: userId }).populate({
             path: "orderedItems.product",
             populate: {
                 path: "category",
+                select: 'productName productImage finalAmount mrp',
                 model: "Category"
             }
         })
@@ -417,18 +418,21 @@ exports.orderDetailsUser = async (req, res) => {
         console.log("order details order: ",order)
         order.orderedItems = order.orderedItems.map(item => {
             const prices = calculateOrderItemPrices(item);
-            console.log("prices:", prices.totalDiscount)
+            console.log("Item prices calculated:", prices);
+            console.log("Original item:", item);
             return {
                 ...item.toObject(),
                 priceAtPurchase: prices.pricePerUnit,
                 discountPercentage: prices.discountPercentage,
-                totalDiscount: prices.totalDiscount
+                totalDiscount: prices.totalDiscount,
+                // productDiscount:prices.originalPrice - prices.pricePerUnit
             };
         });
         console.log("Order address:", order.address);
+        console.log("Final order items:", JSON.stringify(order.orderedItems, null, 2));
         // console.log("orderId : ", orderId, "\nsession : ", session, "\norder : ", order);
         res.render('users/dashboard/order folder/order_details', {
-            order, session, activeTab: 'orders', search
+            order, user: req.session.user_id, activeTab: 'orders', search
         })
     } catch (error) {
         console.error(error)
@@ -445,11 +449,11 @@ exports.getOrdersAdmin = async (req, res) => {
         const limit = 6;
         const skip = (page - 1) * limit;
 
-        const returnRequests = await Orders.find({ 'returnDetails.returnRequested': true }).populate({
+        const returnRequests = await Orders.find({ 'returnDetails.returnStatus': 'Requested' }).populate({
             path: 'orderedItems.product',
             select: 'name'
         }).populate('userId')
-
+        console.log("returnRequests : ", returnRequests)
         const orders = await Orders.find({})
             .populate('userId', 'username email')
             .populate({
@@ -474,6 +478,56 @@ exports.getOrdersAdmin = async (req, res) => {
         res.status(500).json({ message: "Unable to retrieve orders." });
     }
 }
+
+exports.getOrderDetails = async (req, res) => {
+    try {
+        console.log("getOrderDetails called");
+        const orderId = req.params.orderId;
+        const order = await Orders.findById(orderId)
+            .populate('userId', 'username email mobile')
+            .populate({
+                path: 'orderedItems.product',
+                select: 'productName productImage finalAmount'
+            });
+        console.log("order : ", order);
+        if (!order) {
+            return res.status(404).render('admin/admin-error', { message: 'Order not found' });
+        }
+
+        // Format dates for timeline
+        const timeline = [
+            { status: 'Order Placed', date: order.orderDate },
+            { status: 'Processing', date: order.processingDate },
+            { status: 'Shipped', date: order.shippedDate },
+            { status: 'Delivered', date: order.deliveredDate }
+        ].filter(item => item.date);
+
+        // console.log("order : ", order);
+        const orderData = {
+            ...order._doc,
+            orderedItems: order.orderedItems.map(item => ({
+                ...item._doc,
+                total: item.quantity * (item.product?.finalAmount || 0)
+            }))
+        };
+        res.render('admin/order-details', { 
+            order:orderData,
+            timeline,
+            formatDate: (date) => {
+                return date ? new Date(date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'N/A'
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        res.status(500).render('admin/admin-error', { message: 'Error fetching order details' });
+    }
+};
 
 exports.cancelOrder = async (req, res) => {
     try {
@@ -740,95 +794,37 @@ exports.returnOrder = async (req, res) => {
     }
 }
 
-exports.getReturnRequests = async (req, res) => {
-    try {
-        const search = req.query.search || '';
-        let query = {
-            'returnDetails.returnRequested': true
-        };
-
-        if (search) {
-            query = {
-                ...query,
-                $or: [
-                    { orderId: { $regex: search, $options: 'i' } },
-                    { 'userId.username': { $regex: search, $options: 'i' } },
-                    { 'returnDetails.returnStatus': { $regex: search, $options: 'i' } }
-                ]
-            };
-        }
-
-        const returnRequests = await Orders.find(query)
-            .populate('userId', 'username')
-            .sort({ 'returnDetails.returnRequestedAt': -1 });
-
-        res.render('admin/order folder/return_requests', {
-            returnRequests,
-            search
-        });
-    } catch (error) {
-        console.error('Error fetching return requests:', error);
-        res.status(500).render('admin/admin-error', { message: 'Error fetching return requests' });
-    }
-};
-
 exports.approveReturnRequest = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        
-        // Find order and update status
-        const order = await Orders.findById(orderId);
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
-        // Update order status
-        order.status = 'Returned';
-        order.returnDetails.returnStatus = 'Approved';
-        order.returnDetails.returnDate = new Date();
-        await order.save();
-
-        // Process refund
-        await Wallets.findOneAndUpdate(
-            { userId: order.userId },
-            {
-                $inc: { balance: order.finalAmount },
-                $push: {
-                    transactions: {
-                        type: 'credit',
-                        amount: order.finalAmount,
-                        description: `Refund for returned order #${order.orderId}`
-                    }
+        const order = await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnStatus': 'Approved', status: 'Returned' })
+        await Wallets.findOneAndUpdate({ userId: order.userId }, {
+            $inc: { balance: order.totalAmount },
+            $push: {
+                transactions: {
+                    type: 'credit',
+                    amount: order.totalAmount,
+                    description: `Refund for returned order #${order.orderId}`
                 }
             }
-        );
-
-        res.status(200).json({ message: "Return request approved and refund processed" });
+        })
+        res.status(200).json({ message: "Return request approved" })
     } catch (error) {
-        console.error('Error approving return:', error);
-        res.status(500).json({ message: "Failed to approve return request" });
+        console.error(error);
+        res.status(500).json({ message: "Server error" })
     }
-};
+}
 
 exports.rejectReturnRequest = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        
-        // Find and update order
-        const order = await Orders.findById(orderId);
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
-        order.returnDetails.returnStatus = 'Rejected';
-        await order.save();
-
-        res.status(200).json({ message: "Return request rejected" });
+        await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnStatus': 'Rejected' })
+        res.status(200).json({ message: "Return request rejected" })
     } catch (error) {
-        console.error('Error rejecting return:', error);
-        res.status(500).json({ message: "Failed to reject return request" });
+        console.error(error);
+        res.status(500).json({ message: "Server error" })
     }
-};
+}
 
 exports.downloadInvoice = async (req, res) => {
     try {

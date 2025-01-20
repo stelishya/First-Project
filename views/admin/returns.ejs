@@ -1,0 +1,248 @@
+<div class="flex min-h-screen bg-gray-100">
+    <aside class="w-64 bg-white shadow-md">
+        <%- include ('../partials/admin/sidebar')%>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Return Requests</h1>
+        </div>
+
+        <!-- Table Section -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <% if (returns && returns.length > 0) { %>
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Customer</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Product</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Image</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Price</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Quantity</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Total</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Return Reason</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% returns.forEach(return_request => { 
+                            const item = return_request.orderedItems[0];
+                            const product = item.product;
+                        %>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        <%= return_request.userId.username %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        <%= product.productName %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <% if (product.productImage) { %>
+                                        <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="h-16 w-16 object-cover rounded-md">
+                                    <% } else { %>
+                                        <div class="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
+                                            <span class="text-gray-500 text-xs">No image</span>
+                                        </div>
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">₹<%= product.finalAmount %></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900"><%= item.quantity %></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">₹<%= (product.finalAmount * item.quantity).toFixed(2) %></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">
+                                        <%= return_request.returnDetails.returnReason %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
+                                        <%= return_request.returnDetails.returnStatus === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                                            return_request.returnDetails.returnStatus === 'Approved' ? 'bg-green-100 text-green-800' :
+                                            return_request.returnDetails.returnStatus === 'Returned' ? 'bg-orange-100 text-orange-800' :
+                                            'bg-red-100 text-red-800' %>">
+                                        <%= return_request.returnDetails.returnStatus %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <% if (return_request.returnDetails.returnStatus === 'Pending') { %>
+                                        <div class="flex space-x-2">
+                                            <form action="/admin/return-requests/<%= return_request._id %>/approve" method="POST" class="inline" onsubmit="return confirmAction('approve', '<%= product.productName %>')">
+                                                <button type="submit" 
+                                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm">
+                                                    Approve
+                                                </button>
+                                            </form>
+                                            <form action="/admin/return-requests/<%= return_request._id %>/reject" method="POST" class="inline" onsubmit="return confirmAction('reject', '<%= product.productName %>')">
+                                                <button type="submit"
+                                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
+                                                    Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="flex items-center">
+                                            <% if (return_request.returnDetails.returnStatus === 'Approved') { %>
+                                                <div class="flex flex-col">
+                                                    <span class="text-green-600 flex items-center">
+                                                        <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        Return Approved
+                                                    </span>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="text-center py-8">
+                    <p class="text-gray-500 text-lg">No return requests found</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<!-- Return Details Modal -->
+<div id="returnModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg max-w-2xl w-full mx-4">
+        <h3 class="text-xl font-semibold mb-4">Return Request Details</h3>
+        <div id="returnDetails" class="mb-6">
+            <!-- Details will be populated by JavaScript -->
+        </div>
+        
+        <div class="flex gap-3">
+            <button onclick="handleReturn('approve')" 
+                class="flex-1 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                Approve Return
+            </button>
+            <button onclick="handleReturn('reject')" 
+                class="flex-1 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                Reject Return
+            </button>
+            <button onclick="closeReturnModal()" 
+                class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentOrderId = null;
+
+    function showReturnModal(orderId) {
+        currentOrderId = orderId;
+        document.getElementById('returnModal').classList.remove('hidden');
+        document.getElementById('returnModal').classList.add('flex');
+        
+        // Fetch and display order details
+        fetchOrderDetails(orderId);
+    }
+
+    async function fetchOrderDetails(orderId) {
+        try {
+            const response = await axios.get(`/admin/returns/${orderId}`);
+            const order = response.data;
+            
+            const detailsHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-semibold">Order ID: #${order.orderId}</p>
+                        <p>Customer: ${order.userId.username}</p>
+                        <p>Return Requested: ${new Date(order.returnDetails.returnRequestedAt).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Return Reason:</p>
+                        <p>${order.returnDetails.returnReason}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Product Details:</p>
+                        <p>${order.orderedItems[0].product.productName}</p>
+                        <p>Quantity: ${order.orderedItems[0].quantity}</p>
+                        <p>Amount to Refund: ₹${order.orderedItems[0].price}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('returnDetails').innerHTML = detailsHtml;
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            Toastify({
+                text: "Failed to fetch order details",
+                className: "toast_style",
+                duration: 3000,
+                style: { background: "#ff6b6b" }
+            }).showToast();
+        }
+    }
+
+    function closeReturnModal() {
+        document.getElementById('returnModal').classList.add('hidden');
+        document.getElementById('returnModal').classList.remove('flex');
+        currentOrderId = null;
+    }
+
+    async function handleReturn(action) {
+        if (!currentOrderId) return;
+        
+        try {
+            const endpoint = action === 'approve' ? '/admin/approveReturn' : '/admin/rejectReturn';
+            const response = await axios.post(`${endpoint}/${currentOrderId}`);
+            
+            if (response.status === 200) {
+                Toastify({
+                    text: `Return request ${action}ed successfully`,
+                    className: "toast_style",
+                    duration: 3000,
+                    style: {
+                        background: action === 'approve' ? "linear-gradient(to right, #00b09b, #96c93d)" : "#ff6b6b"
+                    }
+                }).showToast();
+                
+                closeReturnModal();
+                // Refresh the page after a short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+        } catch (error) {
+            Toastify({
+                text: error.response?.data?.message || `Failed to ${action} return request`,
+                className: "toast_style",
+                duration: 3000,
+                style: { background: "#ff6b6b" }
+            }).showToast();
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('returnModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeReturnModal();
+        }
+    });
+
+    function confirmAction(action, productName) {
+        const message = action === 'approve' 
+            ? `Are you sure you want to approve the return request for "${productName}"?`
+            : `Are you sure you want to reject the return request for "${productName}"?`;
+        
+        return confirm(message);
+    }
+</script>

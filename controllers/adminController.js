@@ -5,6 +5,7 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const Orders = require('../models/orderSchema');
 const { generateSalesReport } = require('./salesController');
+const Wallets = require('../models/walletSchema'); // Assuming Wallets model is defined in walletSchema.js
 
 
 
@@ -116,7 +117,8 @@ exports.loadDashboard=async (req,res)=>{
         });
     }
 }
-        // let query = { status: 'Delivered' };
+
+// let query = { status: 'Delivered' };
         // let start, end;
         // if (period) {
         //     const now = new Date();
@@ -165,7 +167,6 @@ exports.loadDashboard=async (req,res)=>{
         //     totalDiscount += order.totalDiscount || 0;
         //     totalCouponDiscount += order.couponDiscount || 0;
         // });
-
         // // Format data for response
         // const reportData = {
         //     orders: orders.map(order => ({
@@ -227,94 +228,192 @@ exports.loadDashboard=async (req,res)=>{
 
 
 
-// exports.getSalesReport = async (req, res) => {
-//     try {
-//         const { startDate, endDate, period } = req.query;
-//         let query = { status: 'Delivered' };
-//         let start, end;
+exports.getSalesReport = async (req, res) => {
+    try {
+        const { startDate, endDate, period } = req.query;
+        let query = { status: 'Delivered' };
+        let start, end;
 
-//         // Handle different period types
-//         if (period) {
-//             const now = new Date();
-//             switch (period) {
-//                 case 'daily':
-//                     start = new Date(now.setHours(0, 0, 0, 0));
-//                     end = new Date(now.setHours(23, 59, 59, 999));
-//                     break;
-//                 case 'weekly':
-//                     start = new Date(now.setDate(now.getDate() - 7));
-//                     end = new Date();
-//                     break;
-//                 case 'monthly':
-//                     start = new Date(now.setMonth(now.getMonth() - 1));
-//                     end = new Date();
-//                     break;
-//                 case 'yearly':
-//                     start = new Date(now.setFullYear(now.getFullYear() - 1));
-//                     end = new Date();
-//                     break;
-//             }
-//         } else if (startDate && endDate) {
-//             // Custom date range
-//             start = new Date(startDate);
-//             end = new Date(endDate);
-//         }
+        // Handle different period types
+        if (period) {
+            const now = new Date();
+            switch (period) {
+                case 'daily':
+                    start = new Date(now.setHours(0, 0, 0, 0));
+                    end = new Date(now.setHours(23, 59, 59, 999));
+                    break;
+                case 'weekly':
+                    start = new Date(now.setDate(now.getDate() - 7));
+                    end = new Date();
+                    break;
+                case 'monthly':
+                    start = new Date(now.setMonth(now.getMonth() - 1));
+                    end = new Date();
+                    break;
+                case 'yearly':
+                    start = new Date(now.setFullYear(now.getFullYear() - 1));
+                    end = new Date();
+                    break;
+            }
+        } else if (startDate && endDate) {
+            // Custom date range
+            start = new Date(startDate);
+            end = new Date(endDate);
+        }
 
-//         if (start && end) {
-//             query.orderDate = { $gte: start, $lte: end };
-//         }
+        if (start && end) {
+            query.orderDate = { $gte: start, $lte: end };
+        }
 
-//         // Fetch orders with populated data
-//         const orders = await Orders.find(query)
-//             .populate('userId', 'name email')
-//             .populate('products.productId', 'name mrp')
-//             .sort({ orderDate: -1 });
+        // Fetch orders with populated data
+        const orders = await Orders.find(query)
+            .populate('userId', 'name email')
+            .populate('products.productId', 'name mrp')
+            .sort({ orderDate: -1 });
 
-//         // Calculate totals
-//         let totalOrders = orders.length;
-//         let totalAmount = 0;
-//         let totalDiscount = 0;
-//         let totalCouponDiscount = 0;
+        // Calculate totals
+        let totalOrders = orders.length;
+        let totalAmount = 0;
+        let totalDiscount = 0;
+        let totalCouponDiscount = 0;
 
-//         orders.forEach(order => {
-//             totalAmount += order.totalAmount;
-//             totalDiscount += order.totalDiscount || 0;
-//             totalCouponDiscount += order.couponDiscount || 0;
-//         });
+        orders.forEach(order => {
+            totalAmount += order.totalAmount;
+            totalDiscount += order.totalDiscount || 0;
+            totalCouponDiscount += order.couponDiscount || 0;
+        });
+        // Format data for response
+        const reportData = {
+            orders: orders.map(order => ({
+                orderId: order._id,
+                customerName: order.userId.name,
+                orderDate: order.orderDate,
+                totalAmount: order.totalAmount,
+                discount: order.totalDiscount || 0,
+                couponDiscount: order.couponDiscount || 0,
+                finalAmount: order.finalAmount,
+                status: order.status
+            })),
+            summary: {
+                totalOrders,
+                totalAmount,
+                totalDiscount,
+                totalCouponDiscount,
+                netAmount: totalAmount - totalDiscount - totalCouponDiscount
+            }
+        };
 
-//         // Format data for response
-//         const reportData = {
-//             orders: orders.map(order => ({
-//                 orderId: order._id,
-//                 customerName: order.userId.name,
-//                 orderDate: order.orderDate,
-//                 totalAmount: order.totalAmount,
-//                 discount: order.totalDiscount || 0,
-//                 couponDiscount: order.couponDiscount || 0,
-//                 finalAmount: order.finalAmount,
-//                 status: order.status
-//             })),
-//             summary: {
-//                 totalOrders,
-//                 totalAmount,
-//                 totalDiscount,
-//                 totalCouponDiscount,
-//                 netAmount: totalAmount - totalDiscount - totalCouponDiscount
-//             }
-//         };
+        res.render('admin/dashboard', {
+            reportData,
+            startDate: start?.toISOString().split('T')[0],
+            endDate: end?.toISOString().split('T')[0],
+            period
+        });
 
-//         res.render('admin/dashboard', {
-//             reportData,
-//             startDate: start?.toISOString().split('T')[0],
-//             endDate: end?.toISOString().split('T')[0],
-//             period
-//         });
+    } catch (error) {
+        console.error('Error generating sales report:', error);
+        res.status(500).json({ error: 'Failed to generate sales report' });
+    }
+};
 
-//     } catch (error) {
-//         console.error('Error generating sales report:', error);
-//         res.status(500).json({ error: 'Failed to generate sales report' });
-//     }
-// };
+// Get all return requests
+exports.getReturns = async (req, res) => {
+    try {
+        const returns = await Orders.find({
+            'returnDetails.returnRequested': true,
+            'returnDetails.returnStatus': 'Pending'
+        }).populate('userId', 'username');
+
+        res.render('admin/returns', { returns });
+    } catch (error) {
+        console.error('Error fetching returns:', error);
+        res.status(500).render('admin/admin-error', { message: 'Error fetching returns' });
+    }
+};
+
+// Get return request details
+exports.getReturnDetails = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await Orders.findById(orderId)
+            .populate('userId', 'username')
+            .populate('orderedItems.product');
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        res.json(order);
+    } catch (error) {
+        console.error('Error fetching return details:', error);
+        res.status(500).json({ message: "Failed to fetch return details" });
+    }
+};
+
+// Approve return request
+exports.approveReturn = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await Orders.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Calculate refund amount for the returned product
+        const returnedProduct = order.orderedItems[0];
+        const refundAmount = returnedProduct.price;
+
+        // Update order status
+        order.status = 'Returned';
+        order.returnDetails.returnStatus = 'Approved';
+        order.returnDetails.returnDate = new Date();
+        await order.save();
+
+        // Process refund to wallet
+        if (order.paymentMethod !== 'COD') {
+            await Wallets.findOneAndUpdate(
+                { userId: order.userId },
+                {
+                    $inc: { balance: refundAmount },
+                    $push: {
+                        transactions: {
+                            type: 'credit',
+                            amount: refundAmount,
+                            description: `Refund for returned order #${order.orderId}`
+                        }
+                    }
+                }
+            );
+        }
+
+        res.status(200).json({ message: "Return request approved successfully" });
+    } catch (error) {
+        console.error('Error approving return:', error);
+        res.status(500).json({ message: "Failed to approve return request" });
+    }
+};
+
+// Reject return request
+exports.rejectReturn = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await Orders.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Update return status
+        order.returnDetails.returnStatus = 'Rejected';
+        await order.save();
+
+        res.status(200).json({ message: "Return request rejected successfully" });
+    } catch (error) {
+        console.error('Error rejecting return:', error);
+        res.status(500).json({ message: "Failed to reject return request" });
+    }
+};
 
 exports.downloadReport = async (req, res) => {
     try {

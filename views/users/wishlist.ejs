@@ -62,7 +62,8 @@
                                         </span>
                                 <% if (item.product.discountPercentage> 0) { %>
                                     <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp.toFixed(0) %></span>
-                                    <span class="text-sm text-red-500">(<%= item.product.discountPercentage.toFixed(0) %> Discount)</span>
+                                    <span class="text-md text-green-600"><%= ((item.product.discountPercentage/item.product.mrp)*100).toFixed(0) %> % Off</span>
+                                    <!-- <span class="text-sm text-red-500">(<%= item.product.discountPercentage.toFixed(0) %> Discount)</span> -->
                                     <% } %>
                             </div>
                             <div class="mt-4 text-sm text-gray-500">

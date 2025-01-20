@@ -64,13 +64,16 @@ exports.getCart = async (req,res)=>{
         
         const countOfProducts = products.length;
         console.log("Hi i'm rendering cart page")
+        console.log(`products: ${products}`)
         console.log('Cart Totals:');
+        console.log(`mrp: ${products.mrp}`)
         console.log(`Subtotal: ${subtotal}`);
         console.log(`Total Discount: ${totalDiscount}`);
         console.log(`Final Amount: ${totalAmount}`);
         res.render('users/cart/cart', {
             session: req.session.user,
             products,
+            mrp:products.mrp,
             countOfProducts,
             totalAmount: totalAmount.toFixed(2),
             subtotal: subtotal.toFixed(2),

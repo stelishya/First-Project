@@ -62,6 +62,7 @@
                                         Total: ₹<span id="total-price-<%= product.productId._id %>"><%= (product.discountedPrice * product.quantity).toFixed(2) %></span>
                                     </p>
                                     <p class="text-gray-500">(₹<%= product.discountedPrice.toFixed(2) %> each)</p>
+                                    <!-- <span class="text-md text-green-600"><%= ((product.bestDiscountType/product.mrp)*100).toFixed(0) %> % Off</span> -->
                                     <span class="text-sm text-red-500 font-normal">(<%= product.bestDiscountType %>)</span>
                                 </div>                                                 
                             </div>

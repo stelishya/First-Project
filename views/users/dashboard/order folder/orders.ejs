@@ -175,9 +175,9 @@
                     <% if(order.status !== "Cancelled" && order.status !== "Returned" && order.status !== "Out for delivery" && order.status !== "Delivered" && order.status !== "Payment failed"){ %>
                         <button id="cancelBtn" class="btn btn-danger bg-gray-400 rounded p-2" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                     <% } %>
-                    <% if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000) && !order.returnDetails.returnRequested){ %>
+                    <!-- % if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000) && !order.returnDetails.returnRequested){ %>
                         <button class="btn btn-primary  bg-gray-400 rounded p-2" onclick="returnOrder('<%= order._id %>')">Return Order</button>
-                    <% } %>
+                    % } %> -->
                 </div>
             </div>
             <% }) %>
