@@ -175,39 +175,8 @@
                              <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
                                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
                                     <h2 class="text-2xl font-bold text-gray-800">Sales Analytics</h2>
-                                    <div class="flex gap-4">
-                                        <select id="chartPeriod" class="rounded-lg border-gray-300">
-                                            <option value="weekly">Weekly</option>
-                                            <option value="monthly">Monthly</option>
-                                            <option value="yearly">Yearly</option>
-                                            <option value="custom">Custom Range</option>
-                                        </select>
-            
-                                        <!-- Custom range inputs for chart -->
-                                        <div id="chartDateRange" class="flex items-center gap-2" style="display: none;">
-                                            <input type="date" id="chartStartDate" class="rounded-lg border-gray-300">
-                                            <span class="text-gray-500">to</span>
-                                            <input type="date" id="chartEndDate" class="rounded-lg border-gray-300">
-                                            <button id="applyChartRange" class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
-                                                Apply
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    <div class="bg-white rounded-lg shadow-lg p-6">
-                                        <h2 class="text-xl font-bold mb-4">Sales Overview</h2>
-                                        <canvas id="salesChart"></canvas>
-                                    </div>
-                                    <div class="bg-white rounded-lg shadow-lg p-6">
-                                        <h2 class="text-xl font-bold mb-4">Orders Overview</h2>
-                                        <canvas id="ordersChart"></canvas>
-                                    </div>
-                                </div>
-                             </div>
-                            <input type="hidden" id="reportData" value='<%- JSON.stringify(locals.reportData || { chartData: { labels: [], sales: [], orders: [] }}) %>'>
 
-                            <!-- Filter Form -->
+                                                   <!-- Filter Form -->
             <form id="salesReportForm" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-300 p-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Period</label>
@@ -243,7 +212,7 @@
                     </button>
                 </div>
             </form>
-                            <button type="button" onclick="downloadReport('pdf')"
+            <button type="button" onclick="downloadReport('pdf')"
                                 class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
                                 PDF
                             </button>
@@ -251,6 +220,41 @@
                                 class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">
                                 Excel
                             </button>
+
+                                    <!-- <div class="flex gap-4">
+                                        <select id="chartPeriod" class="rounded-lg border-gray-300">
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="yearly">Yearly</option>
+                                            <option value="custom">Custom Range</option>
+                                        </select>
+            
+                                        
+                                        <div id="chartDateRange" class="flex items-center gap-2" style="display: none;">
+                                            <input type="date" id="chartStartDate" class="rounded-lg border-gray-300">
+                                            <span class="text-gray-500">to</span>
+                                            <input type="date" id="chartEndDate" class="rounded-lg border-gray-300">
+                                            <button id="applyChartRange" class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div> -->
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h2 class="text-xl font-bold mb-4">Sales Overview</h2>
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h2 class="text-xl font-bold mb-4">Orders Overview</h2>
+                                        <canvas id="ordersChart"></canvas>
+                                    </div>
+                                </div>
+                             </div>
+                            <input type="hidden" id="reportData" value='<%- JSON.stringify(locals.reportData || { chartData: { labels: [], sales: [], orders: [] }}) %>'>
+
+             
+                            
                             <!-- Orders Table -->
                             <% if (reportData.orders && reportData.orders.length> 0) { %>
                                 <div class="overflow-x-auto">

@@ -556,11 +556,13 @@ exports.cancelOrder = async (req, res) => {
 
         const currentDate = new Date();
         const refundAmount = order.finalAmount;
+        let newBalance = 0;
 
         // update order status 
         await Orders.findByIdAndUpdate(orderId, {
             status: "Cancelled",
             cancelledOn: currentDate,
+            paymentStatus: order.paymentMethod === 'Online Payment' ? 'Refunded' : 'Cancelled',
             $push: {
                 statusHistory: {
                     status: "Cancelled",
@@ -569,45 +571,73 @@ exports.cancelOrder = async (req, res) => {
                 }
             }
         });
-        const user = await Users.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
+
+        if(order.paymentMethod === 'Online Payment' && order.paymentStatus === 'Paid'){
+            try{
+                console.log("Processing refund for Razorpay Payment")
+                // const user = await Users.findById(userId);
+                // if (!user) {
+                //     return res.status(404).json({
+                //         success: false,
+                //         message: 'User not found'
+                //     });
+                // }
+                // console.log('Current wallet balance:', user.wallet);
+                // const newBalance = (user.wallet || 0) + refundAmount;
+                // console.log('New wallet balance:', newBalance);
+                // user.wallet = newBalance;
+    
+                const latestTransaction = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
+                const currentBalance = latestTransaction ? latestTransaction.balance : 0;
+                newBalance = currentBalance + refundAmount;
+    
+                const walletTransaction = new Wallets({
+                    userId,
+                    orderId,
+                    type: 'CREDIT',
+                    amount: refundAmount,
+                    description: `Refund for cancelled order #${order.orderId || order._id}`,
+                    balance: newBalance
+                });
+                await walletTransaction.save();
+                console.log("Refund processed successfully. New balance:", newBalance);
+                // await Promise.all([
+                //     order.save(),
+                //     user.save(),
+                //     walletTransaction.save()
+                // ]);
+
+            }catch(error){
+                console.error("Error processing refund:", error);
+                res.status(500).json({ 
+                    success:false,
+                    message: "Error processing refund. Please contact support." 
+                });
+            }
         }
-        console.log('Current wallet balance:', user.wallet);
-        const newBalance = (user.wallet || 0) + refundAmount;
-        console.log('New wallet balance:', newBalance);
-        user.wallet = newBalance;
-        const walletTransaction = new Wallets({
-            userId: userId,
-            orderId: orderId,
-            type: 'CREDIT',
-            amount: refundAmount,
-            description: `Refund for cancelled order #${order.orderId || order._id}`,
-            balance: newBalance
-        });
-        await Promise.all([
-            order.save(),
-            user.save(),
-            walletTransaction.save()
-        ]);
-        // restore product inventory
-        const stockUpdatePromises = order.orderedItems.map(item =>
+        try{
+            // restore product inventory
+            const stockUpdatePromises = order.orderedItems.map(item =>
             Products.findByIdAndUpdate(item.product._id, {
                 $inc: { stock: item.quantity }
             })
-        );
-        await Promise.all(stockUpdatePromises);
-
-        console.log("Order cancelled successfully.Amount added to wallet.");
+            );
+            await Promise.all(stockUpdatePromises);
+        }catch(stockError){
+            console.error("Error restoring inventory:", stockError);
+        }
+        const message = order.paymentMethod === 'Online Payment' 
+            ? "Order cancelled successfully. Refund has been added to your wallet."
+            : "Order cancelled successfully.";
+            console.log(message);
+        // console.log("Order cancelled successfully.Amount added to wallet.");
         res.status(200).json({
             success: true,
-            message: "Order cancelled successfully. Amount added to wallet.",
+            message,
             cancelledOn: currentDate,
             refundAmount,
-            newBalance
+            ...(order.paymentMethod === 'Online Payment' && { newBalance })
+            // newBalance
         });
 
     } catch (error) {
