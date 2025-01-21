@@ -74,8 +74,10 @@ admin_route.delete('/coupon/:id', couponController.deleteCoupon);
 
 
 // Sales Report
-admin_route.get('/dashboard', adminController.loadDashboard);
-admin_route.get('/sales-report', adminController.getSalesReport);
-admin_route.get('/download-report', adminController.downloadReport);
+admin_route.get('/dashboard', salesController.loadDashboard);
+admin_route.get('/sales-report', salesController.getSalesReport);
+admin_route.get('/download-report', salesController.downloadReport);
+admin_route.get('/analytics/:period', salesController.getChartData); 
+
 
 module.exports = admin_route;

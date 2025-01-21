@@ -227,19 +227,19 @@
                                 <h3 class="font-semibold text-gray-700 mb-3">Payment Methods</h3>
                                 <div class="space-y-2">
                                     <% paymentMethods.forEach(method=> { %>
-                                        <label
-                                            class="flex items-center space-x-3 p-3 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
+                                        <label class="flex flex-col space-y-2 items-center space-x-3 p-3 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
                                             id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
+                                            <div class="flex items-center space-x-3">
                                             <input type="radio" name="payment" value="<%= method %>"
                                                 class="text-gray-500 focus:ring-gray-500"
                                                 id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" 
-                                                <% if (method==='COD' && totalAmount> 3000) { %>disabled<% } %>>
-                                                <span>
-                                                    <%= method %>
-                                                </span>
-                                                <% if (method === 'COD' && totalAmount > 1000) { %>
-                                            <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
-                                        <% } %> 
+                                                <% if (method==='Cash on Delivery' && Number(totalAmount) > 1000) { %> disabled <% } %>
+                                                >
+                                                <span><%= method %></span>
+                                            </div>
+                                                <% if (method === 'Cash on Delivery' && Number(totalAmount) > 1000) { %>
+                                                <div  class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</div >
+                                                <% } %> 
                                         </label>
                                         <% }); %>
                                 </div>
@@ -354,7 +354,7 @@
             /* Enhanced shadow on hover */
         }
     </style>
-
+    
     <!-- Address Modal -->
     <div id="addressModal" class="modal">
         <div class="modal-content w-full max-w-xl bg-white rounded-lg shadow-lg relative">
@@ -498,6 +498,45 @@
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+
+    function handlePaymentMethodChange(radio) {
+        console.log('Payment method changed:', radio.value);
+
+        if (radio.value === 'COD') {
+            const totalAmountElement = document.getElementById('totalAmount');
+            console.log('Total amount element:', totalAmountElement);
+
+            const totalAmountText = totalAmountElement.textContent;
+            console.log('Total amount text:', totalAmountText);
+
+            const totalAmount = parseFloat(totalAmountText.replace(/[^0-9.]/g, ''));
+            console.log('Parsed Total Amount:', totalAmount);
+            // const totalAmount = parseFloat(document.getElementById('totalAmount').textContent.replace('₹', '').trim());
+            if (totalAmount > 1000) {
+                console.log('Amount exceeds limit, showing toast');
+                radio.checked = false;
+
+                const toastMessage = 'Cash on Delivery is not available for orders above ₹1000';
+                console.log('Toast message:', toastMessage);
+
+                showToast(toastMessage, true);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg z-50 ${isError ? 'bg-red-100 text-red-700 border border-red-500' : 'bg-green-100 text-green-700 border border-green-500'}`;
+        toast.textContent = message;
+        toast.style.zIndex = '1100';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
 
         // Address selection
         let selectedAddressId = null;

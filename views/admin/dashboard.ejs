@@ -2,6 +2,94 @@
     Dashboard
 </title>
 <link rel="stylesheet" href="/Admin/css/dashboard.css">
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .best-seller-card {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .product-item, .category-item {
+        animation: slideInRight 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .best-seller-card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+    }
+
+    .product-item:hover, .category-item:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+        transform: translateX(5px);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card {
+        animation: fadeIn 0.5s ease-out forwards;
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-wrapper {
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+
+    .table-row {
+        transition: all 0.2s ease;
+    }
+
+    .table-row:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .btn-primary {
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #3b82f6, #2563eb);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .report-section {
+        animation: slideIn 0.5s ease-out forwards;
+    }
+
+    canvas#topCategoriesChart {
+        min-height: 300px;
+        width: 100%;
+    }
+</style>
 
 <div>
     <%- include ('../partials/admin/sidebar')%>
@@ -38,42 +126,7 @@
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h1 class="text-2xl font-bold mb-6">Sales Report</h1>
 
-                        <!-- Filter Form -->
-                        <form id="salesReportForm" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-300 p-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Period</label>
-                                <select name="period" id="period"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <option value="">Custom Range</option>
-                                    <option value="daily" <%=locals.period==='daily' ? 'selected' : '' %>>Daily</option>
-                                    <option value="weekly" <%=locals.period==='weekly' ? 'selected' : '' %>>Weekly
-                                    </option>
-                                    <option value="monthly" <%=locals.period==='monthly' ? 'selected' : '' %>>Monthly
-                                    </option>
-                                    <option value="yearly" <%=locals.period==='yearly' ? 'selected' : '' %>>Yearly
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                                <input type="date" id="startDate" name="startDate" value="<%= locals.startDate %>"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">End Date</label>
-                                <input type="date" id="endDate" name="endDate" value="<%= locals.endDate %>"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            </div>
-
-                            <div class="flex items-end space-x-2">
-                                <button type="submit"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                                    Generate Report
-                                </button>
-                            </div>
-                        </form>
+                        
 
                         <% if (locals.reportData && locals.reportData.summary) { %>
                             <!-- Summary Cards -->
@@ -81,17 +134,22 @@
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold">Total Orders</h3>
                                     <p class="text-2xl font-bold">
-                                        <%= reportData.summary.totalOrders %>
+                                        <!-- %= reportData.summary.totalOrders %> -->
+                                        <%= overallStats.totalOrders %>
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold">Total Amount</h3>
-                                    <p class="text-2xl font-bold">₹<%= reportData.summary.netAmount.toFixed(0) %>
+                                    <p class="text-2xl font-bold">
+                                        <!-- ₹%= reportData.summary.netAmount.toFixed(0) %> -->
+                                        ₹<%= overallStats.totalAmount.toFixed(2) %>
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold">Total Discount</h3>
-                                    <p class="text-2xl font-bold">₹<%= reportData.summary.totalDiscount.toFixed(0) %>
+                                    <p class="text-2xl font-bold">
+                                        <!-- ₹%= reportData.summary.totalDiscount.toFixed(0) %> -->
+                                        ₹<%= overallStats.totalDiscount.toFixed(2) %>
                                     </p>
                                 </div>
                                 <!-- <div class="bg-gray-50 p-4 rounded-lg">
@@ -100,14 +158,7 @@
                         </div> -->
                             </div>
 
-                            <button type="button" onclick="downloadReport('pdf')"
-                                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                                PDF
-                            </button>
-                            <button type="button" onclick="downloadReport('excel')"
-                                class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">
-                                Excel
-                            </button>
+                            
                             <!-- Download Buttons -->
                             <!-- <div class="flex gap-4 mb-8 ">
                         <a href="/admin/download-report?format=pdf&<%= new URLSearchParams(query).toString() %>" 
@@ -121,48 +172,115 @@
                     </div> -->
 
                             <!-- Charts Section -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                <div class="bg-white rounded-lg shadow-lg p-6">
-                                    <h2 class="text-xl font-bold mb-4">Sales Overview</h2>
-                                    <canvas id="salesChart"></canvas>
+                             <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800">Sales Analytics</h2>
+                                    <div class="flex gap-4">
+                                        <select id="chartPeriod" class="rounded-lg border-gray-300">
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="yearly">Yearly</option>
+                                            <option value="custom">Custom Range</option>
+                                        </select>
+            
+                                        <!-- Custom range inputs for chart -->
+                                        <div id="chartDateRange" class="flex items-center gap-2" style="display: none;">
+                                            <input type="date" id="chartStartDate" class="rounded-lg border-gray-300">
+                                            <span class="text-gray-500">to</span>
+                                            <input type="date" id="chartEndDate" class="rounded-lg border-gray-300">
+                                            <button id="applyChartRange" class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="bg-white rounded-lg shadow-lg p-6">
-                                    <h2 class="text-xl font-bold mb-4">Orders Overview</h2>
-                                    <canvas id="ordersChart"></canvas>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h2 class="text-xl font-bold mb-4">Sales Overview</h2>
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h2 class="text-xl font-bold mb-4">Orders Overview</h2>
+                                        <canvas id="ordersChart"></canvas>
+                                    </div>
                                 </div>
-                            </div>
+                             </div>
                             <input type="hidden" id="reportData" value='<%- JSON.stringify(locals.reportData || { chartData: { labels: [], sales: [], orders: [] }}) %>'>
 
+                            <!-- Filter Form -->
+            <form id="salesReportForm" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-300 p-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Period</label>
+                    <select name="period" id="period"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <option value="">Custom Range</option>
+                        <option value="daily" <%=locals.period==='daily' ? 'selected' : '' %>>Today</option>
+                        <option value="weekly" <%=locals.period==='weekly' ? 'selected' : '' %>>This Week
+                        </option>
+                        <option value="monthly" <%=locals.period==='monthly' ? 'selected' : '' %>>This Month
+                        </option>
+                        <option value="yearly" <%=locals.period==='yearly' ? 'selected' : '' %>>This Year
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" value="<%= locals.startDate %>"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" id="endDate" name="endDate" value="<%= locals.endDate %>"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+
+                <div class="flex items-end space-x-2">
+                    <button type="submit"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+                            <button type="button" onclick="downloadReport('pdf')"
+                                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                                PDF
+                            </button>
+                            <button type="button" onclick="downloadReport('excel')"
+                                class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">
+                                Excel
+                            </button>
                             <!-- Orders Table -->
                             <% if (reportData.orders && reportData.orders.length> 0) { %>
                                 <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-200">
-                                        <thead class="bg-gray-50">
+                                    <table class="min-w-full divide-y divide-gray-400">
+                                        <thead class="bg-gray-100">
                                             <tr>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     Order ID</th>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     Customer</th>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     Date</th>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     MRP</th>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     Discount</th>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     Coupon</th>
                                                 <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                                     Final Amount</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200">
+                                        <tbody class="bg-white divide-y divide-gray-300">
                                             <% reportData.orders.forEach(order=> { %>
                                                 <tr>
                                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -200,6 +318,81 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- ****************************** -->
+             <!-- Best Sellers Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Best Selling Products -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden best-seller-card">
+                <div class="p-6 border-b">
+                    <h2 class="text-2xl font-bold text-gray-800">Best Selling Products</h2>
+                    <p class="text-gray-600 mt-1">Top <%= topProducts.length %> products by sales volume</p>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4">
+                        <% topProducts.forEach((product, index) => { %>
+                            <li class="flex items-center justify-between product-item" 
+                                style="animation-delay: '<%= index * 100 %>'ms">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
+                                        <%= index + 1 %>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900"><%= product.name || product._id %></h3>
+                                        <p class="text-sm text-gray-500">Sold: <%= product.totalSold %> units</p>
+                                    </div>
+                                </div>
+                                <div class="text-blue-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                            </li>
+                        <% }); %>
+                    </ul>
+                    <!-- Top products Pie Charts Section -->
+                    <div class="mt-6">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Selling Categories -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden best-seller-card">
+                <div class="p-6 border-b">
+                    <h2 class="text-2xl font-bold text-gray-800">Top Categories</h2>
+                    <p class="text-gray-600 mt-1">Top <%= topCategories.length %> categories by sales volume</p>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4">
+                        <% topCategories.forEach((category, index) => { %>
+                            <li class="flex items-center justify-between category-item"
+                            style="animation-delay: '<%= index * 100 %>'ms">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full">
+                                    <%= index + 1 %>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900"><%= category.name %></h3>
+                                    <p class="text-sm text-gray-500">Sold: <%= category.totalSold %> units</p>
+                                </div>
+                            </div>
+                            <div class="text-purple-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                            </li>
+                        <% }); %>
+                    </ul>
+                    <!-- Top categories Pie Charts Section -->
+                    <div class="mt-6">
+                        <canvas id="topCategoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <!-- ********************************* -->
         </main>
 </div>
 
@@ -394,5 +587,172 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log('DOM loaded, initializing form controls');
         initializeFormControls();
+    // });
+
+        // Chart period and custom range handling
+        const chartPeriod = document.getElementById('chartPeriod');
+        const chartDateRange = document.getElementById('chartDateRange');
+        const chartStartDate = document.getElementById('chartStartDate');
+        const chartEndDate = document.getElementById('chartEndDate');
+        const applyChartRange = document.getElementById('applyChartRange');
+        
+        // Function to update chart data
+        async function updateChartData(period, startDate = null, endDate = null) {
+            try {
+                let url = `/admin/analytics/${period}`;
+                if (startDate && endDate) {
+                    url += `?startDate=${startDate}&endDate=${endDate}`;
+                }
+
+                const response = await axios.get(url);
+
+                const data = response.data;
+                salesChart.data.labels = data.labels;
+                salesChart.data.datasets[0].data = data.orders;
+                salesChart.data.datasets[1].data = data.revenue;
+                salesChart.update();
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+                showToast('Error updating chart data', 'error');
+            }
+        }
+        
+        // Add event listener for period change
+        chartPeriod.addEventListener('change', function() {
+            const period = this.value;
+            if (period === 'custom') {
+                chartDateRange.style.display = 'flex';
+                // Set default date range (last 30 days)
+                const today = new Date();
+                const thirtyDaysAgo = new Date(today);
+                thirtyDaysAgo.setDate(today.getDate() - 30);
+
+                chartEndDate.value = formatDate(today);
+                chartStartDate.value = formatDate(thirtyDaysAgo);
+            } else {
+                chartDateRange.style.display = 'none';
+                updateChartData(period);
+            }
+        });
+
+        // Handle custom range apply
+        applyChartRange.addEventListener('click', function() {
+            const startDate = chartStartDate.value;
+            const endDate = chartEndDate.value;
+
+            if (!startDate || !endDate) {
+                showToast('Please select both start and end dates', 'error');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('Start date cannot be after end date', 'error');
+                return;
+            }
+
+            updateChartData('custom', startDate, endDate);
+        });
+
+        // Helper function to format date
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Initial chart data load
+        updateChartData('weekly');
+        
     });
+
+    // Create the top categories pie chart
+    const topCategoriesCtx = document.getElementById('topCategoriesChart').getContext('2d');
+    const topCategoriesChart = new Chart(topCategoriesCtx, {
+        type: 'pie',
+        data: {
+            labels: JSON.parse('<%- JSON.stringify(topCategories.map(cat => cat.name)) %>'),
+            datasets: [{
+                data: JSON.parse('<%- JSON.stringify(topCategories.map(cat => cat.totalSold)) %>'),
+                backgroundColor: [
+                    '#4F46E5', // Indigo
+                    '#7C3AED', // Purple
+                    '#EC4899', // Pink
+                    '#F59E0B', // Amber
+                    '#10B981', // Emerald
+                    '#3B82F6', // Blue
+                    '#6366F1', // Indigo-600
+                    '#8B5CF6', // Purple-600
+                    '#EF4444', // Red-500
+                    '#14B8A6'  // Teal-50
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Sales Distribution by Category',
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            }
+        }
+    });
+
+    // Create the top products pie chart
+    const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+    const topProductsChart = new Chart(topProductsCtx, {
+        type: 'pie',
+        data: {
+            labels: JSON.parse('<%- JSON.stringify(topProducts.map(prod => prod.name)) %>'),
+            datasets: [{
+                data: JSON.parse('<%- JSON.stringify(topProducts.map(prod => prod.totalSold)) %>'),
+                backgroundColor: [
+                    '#4F46E5', // Indigo
+                    '#7C3AED', // Purple
+                    '#EC4899', // Pink
+                    '#F59E0B', // Amber
+                    '#10B981', // Emerald
+                    '#3B82F6', // Blue
+                    '#6366F1', // Indigo-600
+                    '#8B5CF6', // Purple-600
+                    '#EF4444', // Red-500
+                    '#14B8A6'  // Teal-50
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Sales Distribution by Product',
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            }
+        }
+    });
+
 </script>

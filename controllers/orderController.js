@@ -832,116 +832,158 @@ exports.downloadInvoice = async (req, res) => {
         const order = await Orders.findById(orderId)
             .populate("orderedItems.product")
             .populate("userId", "username fullname email");
+
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
+
+        console.log('Order details:', {
+            id: order._id,
+            items: order.orderedItems.map(item => ({
+                productId: item.product._id,
+                productName: item.product.productName,
+                price: item.price,
+                quantity: item.quantity
+            }))
+        });
+
         if (order.status !== 'Delivered') {
             return res.status(403).send('Invoice is only available for delivered orders');
         }
-        // Create a new PDF document
+
         const doc = new PDFDocument({
             margin: 50,
-            font: 'Helvetica' // Use Helvetica font which has better Unicode support
+            font: 'Helvetica'
         });
 
-        // Helper function to format currency
         const formatCurrency = (amount) => {
-            return `Rs. ${Number(amount).toLocaleString('en-IN', {
+            return `₹${Number(amount).toLocaleString('en-IN', {
                 maximumFractionDigits: 2,
                 minimumFractionDigits: 2
             })}`;
         };
 
-        // Set response headers
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
-
-        // Pipe the PDF to the response
         doc.pipe(res);
 
-        // Add the invoice header
+        // Header
         doc.fontSize(20).text('INVOICE', { align: 'center' });
         doc.moveDown();
         doc.fontSize(10).text('CAlliope', { align: 'center' });
         doc.fontSize(10).text('www.calliope.com', { align: 'center' });
         doc.moveDown();
 
-        // Add a horizontal line
-        doc.moveTo(50, doc.y)
-            .lineTo(550, doc.y)
-            .stroke();
+        // Separator line
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown();
 
-        // Add order details
+        // Order Details
         doc.fontSize(12).text(`Order ID: #${orderId}`);
-        doc.fontSize(10).text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-        doc.moveDown();
-
-        // Add customer details
-        doc.fontSize(12).text('Customer Details:');
-        doc.fontSize(10).text(`Name: ${order.userId.fullname || order.userId.username}`);
-        doc.fontSize(10).text(`Email: ${order.userId.email}`);
-        doc.moveDown();
-
-        // Add product table headers
-        let yPos = doc.y;
         doc.fontSize(10)
-            .text('Product', 50, yPos)
-            .text('Quantity', 250, yPos)
-            .text('Price', 350, yPos)
-            .text('Total', 450, yPos);
-
-        // Add a line below headers
-        doc.moveTo(50, doc.y + 5)
-            .lineTo(550, doc.y + 5)
-            .stroke();
+           .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
+           .text(`Status: ${order.status}`)
+           .text(`Payment Method: ${order.paymentMethod}`);
         doc.moveDown();
 
-        // Add products
+        // Customer and Shipping Details in two columns
+        const startY = doc.y;
+        
+        // Customer Details (Left Column)
+        doc.fontSize(12).text('Customer Details:', 50, startY);
+        doc.fontSize(10)
+           .text(`Name: ${order.userId.fullname || order.userId.username}`, 50)
+           .text(`Email: ${order.userId.email}`, 50);
+
+        // Shipping Address (Right Column)
+        doc.fontSize(12).text('Shipping Address:', 300, startY);
+        doc.fontSize(10)
+           .text(`${order.address.name}`, 300)
+           .text(`${order.address.streetAddress}`, 300)
+           .text(`${order.address.city}, ${order.address.state}`, 300)
+           .text(`${order.address.country} - ${order.address.pincode}`, 300)
+           .text(`Phone: ${order.address.mobile}`, 300);
+
+        // Ensure proper spacing after addresses
+        doc.y = Math.max(doc.y, doc.y + 20);
+        doc.moveDown();
+
+        // Separator line
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+        doc.moveDown();
+
+        // Order Items Section
+        doc.fontSize(12).text('Order Items:', 50);
+        doc.moveDown();
+
+        // Table Headers with background
+        const tableTop = doc.y;
+        doc.rect(50, tableTop, 500, 20).fill('#f3f4f6');
+        
+        doc.fillColor('#000000')
+           .fontSize(10)
+           .text('Product', 60, tableTop + 5)
+           .text('Quantity', 250, tableTop + 5)
+           .text('Price', 350, tableTop + 5)
+           .text('Total', 450, tableTop + 5);
+
+        doc.moveDown();
+        let yPos = doc.y + 10;
+
+        // Product Items
         let totalMRP = 0;
-        order.orderedItems.forEach(item => {
+
+        console.log('Processing items:', order.orderedItems.length);
+
+        order.orderedItems.forEach((item,index) => {
+            console.log(`Processing item ${index + 1}:`, {
+                product: item.product,
+                price: item.price,
+                quantity: item.quantity
+            });
             const price = Number(item.price);
             const quantity = Number(item.quantity);
             const total = price * quantity;
 
             yPos = doc.y;
+            const productName = item.product ? (item.product.productName || 'Unknown Product') : 'Unknown Product';
+
             doc.fontSize(10)
-                .text(item.product.name, 50, yPos, { width: 180 })
+                .text(productName, 60, yPos, { width: 180 })
                 .text(quantity.toString(), 250, yPos)
                 .text(formatCurrency(price), 350, yPos)
                 .text(formatCurrency(total), 450, yPos);
 
-            totalMRP += Number(item.product.mrp) * quantity;
-            doc.moveDown();
+            totalMRP += total;
+            yPos += 25;
         });
 
-        // Add a line above totals
-        doc.moveTo(50, doc.y)
-            .lineTo(550, doc.y)
-            .stroke();
+        // Summary Section
+        doc.moveDown();
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown();
 
-        // Function to add aligned text
+        // Right-aligned summary box
+        const summaryX = 350;
+        let currentY = doc.y;
+
+        // Summary details
+        doc.fontSize(10);
+        
+        // Helper function for aligned text
         const addAlignedText = (label, value, y) => {
-            doc.text(label, 350, y);
-            doc.text(value, 450, y, { align: 'left' });
+            doc.text(label, summaryX, y);
+            doc.text(value, summaryX + 100, y, { align: 'right' });
         };
 
-        // Add totals with proper alignment
-        let currentY = doc.y;
-        doc.fontSize(10);
-
-        // Subtotal
         addAlignedText('Subtotal:', formatCurrency(totalMRP), currentY);
         currentY += 20;
 
-        // Discount
-        if (order.totalDiscountAmount) {
-            addAlignedText('Discount:', `-${formatCurrency(Number(order.totalDiscountAmount))}`, currentY);
+        if (order.totalDiscount) {
+            addAlignedText('Discount:', `-${formatCurrency(Number(order.totalDiscount))}`, currentY);
             currentY += 20;
         }
 
-        // Coupon
         if (order.coupon && order.coupon.discountAmount) {
             addAlignedText(
                 `Coupon (${order.coupon.couponCode}):`,
@@ -951,23 +993,21 @@ exports.downloadInvoice = async (req, res) => {
             currentY += 20;
         }
 
-        // Final total with a line above
-        doc.moveTo(350, currentY)
-            .lineTo(550, currentY)
-            .stroke();
+        // Final Total
+        doc.moveTo(summaryX, currentY).lineTo(550, currentY).stroke();
         currentY += 10;
-
-        doc.fontSize(12);
+        
+        doc.fontSize(12).font('Helvetica-Bold');
         addAlignedText('Total Amount:', formatCurrency(Number(order.totalAmount)), currentY);
 
-        // Add footer
-        doc.fontSize(10)
-            .text('Thank you for shopping with us!', 50, 700, { align: 'center' });
+        // Footer
+        doc.fontSize(10).font('Helvetica')
+           .text('Thank you for shopping with us!', 50, 700, { align: 'center' });
 
-        // Finalize the PDF
         doc.end();
     } catch (error) {
         console.error("Error downloading invoice:", error);
+        console.error("Error details:", error.stack);
         res.status(500).json({ message: "Failed to download invoice" });
     }
 }
