@@ -71,8 +71,8 @@ exports.loadDashboard=async (req,res)=>{
                     name: { $first: '$productDetails.productName' }
                 }
             },
-            { $sort: { totalSold: 1 } },
-            { $limit: 17 },
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
             {
                 $project: {
                     _id: 1,

@@ -43,7 +43,8 @@
                     </div>
                     <div>
                         <span class="text-gray-600 font-medium">Order Date:</span>
-                        <span class="text-gray-800"><%= formatDate(order.orderDate) %></span>
+                        <span class="text-gray-800"><%= new Date(order.createdAt).toLocaleDateString() %></span>
+                        <!-- <span class="text-gray-800"><%= formatDate(order.orderDate) %></span> -->
                     </div>
                     <div>
                         <span class="text-gray-600 font-medium">Status:</span>
@@ -109,13 +110,13 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">₹<%= item.product.finalAmount %></div>
+                                        <div class="text-sm text-gray-900">₹<%= item.priceAtPurchase.toFixed(0) %></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900"><%= item.quantity %></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">₹<%= (item.product.finalAmount * item.quantity) %></div>
+                                        <div class="text-sm text-gray-900">₹<%= (item.priceAtPurchase * item.quantity).toFixed(0) %></div>
                                     </td>
                                 </tr>
                             <% }); %>
@@ -123,17 +124,17 @@
                         <tfoot class="bg-gray-50">
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900">Subtotal:</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹<%= order.totalAmount %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹<%= Number(order.total).toFixed(0)  %></td>
                             </tr>
-                            <% if (order.discount) { %>
+                            <% if (order.couponDiscount) { %>
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900">Discount:</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">-₹<%= order.discount %></td>
+                                    <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900"> Coupon discount:</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">-₹<%= order.couponDiscount.toFixed(0)  %></td>
                                 </tr>
                             <% } %>
                             <tr class="bg-gray-100">
                                 <td colspan="3" class="px-6 py-4 text-right text-sm font-bold text-gray-900">Total:</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">₹<%= order.finalAmount %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">₹<%= finalAmount.toFixed(0)  %></td>
                             </tr>
                         </tfoot>
                     </table>

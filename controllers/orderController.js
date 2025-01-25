@@ -519,12 +519,20 @@ exports.getOrderDetails = async (req, res) => {
             orderedItems: order.orderedItems.map(item => ({
                 ...item._doc,
                 total: item.quantity * (item.product?.finalAmount || 0)
-            }))
+            })),
+            total: order.orderedItems.reduce((sum,item)=>{
+                return sum + (item.quantity * item.priceAtPurchase)
+            },0),
+
         };
+
+        console.log("total:",orderData.total)
         console.log("orderData in getOrderDetails: ",orderData)
         res.render('admin/order-details', { 
             activeTab:'orders',
             order:orderData,
+            // total:orderData.total,
+            finalAmount: orderData.total - order.couponDiscount,
             timeline,
             formatDate: (date) => {
                 return date ? new Date(date).toLocaleDateString('en-US', {

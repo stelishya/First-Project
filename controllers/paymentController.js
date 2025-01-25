@@ -7,6 +7,8 @@ const Address = require('../models/addressSchema');
 const Carts = require('../models/cartSchema');
 require('dotenv').config();
 
+const { calculateOrderItemPrices } = require('../helpers/priceCalculator');
+
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
@@ -118,10 +120,16 @@ exports.verifyPayment = async (req, res) => {
             // console.log("Getting product details for:", orderData.singleProductId);
             // const product = await Products.findById(orderData.singleProductId);
             console.log("Found product:", product);
+            const prices = calculateOrderItemPrices({
+                product: product,
+                quantity: orderData.quantity
+            });
             orderedItems = [{
                 product: product._id,
                 quantity: orderData.quantity,
-                priceAtPurchase: product.price
+                priceAtPurchase:  prices.pricePerUnit,
+                total: prices.totalPrice,
+                totalDiscount: prices.totalDiscount
             }];
 
             // Update product stock

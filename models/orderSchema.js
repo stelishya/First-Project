@@ -26,6 +26,9 @@ const orderSchema=new Schema({
             type: Number,
             default:0,
             required: true
+        },
+        total:{
+            type: Number
         }
     }],
     // discount:[{
@@ -66,7 +69,7 @@ const orderSchema=new Schema({
         default:0,
         required: true
     },
-    
+
     address:{
         name:{
             type:String,
