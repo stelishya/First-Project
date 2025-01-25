@@ -53,7 +53,7 @@ exports.loadDashboard=async (req,res)=>{
         }).toString();
         
         const productAggregation = await Orders.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
+            { $match: { status: { $ne: ['Cancelled','Returned','Payment failed']  } } },
             { $unwind: '$orderedItems' },
             {
                 $lookup: {
@@ -71,8 +71,8 @@ exports.loadDashboard=async (req,res)=>{
                     name: { $first: '$productDetails.productName' }
                 }
             },
-            { $sort: { totalSold: -1 } },
-            { $limit: 10 },
+            { $sort: { totalSold: 1 } },
+            { $limit: 17 },
             {
                 $project: {
                     _id: 1,
@@ -84,7 +84,7 @@ exports.loadDashboard=async (req,res)=>{
 
         // Aggregate to find top-selling categories
         const categoryAggregation = await Orders.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
+            { $match: { status: { $ne: ['Cancelled','Returned','Payment failed'] } } },
             { $unwind: '$orderedItems' },
             {
                 $lookup: {
@@ -143,7 +143,8 @@ exports.loadDashboard=async (req,res)=>{
             period: period || '',
             query: queryString,
             topProducts: productAggregation,
-            topCategories: categoryAggregation
+            topCategories: categoryAggregation,
+            activeTab: 'dashboard'
         });
     } catch (error) {
         console.error('Error loading dashboard:', error);
@@ -167,7 +168,44 @@ exports.loadDashboard=async (req,res)=>{
         });
     }
 }
-
+exports.topProduct = async(req,res)=>{
+    try {
+        const productAggregation = await Orders.aggregate([
+            { $match: { status: { $ne: 'Cancelled' } } },
+            { $unwind: '$orderedItems' },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'orderedItems.product',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
+            { $unwind: '$productDetails' },
+            {
+                $group: {
+                    _id: '$orderedItems.product',
+                    totalSold: { $sum: '$orderedItems.quantity' },
+                    name: { $first: '$productDetails.productName' }
+                }
+            },
+            {
+                $match:{"productDetails": { $totalSold: 0 } }
+            },
+            { $sort: { totalSold: 1 } },
+            { $limit: 10 },
+            {
+                $project: {
+                    _id: 1,
+                    totalSold: 1,
+                    name: 1 
+                }
+            }
+        ]);
+    } catch (error) {
+        
+    }
+}
 exports.getSalesReport = async (req, res) => {
     try {
         const { startDate, endDate, period } = req.query;

@@ -12,7 +12,7 @@ exports.customerInfo = async (req,res)=>{
         if(req.query.page){
             page=req.query.page 
         }
-        const limit=3;
+        const limit=8;
         const userData = await User.find({
             is_admin:false,
             $or:[
@@ -35,10 +35,12 @@ exports.customerInfo = async (req,res)=>{
         const currentPage = page;
         res.render('admin/customers',{
             data:userData,
-            search:search,
-            count:count,
-            totalPages:totalPages,
-            currentPage:currentPage
+            search,
+            count,
+            totalPages,
+            currentPage,
+            limit,
+            activeTab: 'users'
         });
     } catch (error) {
         console.log(error);

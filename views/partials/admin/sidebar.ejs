@@ -3,13 +3,13 @@
     <h1 class="text-4xl font-bold mb-8" style="font-family: 'Playfair Display', serif;">CAlliope</h1>
     <nav class="flex-1">
     <ul class="space-y-2">
-        <li><a href="/admin/dashboard" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-tachometer-alt mr-3"></i>Dashboard</a></li>
-        <li><a href="/admin/products" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-box mr-3"></i>Product</a></li>
-        <li><a href="/admin/category" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-list mr-3"></i>Categories</a></li>
-        <li><a href="/admin/orders" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-shopping-cart mr-3"></i>Orders</a></li>
-        <li><a href="/admin/users" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-users mr-3"></i>Customers</a></li>
-        <li><a href="/admin/coupons" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-ticket-alt mr-3"></i>Coupons</a></li>
-        <li><a href="/admin/returns" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center transition-colors"><i class="fas fa-exchange-alt mr-3"></i>Returns</a></li>
+        <li><a href="/admin/dashboard" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'dashboard' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-tachometer-alt mr-3"></i>Dashboard</a></li>
+        <li><a href="/admin/products" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'products' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-box mr-3"></i>Products</a></li>
+        <li><a href="/admin/category" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'categories' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-list mr-3"></i>Categories</a></li>
+        <li><a href="/admin/orders" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'orders' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-shopping-cart mr-3"></i>Orders</a></li>
+        <li><a href="/admin/users" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'users' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-users mr-3"></i>Customers</a></li>
+        <li><a href="/admin/coupons" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'coupons' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-ticket-alt mr-3"></i>Coupons</a></li>
+        <li><a href="/admin/returns" class="text-lg text-black hover:bg-gray-600 hover:text-white rounded px-3 py-2 flex items-center <%= activeTab === 'returns' ? 'bg-gray-500' : 'bg-gray-400' %> transition-colors"><i class="fas fa-exchange-alt mr-3"></i>Returns</a></li>
     </ul>
   </nav>
     

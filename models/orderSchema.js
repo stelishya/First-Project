@@ -42,7 +42,7 @@ const orderSchema=new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending','Order Placed','Processing', 'Shipped',"Out for delivery", 'Delivered', 'Cancelled', 'Return Request', 'Returned'],
+        enum: ['Pending','Order Placed','Processing', 'Shipped',"Out for delivery", 'Delivered', 'Cancelled', 'Return Request', 'Returned','Payment failed'],
         default:"Order Placed"
     },
     statusHistory: [{
@@ -66,6 +66,7 @@ const orderSchema=new Schema({
         default:0,
         required: true
     },
+    
     address:{
         name:{
             type:String,

@@ -107,8 +107,7 @@
                                         <h3 class="text-lg font-semibold">
                                             <%= item.product.productName %>
                                         </h3>
-                                        <div class="text-sm text-gray-600">Quantity: <%= item.quantity %>
-                                        </div>
+                                        <!-- <div class="text-sm text-gray-600">Quantity: <%= item.quantity %></div> -->
                                         <div class="mt-2">
                                             <span class="text-sm text-gray-500 line-through">₹<%=item.product.mrp.toFixed(0) %></span>
                                             <span class="ml-2 text-lg font-semibold text-gray-900">₹<%=item.priceAtPurchase.toFixed(0) %></span>
@@ -125,6 +124,17 @@
                                                         (<%= Math.round(((item.product.mrp - item.priceAtPurchase) / item.product.mrp) * 100) %>% off)
                                                 </span>
                                             <% } %> -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center p-4 border rounded-lg hover:shadow-md transition-shadow duration-300">
+                                    <div class="mt-2">
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <span class="ml-2 text-lg font-semibold text-gray-700">₹<%= item.priceAtPurchase.toFixed(0) %></span>
+                                            <span class="mx-2">×</span>
+                                            <span class="text-md text-gray-600"><%= item.quantity %></span>
+                                            <span class="mx-2">=</span>
+                                            <span class="ml-2 text-lg font-semibold text-gray-900">₹<%= (item.priceAtPurchase * item.quantity).toFixed(0) %></span>
                                         </div>
                                     </div>
                                 </div>
@@ -219,7 +229,7 @@
                                     <%= order.paymentStatus %>
                                 </p>
                             </div>
-                            <% if (order.paymentStatus==='Failed' && order.paymentMethod==='Online' ) { %>
+                            <% if (order.paymentStatus==='Failed' && order.paymentMethod==='Online Payment' ) { %>
                                 <div class="mt-4">
                                     <button onclick="retryPayment('<%= order._id %>', '<%= order.finalAmount %>')"
                                         class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg 
@@ -364,6 +374,7 @@
                 animation: fadeIn 0.5s ease-out forwards;
             }
         </style>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
     let currentOrderId = null;
@@ -525,26 +536,27 @@
     async function retryPayment(orderId, amount) {
         try {
             // Create new Razorpay order
-            const response = await axios.post('/user/razorpay/order', {
-                amount: amount
+            const response = await axios.post('/user/retry-payment', {
+                orderId:orderId
             });
 
             if (response.status === 200) {
                 const options = {
-                    key: '%= razorpayKey %>',
+                    key: response.data.key_id,
                     amount: amount * 100,
                     currency: "INR",
-                    name: "Craftora",
+                    name: "CAlliope",
                     description: "Order Payment",
-                    order_id: response.data.order.id,
+                    order_id: response.data.id,
                     handler: async function (response) {
                         try {
                             // Verify payment
-                            const verifyResponse = await axios.post('/user/razorpay/verify', {
+                            const verifyResponse = await axios.post('/user/verify-retry-payment', {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
-                                orderId: orderId, status: 'Success'
+                                orderId: orderId, 
+                                status: 'Success'
                             });
 
                             if (verifyResponse.data.success) {

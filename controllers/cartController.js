@@ -13,7 +13,7 @@ exports.getCart = async (req,res)=>{
         const cart = await Carts.findOne({ userId }).populate({
             path: 'items.productId',
             model: 'Product',
-            select: 'productName description productImage mrp productOffer maxDiscount  category',
+            select: 'productName description productImage mrp productOffer maxDiscount  category stock',
             populate: { 
                 path: 'category',
                 select: 'name categoryOffer '
@@ -42,7 +42,7 @@ exports.getCart = async (req,res)=>{
                 product: product,
                 quantity: item.quantity
             });
-
+            // mrp
             totalAmount += itemPrices.totalPrice;
             totalDiscount += itemPrices.totalDiscount;
             subtotal += itemPrices.originalPrice * item.quantity;
@@ -51,6 +51,7 @@ exports.getCart = async (req,res)=>{
             console.log(`Original Price: ${itemPrices.originalPrice}`);
             console.log(`Discount: ${itemPrices.totalDiscount}`);
             console.log(`Final Price: ${itemPrices.totalPrice}`);
+            console.log(`Product Stock: ${product.stock}`);
 
             return {
                 ...item.toObject(),
@@ -58,7 +59,8 @@ exports.getCart = async (req,res)=>{
                 discountedPrice:itemPrices.pricePerUnit,
                 totalDiscount: itemPrices.totalDiscount,
                 bestDiscountType: `${itemPrices.discountPercentage} Discount`,
-                finalAmount: itemPrices.totalPrice
+                finalAmount: itemPrices.totalPrice,
+                stock: product.stock 
             };
         }).filter(Boolean); // Remove any null items
         
@@ -66,7 +68,8 @@ exports.getCart = async (req,res)=>{
         console.log("Hi i'm rendering cart page")
         console.log(`products: ${products}`)
         console.log('Cart Totals:');
-        console.log(`mrp: ${products.mrp}`)
+        // console.log(`mrp: ${products.mrp}`)
+        console.log(`mrp: ${products[0]?.mrp || 0}`)
         console.log(`Subtotal: ${subtotal}`);
         console.log(`Total Discount: ${totalDiscount}`);
         console.log(`Final Amount: ${totalAmount}`);

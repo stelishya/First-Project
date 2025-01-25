@@ -5,7 +5,7 @@ exports.categoryInfo = async(req,res)=>{
     try {
         const {offer} = req.body;
         const page = parseInt(req.query.page) || 1;
-        const limit = 4;
+        const limit = 7;
         const skip = (page - 1) * limit;
 
         const categoryData = await Category.find({})
@@ -29,12 +29,14 @@ exports.categoryInfo = async(req,res)=>{
             title: 'Category Management',
             cat: categoryData,
             currentPage: page,
-            totalPages: totalPages,
+            totalPages,
+            limit,
             totalCategories: totalCategories,
             adminName:adminName,
             categoryOffer: offer || 0,
             // discountTypes: ['Percentage Discount', 'Fixed Amount'],
-            path: '/admin/category'
+            path: '/admin/category',
+            activeTab: 'categories'
         });
         
     } catch (error) {

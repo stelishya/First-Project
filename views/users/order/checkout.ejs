@@ -125,7 +125,7 @@
 
                                                 <td class="text-right">
                                                     <div class="text-sm">
-                                                        <div>MRP: ₹<%= totalMRP.toFixed(0) %>
+                                                        <div>MRP: ₹<%= (product.productId.mrp.toFixed(0))*product.quantity %>
                                                         </div>
                                                         <% if (product.prices.totalDiscount> 0) { %>
                                                             <div class="text-red-500">-₹<%=
@@ -189,7 +189,7 @@
                                 <div class="">
                                     <h3>Total MRP</h3>
                                 </div>
-                                <div style="margin-left:67%">₹<%= totalMRP.toFixed(0) %>
+                                <div style="margin-left:67%" id="totalMRP">₹<%= totalMRP.toFixed(0) %>
                                 </div>
                             </div>
                             <div class="space-y-2 mb-4">
@@ -199,7 +199,7 @@
                                             <i class="fas fa-minus-circle text-red-500 mr-2"></i>
                                             Product Discount
                                         </span>
-                                        <span class="text-red-500">-₹<%= totalDiscount.toFixed(0) %></span>
+                                        <span class="text-red-500" id="totalDiscount">-₹<%= totalDiscount.toFixed(0) %></span>
                                         <!-- .toFixed(2) -->
                                     </div>
                                     <% } %>
@@ -252,14 +252,15 @@
                                     Place Order
                                 </button>
                             <% } else { %>
+
                             <button onclick="placeOrder('<%= totalAmount %>')"
-                                // ,'%= products[0].productId._id %>')"
+                                
                                 class="w-full py-3  text-white rounded-lg hover:bg-gray-500 transition-colors mt-6"
                                 style="background-color: #716f6e;">
                                 Place Order
                             </button>
                             <% } %>
-
+                            <!-- // ,'%= products[0].productId._id %>'" -->
                         </div>
                     </div>
                 </div>
@@ -771,6 +772,7 @@
             }
         }
 
+        const productsData = <%- JSON.stringify(products) %>;
 
         async function placeOrder(finalAmount, productId = null) {
             if (!selectedAddressId) {
@@ -789,7 +791,27 @@
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 // const isBuyNow = urlParams.get('buyNow') === 'true';
-                const quantity = urlParams.get('quantity') || 1;
+                // const quantity = urlParams.get('quantity') || 1;
+                let quantity,totalDiscount,totalMRP,couponDiscount;
+                
+                if (productId) {
+                    // For buy now, get quantity from products array
+                    quantity = parseInt(productsData[0].quantity);
+                    console.log("Buy Now Quantity:", quantity);
+                } else {
+                    // For cart checkout, get quantity from products array
+                    quantity = parseInt(productsData[0].quantity);
+                    console.log("Cart Quantity:", quantity); 
+                }
+                totalMRP = parseFloat(document.getElementById('totalMRP').textContent.replace('₹', '').trim());
+                totalDiscount = parseFloat(document.getElementById('totalDiscount').textContent.replace('-₹', '').trim());
+
+                const appliedCouponDiscount = document.getElementById('couponDiscountValue');
+                couponDiscount = appliedCouponDiscount ? 
+                    parseFloat(appliedCouponDiscount.textContent.replace('-₹', '').trim()) : 0;
+
+                console.log("Price Details:", { totalMRP, totalDiscount, couponDiscount });
+                //couponDiscountValue
 
                 // Determine if this is a single product order or cart order
                 // const isSingleProduct = Boolean(productId);
@@ -802,12 +824,13 @@
 
                 let orderData = {
                     addressId: selectedAddressId,
-                    total: parseFloat(finalAmount),
+                    total: parseFloat(finalAmount - (couponDiscount || 0)),
                     paymentType: selectedPayment.value,
-                    // buyNow: false,
                     quantity: parseInt(quantity),
-                    couponCode: couponCode
-
+                    totalMRP: totalMRP,
+                    totalDiscount: totalDiscount,
+                    couponCode: couponCode,
+                    couponDiscount:couponDiscount
                 };
                 // Set buyNow based on whether productId is provided
                 if (productId) {
@@ -882,12 +905,22 @@
                             handler: function (response) {
                                 handlePaymentSuccess(response, razorpayOrderData);
                             },
+                            modal: {
+                                ondismiss: function() {
+                                    console.log("Payment modal dismissed");
+                                    handlePaymentFailure(razorpayOrderData);
+                                }
+                            },
                             theme: {
                                 color: "#3399cc"
                             }
                         };
 
                         const rzp = new Razorpay(options);
+                        rzp.on('payment.failed', function(response) {
+                            console.log("Payment failed event triggered");
+                            handlePaymentFailure(response);
+                        });
                         // rzp.on('payment.failed', function (response) {
                         //     console.error("Payment failed:", response.error);
                         //     showToast(response.error.description || 'Payment failed', true);
@@ -936,6 +969,7 @@
                 });
 
                 if (verifyResponse.data.success) {
+                    console.log("success aahn")
                     await Swal.fire({
                         title: 'Payment Successful!',
                         text: 'Your order has been placed.',
@@ -944,15 +978,62 @@
                         confirmButtonColor: '#f97316'
                     });
                     window.location.href = '/user/orders';
-                } else {
-                    throw new Error(verifyResponse.data.message || 'Payment verification failed');
-                }
+                } 
+                // else {
+                //     console.log("failure")
+                //     // Get the orderId from the response
+                //     const orderId = verifyResponse.data.orderId;
+                //     await Swal.fire({
+                //         title: 'Payment Failed!',
+                //         text: 'Payment Failed. Please try again.',
+                //         icon: 'error',
+                //         confirmButtonText: 'Retry Payment',
+                //         confirmButtonColor: '#f97316'
+                //     });
+                //     window.location.href = `/user/order/details/${orderId}`;
+                //     // throw new Error(verifyResponse.data.message || 'Payment verification failed');
+                // }
             } catch (error) {
                 console.error('Payment verification error:', error);
                 showToast(error.message || 'Payment verification failed', true);
             }
         }
 
+        async function handlePaymentFailure(razorpayOrderData) {
+                        console.log("Handling payment failure");
+                        try {
+                            // Create order with failed status
+                            const orderResponse = await axios.post('/user/verify-payment', {
+                                orderData:razorpayOrderData,
+                                paymentStatus: 'Failed'
+                            });
+                            console.log("orderResponse : ",orderResponse)
+                            if (!orderResponse.data.success) {
+                                const orderId = orderResponse.data.order._id;
+                                await Swal.fire({
+                                    title: 'Payment Failed!',
+                                    text: orderResponse.data.message|| 'Payment Failed. Please try again.',
+                                    icon: 'error',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Retry Payment',
+                                    cancelButtonText: 'Cancel',
+                                    confirmButtonColor: '#f97316',
+                                    cancelButtonColor: '#6b7280'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = `/user/order/details/${orderId}`;
+                                    }
+                                })
+                                // .then(()=>window.location.href = `/user/order/details/${orderId}`)
+                                
+                            } else {
+                                showToast('Error creating order', true);
+                            }
+                        } catch (error) {
+                            console.error('Error handling payment failure:', error);
+                            showToast('Error processing payment failure', true);
+                        }
+                    }
         // Form validation functions
         function validateName() {
             const input = document.getElementById('nameInput').value.trim();
@@ -1270,7 +1351,7 @@
                 //     total = parseFloat(totalMRPElement.textContent.replace('₹', '').trim());
                 //     console.log('MRP total:', total);
                 // } else {
-                //     console.log("coupon apply..error");
+                //     console.log("coupon apply..error")
                 //     console.error('Neither cartTotal nor totalMRP elements found');
                 //     throw new Error('Unable to determine total amount');
                 // }

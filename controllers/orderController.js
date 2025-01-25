@@ -138,7 +138,7 @@ exports.checkout = async (req, res) => {
 };
 
 exports.orderCreation = async (req, res) => {
-    console.log("orderCreation called", req.session.user._id)
+    console.log("orderCreation called")
     const userId = req.session.user._id;
     const orderData = req.body;
     console.log("orderData:", orderData);
@@ -303,15 +303,22 @@ exports.orderCreation = async (req, res) => {
                     country: selectedAddress.country
                 },
                 orderedItems: orderItems,
-                finalAmount: subtotal - couponDiscount,
-                totalDiscount: totalDiscountAmount + couponDiscount,
-                couponDiscount: couponDiscount,
+                // finalAmount: subtotal - couponDiscount,
+                finalAmount: subtotal - (totalDiscountAmount + (couponDiscount || 0)) ,
+                totalDiscount: (totalDiscountAmount + couponDiscount).toFixed(2),
+                couponDiscount: couponDiscount || 0,
                 couponCode: orderData.couponCode,
                 coupon: couponData ? couponData._id : null,
+                paymentMethod: orderData.paymentMethod,
+                paymentStatus: orderData.paymentStatus || 'Pending',
                 status: 'Order Placed',
                 paymentType: orderData.paymentType || 'Cash on Delivery'
             });
-            console.log("Creating order with data - newOrder :", newOrder);
+            console.log("Creating order with data - newOrder :", {
+                totalDiscountAmount,
+                couponDiscount,
+                finalTotalDiscount: newOrder.totalDiscount,
+                newOrder});
             await newOrder.save();
             console.log("Order saved successfully.");
 
@@ -405,7 +412,7 @@ exports.orderDetailsUser = async (req, res) => {
             path: "orderedItems.product",
             populate: {
                 path: "category",
-                select: 'productName productImage finalAmount mrp',
+                select: 'name categoryOffer productName productImage finalAmount mrp',
                 model: "Category"
             }
         })
@@ -446,12 +453,13 @@ exports.getOrdersAdmin = async (req, res) => {
         let search = req.query.search || '';
         const orderStatuses = Orders.schema.path('status').enumValues;
         const page = parseInt(req.query.page) || 1;
-        const limit = 6;
+        const limit = 8;
         const skip = (page - 1) * limit;
 
-        const returnRequests = await Orders.find({ 'returnDetails.returnStatus': 'Requested' }).populate({
+        const returnRequests = await Orders.find({ 'returnDetails.returnStatus': 'Requested' })
+        .populate({
             path: 'orderedItems.product',
-            select: 'name'
+            select: 'productName productImage  priceAtPurchase'
         }).populate('userId')
         console.log("returnRequests : ", returnRequests)
         const orders = await Orders.find({})
@@ -466,12 +474,15 @@ exports.getOrdersAdmin = async (req, res) => {
         const totalPages = Math.ceil(totalOrders / limit);
 
         res.render('admin/order folder/orders', {
-            orders, activeTab: 'orders', orderStatuses, returnRequests,
+            orders, 
+            orderStatuses, 
+            returnRequests,
             page,
             totalPages,
             limit,
             totalOrders,
-            search
+            search,
+            activeTab: 'orders'
         });
     } catch (error) {
         console.error("Error fetching orders:", error);
@@ -510,7 +521,9 @@ exports.getOrderDetails = async (req, res) => {
                 total: item.quantity * (item.product?.finalAmount || 0)
             }))
         };
+        console.log("orderData in getOrderDetails: ",orderData)
         res.render('admin/order-details', { 
+            activeTab:'orders',
             order:orderData,
             timeline,
             formatDate: (date) => {
@@ -873,6 +886,8 @@ exports.downloadInvoice = async (req, res) => {
                 productId: item.product._id,
                 productName: item.product.productName,
                 price: item.price,
+                priceAtPurchase:item.priceAtPurchase,
+                finalAmount:item.finalAmount,
                 quantity: item.quantity
             }))
         });
@@ -969,9 +984,11 @@ exports.downloadInvoice = async (req, res) => {
             console.log(`Processing item ${index + 1}:`, {
                 product: item.product,
                 price: item.price,
+                finalAmount:item.finalAmount,
+                priceAtPurchase:item.priceAtPurchase,
                 quantity: item.quantity
             });
-            const price = Number(item.price);
+            const price = Number(item.priceAtPurchase);
             const quantity = Number(item.quantity);
             const total = price * quantity;
 
@@ -1028,7 +1045,7 @@ exports.downloadInvoice = async (req, res) => {
         currentY += 10;
         
         doc.fontSize(12).font('Helvetica-Bold');
-        addAlignedText('Total Amount:', formatCurrency(Number(order.totalAmount)), currentY);
+        addAlignedText('Total Amount:', formatCurrency(Number(order.finalAmount)), currentY);
 
         // Footer
         doc.fontSize(10).font('Helvetica')

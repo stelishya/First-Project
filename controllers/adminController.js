@@ -319,12 +319,37 @@ exports.getSalesReport = async (req, res) => {
 // Get all return requests
 exports.getReturns = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+
         const returns = await Orders.find({
             'returnDetails.returnRequested': true,
             'returnDetails.returnStatus': 'Pending'
-        }).populate('userId', 'username');
+        }).populate('userId', 'username')
+        .skip(skip)
+        .limit(limit)
+        .sort({ 'returnDetails.returnRequestedAt': -1 });
 
-        res.render('admin/returns', { returns });
+        const totalReturns = await Orders.countDocuments({
+            'returnDetails.returnRequested': true,
+            'returnDetails.returnStatus': 'Pending'
+        });
+
+        const totalPages = Math.ceil(totalReturns / limit);
+        const startIndex = totalReturns === 0 ? 0 : (page - 1) * limit + 1;
+        const endIndex = Math.min(page * limit, totalReturns);
+
+        res.render('admin/returns', { 
+            returns,
+            currentPage: page,
+            totalPages,
+            totalReturns,
+            startIndex,
+            endIndex,
+            limit,
+            activeTab: 'returns',
+         });
     } catch (error) {
         console.error('Error fetching returns:', error);
         res.status(500).render('admin/admin-error', { message: 'Error fetching returns' });

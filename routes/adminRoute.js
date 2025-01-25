@@ -69,7 +69,7 @@ admin_route.post('/rejectReturn/:orderId', adminController.rejectReturn);
 admin_route.get('/coupons',couponController.getAllCoupons);
 admin_route.post('/coupons', couponController.createCoupon);
 admin_route.patch('/coupons/:id/toggle-status',couponController.couponStatus);
-admin_route.post('/admin/coupon/edit/:id', couponController.editCoupon);
+admin_route.patch('/coupon/edit/:id', couponController.editCoupon);
 admin_route.delete('/coupon/:id', couponController.deleteCoupon);
 
 

@@ -14,6 +14,7 @@ const razorpay = new Razorpay({
 
 exports.createOrder = async (req, res) => {
     try {
+        console.log("createOrder called")
         const { amount, couponDiscount = 0 } = req.body;
         const options = {
             amount: amount * 100, // amount in smallest currency unit (paise)
@@ -44,8 +45,9 @@ exports.verifyPayment = async (req, res) => {
             razorpay_order_id, 
             razorpay_payment_id, 
             razorpay_signature,
-            orderData 
+            orderData,
         } = req.body;
+        let paymentStatus = req.body.paymentStatus
 
         console.log("Request body:", req.body);
         // console.log("Session user:", req.session.user);
@@ -59,7 +61,8 @@ exports.verifyPayment = async (req, res) => {
 
         if (razorpay_signature !== expectedSign) {
             console.log("Signature verification failed");
-            return res.status(400).json({ success: false, message: "Invalid signature" });
+            paymentStatus = "Failed"
+            // return res.status(400).json({ success: false, message: "Invalid signature" });
         }
 
         console.log("Signature verified successfully");
@@ -71,7 +74,7 @@ exports.verifyPayment = async (req, res) => {
             if (!user) {
                 throw new Error('User not found');
             }
-
+            console.log("Order data", orderData)
             // Get address details
             const addressDoc = await Address.findOne({ 
                 userId: user._id,
@@ -172,10 +175,11 @@ exports.verifyPayment = async (req, res) => {
                 userId: user._id,
                 orderId: razorpay_payment_id,
                 orderedItems:orderedItems,
-                status: 'Order Placed',
+                status: paymentStatus === "Failed" ?  "Pending":'Order Placed',
                 finalAmount: orderData.total,
-                // totalDiscount: totalDiscount,
-                // couponDiscount: orderData.couponDiscount,
+                totalDiscount: orderData.totalDiscount,
+                couponDiscount: orderData.couponDiscount,
+                couponCode: orderData.couponCode,
                 address: {
                     name: selectedAddress.name,
                     mobile: user.mobile, 
@@ -186,7 +190,7 @@ exports.verifyPayment = async (req, res) => {
                     state: selectedAddress.state || 'Not Specified',
                     alternatePhone: selectedAddress.mobile || user.mobile
                 },
-                paymentStatus: 'Paid',
+                paymentStatus: paymentStatus === 'Failed' ? "Failed": "Paid",
                 paymentId: razorpay_payment_id,
                 paymentMethod: 'Online Payment'
             };
@@ -197,9 +201,11 @@ exports.verifyPayment = async (req, res) => {
             const savedOrder = await order.save();
             console.log("Order saved successfully:", savedOrder);
 
+            if(paymentStatus === "Failed" )return res.status(200).json({success:false, message:"Payment Verification Failed", order:savedOrder})
             res.json({ 
                 success: true, 
                 message: 'Payment verified and order created',
+                orderId: savedOrder._id,
                 order: savedOrder
             });
         } catch (innerError) {
@@ -215,3 +221,81 @@ exports.verifyPayment = async (req, res) => {
         });
     }
 };
+
+exports.retryPayment = async (req,res)=>{
+    try {
+        const { orderId } = req.body;
+        const orderDetails = await Orders.findById(orderId);
+        const amount = orderDetails.finalAmount;
+        const options = {
+            amount: amount * 100, // amount in smallest currency unit (paise)
+            currency: "INR",
+            receipt: `order_${Date.now()}`
+        };
+
+        const order = await razorpay.orders.create(options);
+        res.json({
+            success: true,
+            id: order.id,
+            amount: order.amount,
+            // totalDiscount,
+            // couponDiscount,
+            key_id: process.env.RAZORPAY_KEY_ID || 'your_razorpay_key_id'
+            // finalAmount: order.amount - totalDiscount - couponDiscount
+        });
+    } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        res.status(500).json({ success: false, message: 'Failed to create order' });
+    }
+};
+
+exports.verifyRetryPayment = async(req,res)=>{
+    try {
+        const { 
+            razorpay_order_id, 
+            razorpay_payment_id, 
+            razorpay_signature,
+            orderId,
+        } = req.body;
+
+        const orderData = await Orders.findById(orderId)
+        console.log("order body:", orderData);
+        // console.log("Session user:", req.session.user);
+
+        // Verify signature
+        const sign = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSign = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(sign.toString())
+            .digest("hex");
+
+        if (razorpay_signature !== expectedSign) {
+            console.log("Signature verification failed");
+            return res.status(400).json({ success: false, message: "Invalid signature" });
+        }
+
+        console.log("Signature verified successfully");
+
+        orderData.paymentStatus = "Paid"
+        orderData.status = "Order Placed"
+        await orderData.save()
+        return res.status(200).json({success:true})
+    } catch (error) {
+        console.error('Payment verification error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Payment verification failed',
+            error: error.stack
+        });
+    }
+}
+
+exports.orderCreate = async (req,res)=>{
+    try {
+        console.log("orderCreate called")
+        const { razorpayOrderData,paymentStatus } = req.body;
+        console.log("req.body :",req.body)
+    } catch (error) {
+        
+    }
+}

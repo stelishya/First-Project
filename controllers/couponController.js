@@ -43,10 +43,36 @@ exports.createCoupon = async (req, res) => {
 
 exports.getAllCoupons = async (req,res) => {
     try {
-        const coupons = await Coupon.find({}).sort({ createdAt: -1 });
-        res.render('admin/coupon folder/coupons', { coupons });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+
+        // Get total count of coupons
+        const totalCoupons = await Coupon.countDocuments({});
+        
+        // Get paginated coupons
+        const coupons = await Coupon.find({})
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalCoupons / limit);
+        const startIndex = skip + 1;
+        const endIndex = Math.min(skip + limit, totalCoupons);
+
+        res.render('admin/coupon folder/coupons', {
+            coupons,
+            currentPage: page,
+            totalPages,
+            totalCoupons,
+            startIndex,
+            endIndex,
+            limit,
+            activeTab: 'coupons'
+        });
 
     } catch (error) {
+        console.error('Error fetching coupons:', error);
         res.status(500).json({ message: 'Error fetching coupons', error: error.message });
     }
 };
@@ -54,7 +80,15 @@ exports.editCoupon = async (req, res) => {
     try {
         console.log("editCoupon called ")
         const couponId = req.params.id;
-        const { name,code,offerPercentage,minimumPurchase,maximumDiscount,startDate,expiryDate,usageLimit}=req.body;
+        const { 
+            name,
+            code,
+            offerPercentage,
+            minimumPurchase,
+            maximumDiscount,
+            startDate,
+            expiryDate,
+            usageLimit}=req.body;
         console.log("req.body from edit product : ",req.body)
         if (!name || !code || !offerPercentage || !minimumPurchase || !startDate || !expiryDate) {
             return res.status(400).json({
@@ -66,6 +100,7 @@ exports.editCoupon = async (req, res) => {
             code: code.toUpperCase(),
             _id: { $ne: couponId }
         });
+        console.log('existingCoupon:',existingCoupon)
         if (existingCoupon) {
             return res.status(400).json({
                 success: false,
@@ -83,16 +118,19 @@ exports.editCoupon = async (req, res) => {
             startDate: new Date(startDate),
             expiryDate: new Date(expiryDate)
         },{ new: true });
+
         if (!updatedCoupon) {
             return res.status(404).json({
                 success: false,
                 message: 'Coupon not found'
             });
         }
-        res.redirect('/admin/coupons');
+        console.log('updatedCoupon:',updatedCoupon);
+        return res.status(200).json({success:true,message:'Coupon updated successfully',coupon:updatedCoupon});
+        // res.redirect('/admin/coupons',{success:true,message:'Coupon updated successfully',coupon:updatedCoupon});
     } catch (error) {
         console.error('Error in editCoupon:', error);
-        res.status(500).send({success:false,message:'Error updating coupon',error:error.message});
+        res.status(500).json({success:false,message:'Error updating coupon',error:error.message});
     }
 };
 

@@ -115,6 +115,43 @@
                 </div>
             <% } %>
         </div>
+        <div class="px-8 py-4 border-b border-gray-200">
+                <p class="text-sm text-gray-600">
+                    Showing <%= startIndex %>-<%= endIndex %> of <%= totalReturns %> returns
+                </p>
+        </div>
+        <% if (totalReturns > 0) { %>
+                <div class="px-8 py-4 flex justify-end items-center border-t border-gray-200">
+                    <div class="flex space-x-2">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=<%= currentPage - 1 %>" 
+                               class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">
+                                Previous
+                            </a>
+                        <% } %>
+
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <% if(i === currentPage) { %>
+                                <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded">
+                                    <%= i %>
+                                </span>
+                            <% } else { %>
+                                <a href="?page=<%= i %>" 
+                                   class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                    <%= i %>
+                                </a>
+                            <% } %>
+                        <% } %>
+
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>"
+                               class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">
+                                Next
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            <% } %>
     </main>
 </div>
 

@@ -63,17 +63,16 @@ async function sendVerificationEmail(email, otp) {
             `
         };
 
-        // Verify connection configuration
         await transporter.verify();
         console.log('Transporter verified successfully');
 
         const info = await transporter.sendMail(mailOptions);
         if (info && info.response) {
-            console.log("Email sent: ", info.response); // Logs the email sending status
-            return true;  // Email sent successfully
+            console.log("Email sent: ", info.response); 
+            return true; 
         } else {
             console.error("Error: No response from email transporter");
-            return false; // Failure in sending email
+            return false; 
         }
     } catch (error) {
         console.error('Error sending email:', error);
@@ -99,13 +98,12 @@ exports.insertUser = async (req, res) => {
         if (!user) {
             const newuser = new User({
                 username: username,
-                password: await bcrypt.hash(req.body.password, 10),// Hashing password for security
+                password: await bcrypt.hash(req.body.password, 10),
                 email: email,
                 mobile: mobile,
                 language: language,
                 createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
             });
-            // save the new user
             await newuser.save();
             console.log("User saved successfully");
 
@@ -208,7 +206,7 @@ exports.verifyOTP = async (req, res) => {
             console.log('hai hello')
             await User.findOneAndUpdate({ email: req.session.otp_cred }, { is_verified: true })
             // console.log('hai hello')
-            res.status(200).json({ success: true, message: "successfully verified" })
+            res.status(200).json({ success: true, message: "OTP verified successfully" })
         } else if (req.session.otpExpires < Date.now()) {
             res.status(400).json({ success: false, message: 'OTP Expired' })
         } 

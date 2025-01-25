@@ -70,18 +70,19 @@
                                 <div class="flex items-center space-x-4">
                                     <span class="text-gray-700 font-medium">Quantity:</span>
                                     <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden">
-                                        <button onclick="updateQuantity('<%= product.productId._id %>', -1, '<%= product.productId.quantity %>',' <%= product.discountedPrice %>')" 
+                                        <button onclick="updateQuantity('<%= product.productId._id %>', -1, '<%= product.productId.stock %>',' <%= product.discountedPrice %>')" 
                                                 class="px-4 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
                                             <i class="fas fa-minus text-gray-600"></i>
                                         </button>
+                                        <!-- Math.min(product.productId.stock, 5) -->
                                         <input type="number" 
                                                id="quantity-<%= product.productId._id %>" 
                                                value="<%= product.quantity %>" 
                                                min="1" 
-                                               max="<%= Math.min(product.productId.quantity, 5) %>"
+                                               max="<%= product.productId.stock < 6 ? product.productId.stock : 5  %>"
                                                class="w-16 text-center border-x border-gray-300 py-2 focus:outline-none"
-                                               onchange="validateAndUpdateQuantity(this, '<%= product.productId._id %>', '<%= product.productId.quantity %>', '<%= product.discountedPrice %>')">
-                                        <button onclick="updateQuantity('<%= product.productId._id %>', 1, '<%= product.productId.quantity %>', '<%= product.discountedPrice %>')"
+                                               onchange="validateAndUpdateQuantity(this, '<%= product.productId._id %>', '<%= product.productId.stock %>', '<%= product.discountedPrice %>')">
+                                        <button onclick="updateQuantity('<%= product.productId._id %>', 1, '<%= product.productId.stock %>', '<%= product.discountedPrice %>')"
                                                 class="px-4 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
                                             <i class="fas fa-plus text-gray-600"></i>
                                         </button>
@@ -145,8 +146,8 @@
                 return;
             }
             if (newValue > maxQuantity) {
-                showErrorToast(`Maximum quantity allowed is ${maxQuantity}`);
                 input.value = maxQuantity;
+                showErrorToast(`Maximum quantity allowed is ${maxQuantity}`);
                 return;
             }
             

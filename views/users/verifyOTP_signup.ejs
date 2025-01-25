@@ -92,6 +92,34 @@
         margin-bottom: 1rem;
         color: #463c2e;
     }
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 6px;
+        border-width: 1px;
+        border-style: solid;
+        font-size: 14px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        min-width: 200px;
+        max-width: 400px;
+    }
+
+    .toast.bg-red-100 {
+        background-color: #fee2e2;
+        border-color: #ef4444;
+        color: #991b1b;
+    }
+
+    .toast.bg-green-100 {
+        background-color: #dcfce7;
+        border-color: #22c55e;
+        color: #166534;
+    }
     </style>
 </head>
 <body>
@@ -134,15 +162,13 @@
             console.log('OTP Array:', otpArray);
             console.log('Request Payload:', { otp: otpArray });
 
-            // Send POST request using Axios
+           
             const response = await axios.post('/user/verifyOTP', { otp: otpArray });
             console.log("\notpInputs : "+otpInputs+"\notpArray : "+otpArray)
-            // +"\nresponse : "+response)
-            // Handle response
+          
             if (response.data.success) {
                 showToast(response.data.message || 'OTP verified successfully');
-                // closeModal();
-                // alert('OTP verified successfully!'); 
+                
                 window.location.reload('/user/login')
             } else {
                 throw new Error(response.data.message || 'OTP verification failed. Please try again.');
@@ -242,7 +268,8 @@
             });
         }
 
-        function showToast(message, isError = false) {
+function showToast(message, isError = false) {
+    console.log("otp toast vannu")
     const toast = document.createElement('div');
     toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
     toast.style.zIndex = '1100';
@@ -258,9 +285,9 @@
     // Hide and remove toast
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 500);
+    }, 5000);
 }
     </script>
 </body>

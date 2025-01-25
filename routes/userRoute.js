@@ -19,11 +19,9 @@ const passport = require('passport')
 
 user_route.use('/',express.static('public'));
 
-
-// Sign up management
 user_route.get('/signup',userController.loadRegister);
 user_route.post("/signup",userController.insertUser);
-user_route.post('/verifyOTP',userController.verifyOTP);// OTP Verification routes
+user_route.post('/verifyOTP',userController.verifyOTP);
 user_route.post('/resendOTP',userController.resendOTP);
 user_route.get('/auth/google',passport.authenticate('google',{scope:['profile','email'],prompt: 'select_account'}));
 user_route.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/user/signup'}),async (req,res)=>{
@@ -57,7 +55,6 @@ user_route.get('/forgotPassword',userController.forgotPasswordPage)
 
 //Home page 
 user_route.get('/demo',userAuth,(req,res)=>{res.render('users/home')});
-
 user_route.get('/home',userAuth,userController.loadHome);
 user_route.get('/logout',userController.userLogout);
 
@@ -103,6 +100,9 @@ user_route.post('/order/return/:orderId',userAuth,orderController.returnOrder)
 //RazorPay Payment
 user_route.post('/create-order', userAuth, paymentController.createOrder);
 user_route.post('/verify-payment', userAuth, paymentController.verifyPayment);
+// user_route.post('/order/create',userAuth,paymentController.orderCreate)
+user_route.post('/retry-payment', userAuth, paymentController.retryPayment)
+user_route.post('/verify-retry-payment', userAuth, paymentController.verifyRetryPayment)
 
 //Coupon
 user_route.get('/available-coupons', userAuth, couponController.getAvailableCoupons);
@@ -121,5 +121,9 @@ user_route.post('/wallet/add-money',userAuth, walletController.addMoneyToWallet)
 user_route.get('/wallet/balance',userAuth, walletController.getWalletBalance);
 
 user_route.get('/pageNotFound',userController.pageNotFound);
+user_route.post("/order/create",(req,res)=>{
+    console.log("heyyyy");
+    
+})
 
 module.exports =user_route;
