@@ -15,34 +15,39 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Customer</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Product</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Image</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Price</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Quantity</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Total</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Return Reason</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Status</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-medium text-gray-500">Action</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">SI No.</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Customer</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Product</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Image</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Price</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Quantity</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Total</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Total - CouponDiscount</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Return Reason</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <% returns.forEach(return_request => { 
+                        <% returns.forEach((return_request,index) => { 
                             const item = return_request.orderedItems[0];
                             const product = item.product;
                         %>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= ((currentPage - 1) * limit) + index + 1 %>
+                                </td>
+                                <td class="px-4 py-4">
                                     <div class="text-sm font-medium text-gray-900">
                                         <%= return_request.userId.username %>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        <%= product.productName %>
+                                <td class="px-4 py-4">
+                                    <div class="text-sm font-medium text-gray-900" data-product-name="<%= item.product ? item.product.productName : 'Product Not Found' %>">
+                                        <%= item.product ? item.product.productName : 'Product Not Found' %>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-4">
                                     <% if (product.productImage) { %>
                                         <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="h-16 w-16 object-cover rounded-md">
                                     <% } else { %>
@@ -51,21 +56,33 @@
                                         </div>
                                     <% } %>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">₹<%= product.finalAmount %></div>
+                                <td class="px-4 py-4">
+                                    <div class="text-sm text-gray-900">₹<%= item.priceAtPurchase %></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-4">
                                     <div class="text-sm text-gray-900"><%= item.quantity %></div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">₹<%= (product.finalAmount * item.quantity).toFixed(2) %></div>
+                                <td class="px-4 py-4">
+                                    <div class="text-sm text-gray-900">₹<%= (item.priceAtPurchase * item.quantity).toFixed(2) %></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-4">
+                                    <%
+                                    const itemTotal = item.priceAtPurchase * item.quantity;
+                                        const totalOrderValue = return_request.orderedItems.reduce((total, orderItem) => {
+                                            return total + (orderItem.priceAtPurchase * orderItem.quantity);
+                                        }, 0);
+                                        const itemProportion = itemTotal / totalOrderValue;
+                                        const itemCouponDiscount = (return_request.couponDiscount || 0) * itemProportion;
+                                        const finalAmount = itemTotal - itemCouponDiscount;
+                                    %>
+                                    <div class="text-sm text-gray-900">₹<%= finalAmount.toFixed(2) %></div>
+                                </td>
+                                <td class="px-4 py-4">
                                     <div class="text-sm text-gray-900">
                                         <%= return_request.returnDetails.returnReason %>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-4">
                                     <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
                                         <%= return_request.returnDetails.returnStatus === 'Pending' ? 'bg-gray-100 text-gray-800' :
                                             return_request.returnDetails.returnStatus === 'Approved' ? 'bg-green-100 text-green-800' :
@@ -74,16 +91,16 @@
                                         <%= return_request.returnDetails.returnStatus %>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-4">
                                     <% if (return_request.returnDetails.returnStatus === 'Pending') { %>
                                         <div class="flex space-x-2">
-                                            <form action="/admin/return-requests/<%= return_request._id %>/approve" method="POST" class="inline" onsubmit="return confirmAction('approve', '<%= product.productName %>')">
+                                            <form action="/admin/approveReturn/<%= return_request._id %>" method="POST" class="inline" onsubmit="return confirmAction('approve', '<%= product.productName %>')">
                                                 <button type="submit" 
                                                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm">
                                                     Approve
                                                 </button>
                                             </form>
-                                            <form action="/admin/return-requests/<%= return_request._id %>/reject" method="POST" class="inline" onsubmit="return confirmAction('reject', '<%= product.productName %>')">
+                                            <form action="/admin/rejectReturn/<%= return_request._id %>" method="POST" class="inline" onsubmit="return confirmAction('reject', '<%= product.productName %>')">
                                                 <button type="submit"
                                                     class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
                                                     Reject
@@ -180,6 +197,9 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     let currentOrderId = null;
 
@@ -236,15 +256,16 @@
     }
 
     async function handleReturn(action) {
+        console.log("handleReturn is working")
         if (!currentOrderId) return;
         
         try {
             const endpoint = action === 'approve' ? '/admin/approveReturn' : '/admin/rejectReturn';
             const response = await axios.post(`${endpoint}/${currentOrderId}`);
-            
-            if (response.status === 200) {
+            console.log("response : ",response)
+            if (response.data && response.status === 200) {
                 Toastify({
-                    text: `Return request ${action}ed successfully`,
+                    text: response.data.message,
                     className: "toast_style",
                     duration: 3000,
                     style: {
@@ -259,11 +280,14 @@
                 }, 1000);
             }
         } catch (error) {
+            console.error('Error:', error);
             Toastify({
-                text: error.response?.data?.message || `Failed to ${action} return request`,
+                text: error.response?.data?.message || 'An error occurred',
                 className: "toast_style",
                 duration: 3000,
-                style: { background: "#ff6b6b" }
+                style: {
+                    background: "#ff6b6b"
+                }
             }).showToast();
         }
     }
@@ -275,11 +299,39 @@
         }
     });
 
-    function confirmAction(action, productName) {
-        const message = action === 'approve' 
+    async function confirmAction(action, productName) {
+        const title = action === 'approve' ? 'Approve Return Request' : 'Reject Return Request';
+        const text = action === 'approve' 
             ? `Are you sure you want to approve the return request for "${productName}"?`
             : `Are you sure you want to reject the return request for "${productName}"?`;
-        
-        return confirm(message);
+            
+        const result = await Swal.fire({
+            title: title,
+            text: text,
+            icon: action === 'approve' ? 'success' : 'warning',
+            showCancelButton: true,
+            confirmButtonColor: action === 'approve' ? '#4CAF50' : '#f44336',
+            cancelButtonColor: '#9e9e9e',
+            confirmButtonText: action === 'approve' ? 'Yes, Approve it!' : 'Yes, Reject it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        });
+
+        return result.isConfirmed;
     }
+
+    // Update form submission to use async/await
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const action = this.querySelector('button[type="submit"]').textContent.trim().toLowerCase();
+                const productName = this.closest('tr').querySelector('[data-product-name]').dataset.productName;
+                
+                if (await confirmAction(action, productName)) {
+                    this.submit();
+                }
+            });
+        });
+    });
 </script>

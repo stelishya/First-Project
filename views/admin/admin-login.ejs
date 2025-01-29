@@ -95,12 +95,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="container bg-gray-200 rounded-lg shadow-md pt-6 mb-6 transform hover:scale-[1.02] transition-transform duration-300" style="margin-top: 5%;">
+        <div class="header rounded-lg">
             <h1>CAlliope</h1>
             <h2>Admin Login</h2>
         </div>
-        <div class="login-form">
+        <div class="login-form rounded-lg">
             <form action="/admin/login" method="post" id="adminloginForm">
                 
                 <p>Please fill in your admin login details below</p>
@@ -112,7 +112,7 @@
                 <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
                 
                 <!-- <a href="#">Forgot Password?</a> -->
-                <button type="submit">Log In</button>
+                <button class=" mb-6 rounded-lg" type="submit">Log In</button>
             </form>
             <form action="/admin/login" method="post" >
                 <input type="hidden" value="sihona@gmail.com" name="email">

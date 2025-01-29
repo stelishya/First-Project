@@ -46,8 +46,7 @@
                                             d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                                             clip-rule="evenodd"></path>
                                     </svg>
-                                    <a href="/user/orders" class="ml-1 text-gray-700 hover:text-gray-600 md:ml-2">Orders
-                                        history </a>
+                                    <a href="/user/orders" class="ml-1 text-gray-700 hover:text-gray-600 md:ml-2">Orders history </a>
                                 </div>
                             </li>
                             <li aria-current="page">
@@ -469,8 +468,8 @@
             returnReason = otherReasonText.value.trim();
         }
 
-        try {console.log('currentOrderId :')
-            const response = await axios.post(`/user/return/${currentOrderId}`, {
+        try {console.log('currentOrderId :',currentOrderId)
+            const response = await axios.post(`/user/order/return/${currentOrderId}`, {
                 returnReason,
                 productId: currentProductId
             });
@@ -531,15 +530,33 @@
             closeReturnModal();
         }
     });
-</script>
-        <script>
+
     async function retryPayment(orderId, amount) {
         try {
-            // Create new Razorpay order
             const response = await axios.post('/user/retry-payment', {
                 orderId:orderId
             });
 
+            const data = await response.json();
+
+        if (!data.success) {
+            if (data.insufficientStockItems) {
+                // Show error message with out of stock items
+                let message = 'Cannot process payment due to insufficient stock:\n';
+                data.insufficientStockItems.forEach(item => {
+                    message += `\n${item.productName}:\nRequested: ${item.requestedQuantity}\nAvailable: ${item.availableStock}`;
+                });
+
+                await Swal.fire({
+                    title: 'Out of Stock',
+                    text: message,
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
+                return;
+            }
+            throw new Error(data.message);
+        }
             if (response.status === 200) {
                 const options = {
                     key: response.data.key_id,

@@ -5,7 +5,7 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const Orders = require('../models/orderSchema');
 const { generateSalesReport } = require('./salesController');
-const Wallets = require('../models/walletSchema'); // Assuming Wallets model is defined in walletSchema.js
+const Wallets = require('../models/walletSchema');
 
 
 
@@ -316,129 +316,7 @@ exports.getSalesReport = async (req, res) => {
     }
 };
 
-// Get all return requests
-exports.getReturns = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 5;
-        const skip = (page - 1) * limit;
 
-        const returns = await Orders.find({
-            'returnDetails.returnRequested': true,
-            'returnDetails.returnStatus': 'Pending'
-        }).populate('userId', 'username')
-        .skip(skip)
-        .limit(limit)
-        .sort({ 'returnDetails.returnRequestedAt': -1 });
-
-        const totalReturns = await Orders.countDocuments({
-            'returnDetails.returnRequested': true,
-            'returnDetails.returnStatus': 'Pending'
-        });
-
-        const totalPages = Math.ceil(totalReturns / limit);
-        const startIndex = totalReturns === 0 ? 0 : (page - 1) * limit + 1;
-        const endIndex = Math.min(page * limit, totalReturns);
-
-        res.render('admin/returns', { 
-            returns,
-            currentPage: page,
-            totalPages,
-            totalReturns,
-            startIndex,
-            endIndex,
-            limit,
-            activeTab: 'returns',
-         });
-    } catch (error) {
-        console.error('Error fetching returns:', error);
-        res.status(500).render('admin/admin-error', { message: 'Error fetching returns' });
-    }
-};
-
-// Get return request details
-exports.getReturnDetails = async (req, res) => {
-    try {
-        const orderId = req.params.orderId;
-        const order = await Orders.findById(orderId)
-            .populate('userId', 'username')
-            .populate('orderedItems.product');
-
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
-        res.json(order);
-    } catch (error) {
-        console.error('Error fetching return details:', error);
-        res.status(500).json({ message: "Failed to fetch return details" });
-    }
-};
-
-// Approve return request
-exports.approveReturn = async (req, res) => {
-    try {
-        const orderId = req.params.orderId;
-        const order = await Orders.findById(orderId);
-
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
-        // Calculate refund amount for the returned product
-        const returnedProduct = order.orderedItems[0];
-        const refundAmount = returnedProduct.price;
-
-        // Update order status
-        order.status = 'Returned';
-        order.returnDetails.returnStatus = 'Approved';
-        order.returnDetails.returnDate = new Date();
-        await order.save();
-
-        // Process refund to wallet
-        if (order.paymentMethod !== 'COD') {
-            await Wallets.findOneAndUpdate(
-                { userId: order.userId },
-                {
-                    $inc: { balance: refundAmount },
-                    $push: {
-                        transactions: {
-                            type: 'credit',
-                            amount: refundAmount,
-                            description: `Refund for returned order #${order.orderId}`
-                        }
-                    }
-                }
-            );
-        }
-
-        res.status(200).json({ message: "Return request approved successfully" });
-    } catch (error) {
-        console.error('Error approving return:', error);
-        res.status(500).json({ message: "Failed to approve return request" });
-    }
-};
-
-// Reject return request
-exports.rejectReturn = async (req, res) => {
-    try {
-        const orderId = req.params.orderId;
-        const order = await Orders.findById(orderId);
-
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
-        // Update return status
-        order.returnDetails.returnStatus = 'Rejected';
-        await order.save();
-
-        res.status(200).json({ message: "Return request rejected successfully" });
-    } catch (error) {
-        console.error('Error rejecting return:', error);
-        res.status(500).json({ message: "Failed to reject return request" });
-    }
-};
 
 exports.downloadReport = async (req, res) => {
     try {

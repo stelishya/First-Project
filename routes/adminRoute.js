@@ -8,6 +8,7 @@ const productController = require("../controllers/productController")
 const orderController = require("../controllers/orderController")
 const couponController = require('../controllers/couponController');
 const salesController = require('../controllers/salesController');
+const returnController = require('../controllers/returnController');
 
 const Coupon = require('../models/couponSchema');
 
@@ -60,10 +61,10 @@ admin_route.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
 admin_route.get('/orders/:orderId/details', orderController.getOrderDetails);
 
 // Return Management
-admin_route.get('/returns', adminController.getReturns);
-admin_route.get('/returns/:orderId', adminController.getReturnDetails);
-admin_route.post('/approveReturn/:orderId', adminController.approveReturn);
-admin_route.post('/rejectReturn/:orderId', adminController.rejectReturn);
+admin_route.get('/returns', returnController.getReturns);
+admin_route.get('/returns/:orderId', returnController.getReturnDetails);
+admin_route.post('/approveReturn/:orderId', returnController.approveReturn);
+admin_route.post('/rejectReturn/:orderId', returnController.rejectReturn);
 
 //Coupon Management
 admin_route.get('/coupons',couponController.getAllCoupons);

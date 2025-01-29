@@ -31,7 +31,7 @@ exports.createOrder = async (req, res) => {
             amount: order.amount,
             // totalDiscount,
             couponDiscount,
-            key_id: process.env.RAZORPAY_KEY_ID || 'your_razorpay_key_id'
+            key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_OYHXIdhBCUDwEK'
             // finalAmount: order.amount - totalDiscount - couponDiscount
         });
     } catch (error) {
@@ -192,7 +192,7 @@ exports.verifyPayment = async (req, res) => {
                     name: selectedAddress.name,
                     mobile: user.mobile, 
                     pincode: selectedAddress.pincode,
-                    locality: selectedAddress.streetAddress,
+                    streetAddress: selectedAddress.streetAddress,
                     address: selectedAddress.streetAddress,
                     city: selectedAddress.city,
                     state: selectedAddress.state || 'Not Specified',
@@ -233,10 +233,32 @@ exports.verifyPayment = async (req, res) => {
 exports.retryPayment = async (req,res)=>{
     try {
         const { orderId } = req.body;
-        const orderDetails = await Orders.findById(orderId);
+        const orderDetails = await Orders.findById(orderId)
+        .populate({
+            path: 'orderedItems.product',
+            select: 'productName stock'
+        });
+        const insufficientStockItems = [];
+        for (const item of orderDetails.orderedItems) {
+            if (!item.product || item.product.stock < item.quantity) {
+                insufficientStockItems.push({
+                    productName: item.product ? item.product.productName : 'Product Not Found',
+                    requestedQuantity: item.quantity,
+                    availableStock: item.product ? item.product.stock : 0
+                });
+            }
+        }
+        if (insufficientStockItems.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Some items have insufficient stock',
+                insufficientStockItems
+            });
+        }
+
         const amount = orderDetails.finalAmount;
         const options = {
-            amount: amount * 100, // amount in smallest currency unit (paise)
+            amount: amount * 100, 
             currency: "INR",
             receipt: `order_${Date.now()}`
         };
@@ -246,10 +268,7 @@ exports.retryPayment = async (req,res)=>{
             success: true,
             id: order.id,
             amount: order.amount,
-            // totalDiscount,
-            // couponDiscount,
-            key_id: process.env.RAZORPAY_KEY_ID || 'your_razorpay_key_id'
-            // finalAmount: order.amount - totalDiscount - couponDiscount
+            key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_OYHXIdhBCUDwEK'
         });
     } catch (error) {
         console.error('Error creating Razorpay order:', error);

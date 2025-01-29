@@ -407,7 +407,8 @@ exports.orderDetailsUser = async (req, res) => {
         console.log("orderDetailsUser called")
         const search = req.query.search || '';
         const orderId = req.params.orderId
-        const userId  = req.session.user_id
+        const userId  = req.session.user_id;
+        const session = req.session.user;
         const order = await Orders.findById({ _id: orderId, userId: userId }).populate({
             path: "orderedItems.product",
             populate: {
@@ -439,7 +440,7 @@ exports.orderDetailsUser = async (req, res) => {
         console.log("Final order items:", JSON.stringify(order.orderedItems, null, 2));
         // console.log("orderId : ", orderId, "\nsession : ", session, "\norder : ", order);
         res.render('users/dashboard/order folder/order_details', {
-            order, user: req.session.user_id, activeTab: 'orders', search
+            order,session, user: req.session.user_id, activeTab: 'orders', search
         })
     } catch (error) {
         console.error(error)
@@ -459,8 +460,9 @@ exports.getOrdersAdmin = async (req, res) => {
         const returnRequests = await Orders.find({ 'returnDetails.returnStatus': 'Requested' })
         .populate({
             path: 'orderedItems.product',
-            select: 'productName productImage  priceAtPurchase'
-        }).populate('userId')
+            select: 'productName productImage mrp  priceAtPurchase finalAmount'
+        }).populate('userId', 'username email')
+        .sort({ createdAt: -1 });
         console.log("returnRequests : ", returnRequests)
         const orders = await Orders.find({})
             .populate('userId', 'username email')
@@ -610,7 +612,7 @@ exports.cancelOrder = async (req, res) => {
     
                 const latestTransaction = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
                 const currentBalance = latestTransaction ? latestTransaction.balance : 0;
-                newBalance = currentBalance + refundAmount;
+                const newBalance = currentBalance + refundAmount;
     
                 const walletTransaction = new Wallets({
                     userId,
@@ -945,7 +947,7 @@ exports.downloadInvoice = async (req, res) => {
         // Customer Details (Left Column)
         doc.fontSize(12).text('Customer Details:', 50, startY);
         doc.fontSize(10)
-           .text(`Name: ${order.userId.fullname || order.userId.username}`, 50)
+           .text(`Name: ${order.userId.username}`, 50)
            .text(`Email: ${order.userId.email}`, 50);
 
         // Shipping Address (Right Column)
@@ -1034,15 +1036,15 @@ exports.downloadInvoice = async (req, res) => {
         addAlignedText('Subtotal:', formatCurrency(totalMRP), currentY);
         currentY += 20;
 
-        if (order.totalDiscount) {
-            addAlignedText('Discount:', `-${formatCurrency(Number(order.totalDiscount))}`, currentY);
-            currentY += 20;
-        }
+        // if (order.totalDiscount) {
+        //     addAlignedText('Discount:', `-${formatCurrency(Number(order.totalDiscount))}`, currentY);
+        //     currentY += 20;
+        // }
 
-        if (order.coupon && order.coupon.discountAmount) {
+        if (order.couponDiscount) {
             addAlignedText(
-                `Coupon (${order.coupon.couponCode}):`,
-                `-${formatCurrency(Number(order.coupon.discountAmount))}`,
+                `Coupon (${order.couponCode}):`,
+                `-${formatCurrency(Number(order.couponDiscount))}`,
                 currentY
             );
             currentY += 20;

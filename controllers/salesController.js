@@ -72,7 +72,7 @@ exports.loadDashboard=async (req,res)=>{
                 }
             },
             { $sort: { totalSold: -1 } },
-            { $limit: 10 },
+            { $limit: 20 },
             {
                 $project: {
                     _id: 1,
@@ -120,7 +120,7 @@ exports.loadDashboard=async (req,res)=>{
             { $sort: { totalSold: -1 } },
             { $limit: 10 }
         ]);
-
+        console.log("Report data:", reportData);
         res.render('admin/dashboard', {
             admin: req.session.admin,
             reportData: reportData || { 
@@ -578,61 +578,64 @@ exports.dashboard = async (req, res) => {
 
 const generateSalesReport = async (query) => {
     try {
-        const { period, startDate, endDate } = query;
+        const { period, startDate, endDate, page = 1, limit = 10 } = query;
         let dateFilter = {};
         let groupBy;
 
-        // if (period) {
-        // Set date range based on period
         const now = new Date();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
         switch (period) {
             case 'daily':
-                const today = new Date(now.setHours(0, 0, 0, 0));
-                dateFilter = { createdAt: { $gte: today } };
+                // Get the first day of current month
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                dateFilter = { createdAt: { $gte: monthStart } };
                 groupBy = {
-                    year: { $year: '$createdAt' },
-                    month: { $month: '$createdAt' },
                     day: { $dayOfMonth: '$createdAt' }
                 };
                 break;
             case 'weekly':
-                const weekStart = new Date(now);
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                weekStart.setHours(0, 0, 0, 0);
-                dateFilter = { createdAt: { $gte: weekStart } };
+                // Get the first day of current month
+                const monthStartWeek = new Date(now.getFullYear(), now.getMonth(), 1);
+                dateFilter = { createdAt: { $gte: monthStartWeek } };
                 groupBy = {
-                    week: { $week: '$createdAt' },
-                    year: { $year: '$createdAt' }
+                    month: { $month: '$createdAt' },
+                    week: {
+                        $ceil: {
+                            $divide: [
+                                { $subtract: [
+                                    { $dayOfMonth: '$createdAt' },
+                                    1
+                                ]},
+                                7
+                            ]
+                        }
+                    }
                 };
                 break;
             case 'monthly':
-                const monthStart = new Date(now);
-                monthStart.setDate(1);
-                monthStart.setHours(0, 0, 0, 0);
-                dateFilter = { createdAt: { $gte: monthStart } };
+                // Get last 3 months
+                const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+                dateFilter = { createdAt: { $gte: threeMonthsAgo } };
                 groupBy = {
-                    month: { $month: '$createdAt' },
-                    year: { $year: '$createdAt' }
+                    year: { $year: '$createdAt' },
+                    month: { $month: '$createdAt' }
                 };
                 break;
             case 'yearly':
-                const yearStart = new Date(now);
-                yearStart.setMonth(0, 1);
-                yearStart.setHours(0, 0, 0, 0);
-                dateFilter = { createdAt: { $gte: yearStart } };
+                // Show current and last year
+                const lastYear = new Date(now.getFullYear() - 1, 0, 1);
+                dateFilter = { createdAt: { $gte: lastYear } };
                 groupBy = {
                     year: { $year: '$createdAt' }
                 };
                 break;
-            // }
-            // } else if (startDate && endDate) {
             default:
                 if (startDate && endDate) {
                     const start = new Date(startDate);
                     const end = new Date(endDate);
                     end.setHours(23, 59, 59, 999);
                     dateFilter = { createdAt: { $gte: start, $lte: end } };
-                    // }
                     groupBy = {
                         year: { $year: '$createdAt' },
                         month: { $month: '$createdAt' },
@@ -642,52 +645,53 @@ const generateSalesReport = async (query) => {
         }
 
         dateFilter.status = { $in: ['Delivered', 'Completed'] };
-        // Fetch orders with aggregation for chart data
         const chartData = await Orders.aggregate([
             { $match: dateFilter },
             {
                 $group: {
                     _id: groupBy,
                     totalSales: { $sum: '$finalAmount' },
-                    orderCount: { $sum: 1 },
-                    // createdAt: { $first: '$createdAt' } 
+                    orderCount: { $sum: 1 }
                 }
             },
-            // { $sort: { 'createdAt': 1 } }
-            { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
+            { $sort: { 
+                '_id.year': 1, 
+                '_id.month': 1, 
+                '_id.week': 1,
+                '_id.day': 1
+            }}
         ]);
 
-        // Format chart data
         const formattedChartData = {
             labels: [],
             sales: [],
             orders: []
         };
 
+        // Get current month's total days
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        // Calculate number of weeks in current month
+        const weeksInMonth = Math.ceil(daysInMonth / 7);
+
         chartData.forEach(item => {
             let label;
             switch (period) {
                 case 'daily':
-                    // label = new Date(item.createdAt)
-                    label = new Date(item._id.year, item._id.month - 1, item._id.day)
-                        .toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                    label = item._id.day.toString();
                     break;
                 case 'weekly':
-                    label = `Week ${item._id.week}`;
+                    const monthName = months[item._id.month - 1];
+                    label = `${monthName} Week ${item._id.week}`;
                     break;
                 case 'monthly':
-                    // label = new Date(new Date().setMonth(item._id.month - 1))
-                    label = new Date(item._id.year, item._id.month - 1)
-                        .toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+                    label = months[item._id.month - 1];
                     break;
                 case 'yearly':
                     label = item._id.year.toString();
                     break;
                 default:
                     if (startDate && endDate) {
-                        // label = new Date(item.createdAt)
-                        label = new Date(item._id.year, item._id.month - 1, item._id.day)
-                            .toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                        label = `${item._id.day} ${months[item._id.month - 1]}`;
                     }
             }
 
@@ -695,6 +699,21 @@ const generateSalesReport = async (query) => {
             formattedChartData.sales.push(item.totalSales);
             formattedChartData.orders.push(item.orderCount);
         });
+
+        // For weekly view, ensure all weeks are represented with month name
+        if (period === 'weekly' && formattedChartData.labels.length < weeksInMonth) {
+            const currentMonth = months[now.getMonth()];
+            for (let i = 1; i <= weeksInMonth; i++) {
+                const weekLabel = `${currentMonth} Week ${i}`;
+                if (!formattedChartData.labels.includes(weekLabel)) {
+                    // Find the correct position to insert
+                    const insertIndex = i - 1;
+                    formattedChartData.labels.splice(insertIndex, 0, weekLabel);
+                    formattedChartData.sales.splice(insertIndex, 0, 0);
+                    formattedChartData.orders.splice(insertIndex, 0, 0);
+                }
+            }
+        }
 
         // Fetch detailed order data
         const orders = await Orders.find(dateFilter)
@@ -705,229 +724,45 @@ const generateSalesReport = async (query) => {
             })
             .sort({ createdAt: -1 });
 
-        // Calculate summary data
-        const summary = orders.reduce((acc, order) => {
+        // Get total count for pagination
+        const totalOrders = await Orders.countDocuments(dateFilter);
+        const totalPages = Math.ceil(totalOrders / limit);
+        const skip = (page - 1) * limit;
 
-            const orderTotal = order.orderedItems.reduce((sum, item) => {
-                return sum + (item.product?.mrp || 0) * item.quantity;
-            }, 0);
+        // Fetch paginated order data
+        const paginatedOrders = await Orders.find(dateFilter)
+            .populate('userId', 'username email')
+            .populate({
+                path: 'orderedItems.product',
+                select: 'productName mrp'
+            })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-
-            const productDiscount = order.orderedItems.reduce((sum, item) => {
-                const mrp = item.product?.mrp || 0;
-                const price = item.priceAtPurchase || mrp;
-                return sum + ((mrp - price) * item.quantity);
-            }, 0);
-
-            // const couponDiscount = order.couponDiscount || 0;
-
-            return {
-                totalOrders: acc.totalOrders + 1,
-                totalAmount: acc.totalAmount + orderTotal,
-                totalDiscount: acc.totalDiscount + productDiscount,
-                // totalCouponDiscount: acc.totalCouponDiscount + couponDiscount,
-                totalCouponDiscount: acc.totalCouponDiscount + (order.couponDiscount || 0),
-                netAmount: acc.netAmount + order.finalAmount
-            };
-        }, {
-            totalOrders: 0,
-            totalAmount: 0,
-            totalDiscount: 0,
-            totalCouponDiscount: 0,
-            netAmount: 0
-        });
-
-        // Format order data
-        const formattedOrders = orders.map(order => ({
-            orderId: order._id,
-            // orderDate: (order.createdAt ? new Date(order.createdAt) : new Date()).toLocaleDateString(),
-            customerName: order.userId?.username || 'Unknown',
-            // 
-            // orderDate: order.createdAt.toLocaleDateString('en-IN'),
-            totalAmount: order.orderedItems.reduce((sum, item) => 
-                sum + ((item.product?.mrp || 0) * item.quantity), 0),
-            discount: order.orderedItems.reduce((sum, item) => {
-                const mrp = item.product?.mrp || 0;
-                const price = item.priceAtPurchase || mrp;
-                return sum + ((mrp - price) * item.quantity);
-            }, 0),
-            couponDiscount: order.couponDiscount || 0,
-            finalAmount: order.finalAmount,
-            status: order.status,
-            // items: order.orderedItems.map(item => ({
-            //     productName: item.product?.productName || 'Unknown Product',
-            //     quantity: item.quantity,
-            //     price: item.priceAtPurchase,
-            //     discount: item.totalDiscount || 0
-            // }))
-        }));
-        
         return {
-            orders: formattedOrders,
-            summary,
-            chartData: formattedChartData
+            orders: paginatedOrders,
+            chartData: formattedChartData,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages,
+                totalItems: totalOrders,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            },
+            summary: {
+                totalOrders: totalOrders,
+                totalAmount: orders.reduce((sum, order) => sum + order.finalAmount, 0),
+                totalDiscount: orders.reduce((sum, order) => {
+                    return sum + (order.totalDiscountAmount || 0) + (order.couponDiscount || 0);
+                }, 0)
+            }
         };
     } catch (error) {
         console.error('Error generating sales report:', error);
         throw error;
     }
 };
-
-// const generateSalesReport = async (req, res) => {
-//     try {
-//         const { type, date, startDate, endDate } = req.query;
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 10;
-//         const skip = (page - 1) * limit;
-
-//         let dateFilter = {};
-
-//         // Set up date filter based on report type
-//         switch(type) {
-//             case 'today':
-//                 const today = new Date();
-//                 today.setHours(0, 0, 0, 0);
-//                 dateFilter = { createdAt: { $gte: today } };
-//                 break;
-
-//             case 'yesterday':
-//                 const yesterday = new Date();
-//                 yesterday.setDate(yesterday.getDate() - 1);
-//                 yesterday.setHours(0, 0, 0, 0);
-//                 const yesterdayEnd = new Date(yesterday);
-//                 yesterdayEnd.setHours(23, 59, 59, 999);
-//                 dateFilter = { createdAt: { $gte: yesterday, $lte: yesterdayEnd } };
-//                 break;
-
-//             case 'thisWeek':
-//                 const thisWeek = new Date();
-//                 thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay());
-//                 thisWeek.setHours(0, 0, 0, 0);
-//                 dateFilter = { createdAt: { $gte: thisWeek } };
-//                 break;
-
-//             case 'thisMonth':
-//                 const thisMonth = new Date();
-//                 thisMonth.setDate(1);
-//                 thisMonth.setHours(0, 0, 0, 0);
-//                 dateFilter = { createdAt: { $gte: thisMonth } };
-//                 break;
-
-//             case 'specificDate':
-//                 const specificDate = new Date(date);
-//                 const nextDate = new Date(specificDate);
-//                 nextDate.setDate(nextDate.getDate() + 1);
-//                 dateFilter = { createdAt: { $gte: specificDate, $lt: nextDate } };
-//                 break;
-
-//             case 'customRange':
-//                 const startDateTime = new Date(startDate);
-//                 const endDateTime = new Date(endDate);
-//                 endDateTime.setHours(23, 59, 59, 999);
-//                 dateFilter = { createdAt: { $gte: startDateTime, $lte: endDateTime } };
-//                 break;
-
-//             default: // 'all'
-//                 dateFilter = {};
-//         }
-
-//         const totalOrders = await Orders.countDocuments(dateFilter);
-//         const totalPages = Math.ceil(totalOrders / limit);
-//         // Get filtered orders
-//         const orders = await Orders.find(dateFilter)
-//             .populate('userId')
-//             .populate('products.productId')
-//             .sort({ createdAt: -1 }).skip(skip).limit(limit);
-
-//         const reportData = orders.map(order => ({
-//             orderId: order.orderId || order._id,
-//             date: order.createdAt.toLocaleDateString(),
-//             customerName: order.userId.fullname || order.userId.username,
-//             orderDate: order.createdAt,
-//             totalAmount: order.products.reduce((sum, prod) => sum + (prod.productId.mrp * prod.quantity), 0),
-//             discount: order.totalDiscountAmount || 0,
-//             couponDiscount: order.couponDiscountAmount || 0,
-//             finalAmount: order.totalAmount,
-//             // amount: order.products.reduce((sum,prod) => sum + (prod.priceAtPurchase * prod.quantity), 0),
-//             products: order.products.map(item =>({ 
-//                 name: item.productId.name,
-//                 quantity: item.quantity,
-//                 price:item.productId.mrp
-//             }))
-//         }));
-
-//         const totalAmount = reportData.reduce((sum, order) => sum + order.amount, 0);
-//         const totalDiscountAmount = reportData.reduce((sum, order) => sum + order.discount, 0);
-//         const totalFinalAmount = reportData.reduce((sum, order) => sum + order.finalAmount, 0);
-
-//         // Send JSON response for AJAX request
-//         res.json({
-//             salesReport: reportData,
-//             pagination: {
-//                 currentPage: page,
-//                 totalPages,
-//                 totalOrders,
-//                 limit
-//             }
-//         });
-//     } catch (error) {
-//         console.error('Generate Sales Report Error:', error);
-//         res.status(500).json({ error: 'Server error' });
-//     }
-// };
-// down code needed...
-// async function getFilteredOrders(type, date, startDate, endDate) {
-//     let dateFilter = {};
-
-//     switch (type) {
-//         case 'today':
-//             const today = new Date();
-//             today.setHours(0, 0, 0, 0);
-//             dateFilter = { createdAt: { $gte: today } };
-//             break;
-//         case 'yesterday':
-//             const yesterday = new Date();
-//             yesterday.setDate(yesterday.getDate() - 1);
-//             yesterday.setHours(0, 0, 0, 0);
-//             const yesterdayEnd = new Date(yesterday);
-//             yesterdayEnd.setHours(23, 59, 59, 999);
-//             dateFilter = { createdAt: { $gte: yesterday, $lte: yesterdayEnd } };
-//             break;
-//         case 'thisWeek':
-//             const weekStart = new Date();
-//             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-//             weekStart.setHours(0, 0, 0, 0);
-//             dateFilter = { createdAt: { $gte: weekStart } };
-//             break;
-//         case 'thisMonth':
-//             const monthStart = new Date();
-//             monthStart.setDate(1);
-//             monthStart.setHours(0, 0, 0, 0);
-//             dateFilter = { createdAt: { $gte: monthStart } };
-//             break;
-//         case 'specificDate':
-//             const specificDate = new Date(date);
-//             const nextDate = new Date(date);
-//             nextDate.setDate(nextDate.getDate() + 1);
-//             dateFilter = { createdAt: { $gte: specificDate, $lt: nextDate } };
-//             break;
-//         case 'customRange':
-//             const startDateTime = new Date(startDate);
-//             const endDateTime = new Date(endDate);
-//             endDateTime.setHours(23, 59, 59, 999);
-//             dateFilter = { createdAt: { $gte: startDateTime, $lte: endDateTime } };
-//             break;
-//         default:
-//             break;
-//     }
-
-//     const orders = await Orders.find(dateFilter)
-//         .populate('userId')
-//         .populate('products.productId')
-//         .sort({ createdAt: -1 });
-
-//     return orders;
-// }
 
 exports.downloadSalesReport = async (req, res) => {
     try {
@@ -1346,8 +1181,6 @@ exports.getAnalyticsData = async (req, res) => {
                     groupBy = { $year: '$createdAt' };
                     startDate = new Date(2000, 0, 1);
                     break;
-                default:
-                    return res.status(400).json({ error: 'Invalid period' });
             }
         }
 

@@ -1,55 +1,66 @@
 <title>User Login</title>
 <link rel="stylesheet" href="/User/css/Login.css">
 <script src="/validation.js"></script>
-<div class="header" style="margin-bottom: 100px;">
-    <h1>CAlliope</h1>
-</div>
-<h2 class="text-center mb-4" style="font-size:30px; ">Log In</h2>
 
-<form action="/user/login" method="post" >
-    <input type="hidden" value="delwin@gmail.com" name="email">
-    <input type="hidden" value="Delwin@22" name="password">
-    <button class="btn btn-secondary bg-gray-300 color-white" type="submit">Demo login</button>
-</form>
-<form action="/user/login" method="post" id="userloginForm">
-    <div class="login-container">
-        <label for="email"><b>Email</b></label>
-        <input id="email" type="text" placeholder="E-mail" name="email" oninput="validateEmail()">
-        <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
-
-        <label for="password"><b>Password</b></label>
-        <input id="password" type="password" placeholder="Password" name="password" oninput="validatePassword()">
-        <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
-
-
-        <% if(locals.message && message.length>0){ %>
-            <div class="alert alert-danger text-center">
-                <%= message %>
-            </div>
-            <% } %>
-                <button id="forgotPasswordBtn"
-                    class="pl-80  hover:text-gray-600 ">
-                    Forgot Password
-                </button>
-
-                <!-- <div class="form-group d-flex justify-content-end">
-            <a href="/forgot-password" class="forgot-password-link ms-auto">
-                Forgot Password  
-            </a>
+    <div class="container">
+        <div class="header rounded-lg" style="margin-left:30%; width:39%">
+            <h1>CAlliope</h1>
+            <!-- <h2>User Login</h2> -->
+            <form action="/user/login" method="post" style="margin-left: 70%;">
+                <input type="hidden" value="delwin@gmail.com" name="email">
+                <input type="hidden" value="Delwin@22" name="password">
+                <button class="btn btn-secondary bg-gray-300 p-2 rounded-lg color-white" type="submit">Demo login</button>
+            </form>
+        </div>
+        <!-- <div class="header" style="margin-bottom: 100px;">
+            <h1>CAlliope</h1>
         </div> -->
+        <div class="login-form rounded-lg" style="margin-left: 30%;">
+        <form action="/user/login" method="post" id="userloginForm">
+            <div class="login-container rounded-lg p-5 bg-gray-200 ">
+                <h2 class="text-center mb-1" style="font-size:30px; ">Log In</h2>
 
-                <button class="login hover:text-gray-600" type="submit">Log In</button>
-</form>
-<div class="signup">
-    <a href="#">Don’t have an account?</a>
-    <a class="hover:text-gray-600" href="/user/signup">Sign Up..</a>
-</div>
-<div class="social-login">
-    <p>- or you can log in with -</p>
-    <a href="/user/auth/google" class="google" style="border-radius: 25px;">Google</a>
-</div>
-</div>
+                <label for="email"><b>Email</b></label>
+                <input id="email" type="text" placeholder="E-mail" name="email" oninput="validateEmail()">
+                <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
+            
+                <label for="password"><b>Password</b></label>
+                <input id="password" type="password" placeholder="Password" name="password" oninput="validatePassword()">
+                <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
+            
+            
+                <% if(locals.message && message.length>0){ %>
+                    <div class="alert alert-danger text-center">
+                        <%= message %>
+                    </div>
+                    <% } %>
+                        <button id="forgotPasswordBtn"
+                            class="pl-80  hover:text-gray-600 ">
+                            Forgot Password
+                        </button>
+                    
+                        <!-- <div class="form-group d-flex justify-content-end">
+                    <a href="/forgot-password" class="forgot-password-link ms-auto">
+                        Forgot Password  
+                    </a>
+                </div> -->
+            <button class="login hover:text-gray-600 rounded-lg" type="submit">Log In</button>
+            
+        
+        
+            <div class="signup">
+                <a href="#">Don’t have an account?</a>
+                <a class="hover:text-gray-600" href="/user/signup">Sign Up..</a>
+            </div>
+            <div class="social-login">
+                <p>- or you can log in with -</p>
+                <a href="/user/auth/google" class="google" style="border-radius: 25px;">Google</a>
+            </div>
 
+            </div>
+        </form>
+        </div>
+    </div>
 <!-- Trigger Button -->
 <!-- <button id="forgotPasswordBtn" class="bg-blue-500 text-white py-2 px-4 rounded">Forgot Password</button> -->
 

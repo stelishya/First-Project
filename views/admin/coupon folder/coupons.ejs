@@ -63,6 +63,7 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="text-gray-600 border-b">
+                            <th class="py-3 px-4 text-center">SI No.</th>
                             <th class="py-3 px-4 text-center">Code</th>
                             <th class="py-3 px-4 text-center">Coupon Name</th>
                             <th class="py-3 px-4 text-center">Offer</th>
@@ -74,8 +75,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% coupons.forEach(coupon=> { %>
+                        <% coupons.forEach((coupon,index)=> { %>
                             <tr class="border-b hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= ((currentPage - 1) * limit) + index + 1 %>
+                                </td>
                                 <td class="py-3 px-4 font-medium text-center">
                                     <%= coupon.code %>
                                 </td>

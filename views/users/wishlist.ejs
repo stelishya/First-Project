@@ -32,9 +32,9 @@
         </div>
         <h1 class="text-3xl font-bold mb-8">My Wishlist</h1>
 
-        <% if (wishlistItems && wishlistItems.length> 0) { %>
+        <% if (wishlistItems && wishlistItems.length > 0) { %>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <% wishlistItems.forEach(item=> { %>
+                <% wishlistItems.forEach(item => { %>
                     <div class="product-card relative bg-white rounded-lg shadow-md overflow-hidden" data-product="<%= item.product._id %>">
                         <!-- Wishlist Icon -->
                         <div class="wishlist-icon active" data-product="<%= item.product._id %>"
@@ -53,18 +53,15 @@
 
                         <!-- Product Info -->
                         <div class="p-4">
-                            <h3
-                                class="text-lg font-semibold text-gray-800 truncate hover:text-green-600 transition-colors duration-200">
+                            <h3 class="text-lg font-semibold text-gray-800 truncate hover:text-green-600 transition-colors duration-200">
                                 <%= item.product.productName %>
                             </h3>
                             <div class="mt-2 flex items-baseline space-x-2">
-                                <span class="text-xl font-bold text-green-600">₹<%= item.product.finalPrice.toFixed(0)%>
-                                        </span>
-                                <% if (item.product.discountPercentage> 0) { %>
+                                <span class="text-xl font-bold text-green-600">₹<%= item.product.finalPrice.toFixed(0)%></span>
+                                <% if (item.product.discountPercentage > 0) { %>
                                     <span class="text-sm text-gray-500 line-through">₹<%= item.product.mrp.toFixed(0) %></span>
                                     <span class="text-md text-green-600"><%= ((item.product.discountPercentage/item.product.mrp)*100).toFixed(0) %> % Off</span>
-                                    <!-- <span class="text-sm text-red-500">(<%= item.product.discountPercentage.toFixed(0) %> Discount)</span> -->
-                                    <% } %>
+                                <% } %>
                             </div>
                             <div class="mt-4 text-sm text-gray-500">
                                 Added on <%= new Date(item.addedAt).toLocaleDateString() %>
@@ -77,8 +74,37 @@
                             </div>
                         </div>
                     </div>
-                    <% }); %>
+                <% }); %>
             </div>
+
+            <!-- Pagination Controls -->
+            <% if (totalPages > 1) { %>
+                <div class="flex justify-center items-center space-x-4 mt-8 mb-4">
+                    <% if (currentPage > 1) { %>
+                        <a href="/user/wishlist?page=<%= currentPage - 1 %>&search=<%= search %>" 
+                           class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                            Previous
+                        </a>
+                    <% } %>
+
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="/user/wishlist?page=<%= i %>&search=<%= search %>" 
+                           class="px-4 py-2 rounded transition-colors <%= currentPage === i ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/user/wishlist?page=<%= currentPage + 1 %>&search=<%= search %>" 
+                           class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                            Next
+                        </a>
+                    <% } %>
+                </div>
+                <div class="text-center text-gray-600 mt-2">
+                    Showing <%= ((currentPage - 1) * 8) + 1 %>-<%= Math.min(currentPage * 8, totalItems) %> of <%= totalItems %> items
+                </div>
+            <% } %>
             <% } else { %>
                 <div class="text-center py-12">
                     <div class="text-6xl mb-4">🛍️</div>
@@ -89,7 +115,7 @@
                         Browse Products
                     </a>
                 </div>
-                <% } %>
+            <% } %>
     </div>
 
     <style>

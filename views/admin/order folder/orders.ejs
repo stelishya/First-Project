@@ -198,6 +198,7 @@
             <table class="w-full text-left" style="background-color: #fbf7f7;">
                 <thead>
                     <tr class="text-gray-600">
+                        <th class="py-2 text-center">SI No.</th>
                         <th class="py-2 text-center">Order ID</th>
                         <th class="py-2 text-center">Product</th>
                         <th class="py-2 text-center">Date</th>
@@ -212,6 +213,9 @@
                 <tbody class="text-gray-700">
                     <% orders.forEach((order,index)=>{ %>
                         <tr class=" text-center border-b">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                <%= ((page - 1) * limit) + index + 1 %>
+                            </td>
                             <td class="py-2">
                                 <a class="text-gray-500" href="#">
                                     <%= order.orderId ? order.orderId.substring(0, 10) : order._id %>...

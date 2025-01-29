@@ -10,6 +10,12 @@ exports.getCart = async (req,res)=>{
         }
         const userId = req.session.user._id;
 
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6;
+        const skip = (page - 1) * limit;
+
+        // Get cart with total count
         const cart = await Carts.findOne({ userId }).populate({
             path: 'items.productId',
             model: 'Product',
@@ -26,15 +32,35 @@ exports.getCart = async (req,res)=>{
                 countOfProducts: 0,
                 products: [],
                 totalAmount: 0,
-                search
+                search,
+                currentPage: 1,
+                totalPages: 1,
+                totalItems: 0
             });
         }
+
+        // Get total count for pagination
+        const totalItems = cart.items.length;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        // Get paginated cart items
+        const paginatedCart = await Carts.findOne({ userId })
+            .populate({
+                path: 'items.productId',
+                model: 'Product',
+                select: 'productName description productImage mrp productOffer maxDiscount category stock',
+                populate: { 
+                    path: 'category',
+                    select: 'name categoryOffer'
+                }
+            })
+            .slice('items', [skip, limit]);
 
         let totalAmount = 0;
         let totalDiscount = 0;
         let subtotal = 0;
 
-        const products = cart.items.map(item => {
+        const products = paginatedCart.items.map(item => {
             const product = item.productId;
             if (!product) return null;
 
@@ -42,7 +68,7 @@ exports.getCart = async (req,res)=>{
                 product: product,
                 quantity: item.quantity
             });
-            // mrp
+            
             totalAmount += itemPrices.totalPrice;
             totalDiscount += itemPrices.totalDiscount;
             subtotal += itemPrices.originalPrice * item.quantity;
@@ -56,7 +82,7 @@ exports.getCart = async (req,res)=>{
             return {
                 ...item.toObject(),
                 mrp: itemPrices.originalPrice,
-                discountedPrice:itemPrices.pricePerUnit,
+                discountedPrice: itemPrices.pricePerUnit,
                 totalDiscount: itemPrices.totalDiscount,
                 bestDiscountType: `${itemPrices.discountPercentage} Discount`,
                 finalAmount: itemPrices.totalPrice,
@@ -64,24 +90,28 @@ exports.getCart = async (req,res)=>{
             };
         }).filter(Boolean); // Remove any null items
         
-        const countOfProducts = products.length;
-        console.log("Hi i'm rendering cart page")
-        console.log(`products: ${products}`)
+        const countOfProducts = totalItems; // Use total items instead of current page items
+        console.log("Hi i'm rendering cart page");
+        console.log(`products: ${products}`);
         console.log('Cart Totals:');
-        // console.log(`mrp: ${products.mrp}`)
-        console.log(`mrp: ${products[0]?.mrp || 0}`)
+        console.log(`mrp: ${products[0]?.mrp || 0}`);
         console.log(`Subtotal: ${subtotal}`);
         console.log(`Total Discount: ${totalDiscount}`);
         console.log(`Final Amount: ${totalAmount}`);
+
         res.render('users/cart/cart', {
             session: req.session.user,
             products,
-            mrp:products.mrp,
+            mrp: products.mrp,
             countOfProducts,
             totalAmount: totalAmount.toFixed(2),
             subtotal: subtotal.toFixed(2),
             totalDiscount: totalDiscount.toFixed(2),
-            search
+            search,
+            currentPage: page,
+            totalPages,
+            totalItems,
+            limit
         });
         
     } catch (error) {
