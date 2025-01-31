@@ -42,7 +42,7 @@ exports.createOrder = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
     try {
-        console.log("Starting payment verification...");
+        console.log("verifyPayment called");
         const { 
             razorpay_order_id, 
             razorpay_payment_id, 
@@ -105,20 +105,13 @@ exports.verifyPayment = async (req, res) => {
             if (orderData.buyNow) {
                 // Single product order
                 console.log("Processing single product order");
-                const product = await Products.findById(orderData.singleProductId);
+                const product = await Products.findById(orderData.singleProductId).populate('category');
                 if (!product) {
                     throw new Error('Product not found');
                 }
                 if (product.stock < orderData.quantity) {
                     throw new Error('Not enough stock available');
                 }
-                // Calculate discount for single product
-                // totalDiscount = (product.mrp - product.price) * orderData.quantity;
-                // console.log(`Single product discount: ${totalDiscount}`);
-
-            // Get product details
-            // console.log("Getting product details for:", orderData.singleProductId);
-            // const product = await Products.findById(orderData.singleProductId);
             console.log("Found product:", product);
             const prices = calculateOrderItemPrices({
                 product: product,
@@ -149,12 +142,8 @@ exports.verifyPayment = async (req, res) => {
                     const product = await Products.findById(item.productId._id);
                     if (!product || product.stock < item.quantity) {
                         throw new Error(`Not enough stock available for product ${product ? product.productName : item.productId._id}`);
-                    }
-                    // Calculate discount for each cart item
-                    // totalDiscount += (item.productId.mrp - item.productId.price) * item.quantity;
+                    }                   
                 }
-                // console.log(`Cart total discount: ${totalDiscount}`);
-
                  // Process each cart item
                  orderedItems = cart.items.map(item => ({
                     product: item.productId._id,
@@ -195,7 +184,7 @@ exports.verifyPayment = async (req, res) => {
                     streetAddress: selectedAddress.streetAddress,
                     address: selectedAddress.streetAddress,
                     city: selectedAddress.city,
-                    state: selectedAddress.state || 'Not Specified',
+                    state: selectedAddress.state,
                     alternatePhone: selectedAddress.mobile || user.mobile
                 },
                 paymentStatus: paymentStatus === 'Failed' ? "Failed": "Paid",
@@ -209,7 +198,11 @@ exports.verifyPayment = async (req, res) => {
             const savedOrder = await order.save();
             console.log("Order saved successfully:", savedOrder);
 
-            if(paymentStatus === "Failed" )return res.status(200).json({success:false, message:"Payment Verification Failed", order:savedOrder})
+            if(paymentStatus === "Failed" ){       
+                console.log("Payment verification failed");
+                         
+                return res.status(200).json({success:false, message:"Payment Verification Failed", order:savedOrder})
+            }            
             res.json({ 
                 success: true, 
                 message: 'Payment verified and order created',

@@ -264,14 +264,20 @@
             const response = await axios.post(`${endpoint}/${currentOrderId}`);
             console.log("response : ",response)
             if (response.data && response.status === 200) {
-                Toastify({
+                await Swal.fire({
+                    title: action === 'approve' ? 'Return Approved!' : 'Return Rejected!',
                     text: response.data.message,
-                    className: "toast_style",
-                    duration: 3000,
-                    style: {
-                        background: action === 'approve' ? "linear-gradient(to right, #00b09b, #96c93d)" : "#ff6b6b"
-                    }
-                }).showToast();
+                    icon: action === 'approve' ? 'success' : 'warning',
+                    confirmButtonColor: action === 'approve' ? '#4CAF50' : '#f44336'
+                });
+                // Toastify({
+                //     text: response.data.message,
+                //     className: "toast_style",
+                //     duration: 3000,
+                //     style: {
+                //         background: action === 'approve' ? "linear-gradient(to right, #00b09b, #96c93d)" : "#ff6b6b"
+                //     }
+                // }).showToast();
                 
                 closeReturnModal();
                 // Refresh the page after a short delay

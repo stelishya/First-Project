@@ -138,6 +138,7 @@ exports.approveReturn = async (req, res) => {
             //     },
             //     { new: true }
             // );
+            const userId = order.userId;
             const latestTransaction = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
             const currentBalance = latestTransaction ? latestTransaction.balance : 0;
             const newBalance = currentBalance + refundAmount;
@@ -147,7 +148,7 @@ exports.approveReturn = async (req, res) => {
                     orderId,
                     type: 'CREDIT',
                     amount: refundAmount,
-                    description: `Refund for returned order #${order._id} (after coupon adjustment)`,
+                    description: `Refund for returned order #${order._id} `,
                     balance: newBalance
                 });
                 await wallet.save();

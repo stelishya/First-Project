@@ -122,60 +122,37 @@
                 </div>
             </header>
             <div class="content-area">
-                <div class="con_tainer mx-auto px-4 py-4">
+                <div class="con_tainer  mx-auto px-4 py-4">
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h1 class="text-2xl font-bold mb-6">Sales Report</h1>
 
                         <% if (locals.reportData && locals.reportData.summary) { %>
                             <!-- Summary Cards -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-gray-300 p-3">
+                            <div class="grid grid-cols-1 rounded-lg md:grid-cols-3 gap-4 mb-8 bg-gray-300 p-3">
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold">Total Orders</h3>
                                     <p class="text-2xl font-bold">
-                                        <!-- %= reportData.summary.totalOrders %> -->
                                         <%= overallStats.totalOrders %>
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold">Total Amount</h3>
                                     <p class="text-2xl font-bold">
-                                        <!-- ₹%= reportData.summary.netAmount.toFixed(0) %> -->
                                         ₹<%= overallStats.totalAmount.toFixed(2) %>
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="text-lg font-semibold">Total Discount</h3>
                                     <p class="text-2xl font-bold">
-                                        <!-- ₹%= reportData.summary.totalDiscount.toFixed(0) %> -->
                                         ₹<%= overallStats.totalDiscount.toFixed(2) %>
                                     </p>
                                 </div>
-                                <!-- <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="text-lg font-semibold">Net Amount</h3>
-                            <p class="text-2xl font-bold">₹%= reportData.summary.netAmount.toFixed(0) %></p>
-                        </div> -->
                             </div>
+            <h2 class="text-2xl font-bold text-gray-800">Sales Analytics</h2>
+             <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
 
-                            
-                            <!-- Download Buttons -->
-                            <!-- <div class="flex gap-4 mb-8 ">
-                        <a href="/admin/download-report?format=pdf&<%= new URLSearchParams(query).toString() %>" 
-                           class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">
-                            Download PDF
-                        </a>
-                        <a href="/admin/download-report?format=excel&<%= new URLSearchParams(query).toString() %>" 
-                           class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                            Download Excel
-                        </a>
-                    </div> -->
-
-                            <!-- Charts Section -->
-                             <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                                    <h2 class="text-2xl font-bold text-gray-800">Sales Analytics</h2>
-
-                                                   <!-- Filter Form -->
-            <form id="salesReportForm" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-300 p-3">
+            <!-- Filter Form -->
+            <form id="salesReportForm" class="mb-8 w-full rounded-lg grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-300 p-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Period</label>
                     <select name="period" id="period"
@@ -211,33 +188,15 @@
                 </div>
             </form>
             <button type="button" onclick="downloadReport('pdf')"
-                                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                                PDF
-                            </button>
-                            <button type="button" onclick="downloadReport('excel')"
-                                class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">
-                                Excel
-                            </button>
-
-                                    <!-- <div class="flex gap-4">
-                                        <select id="chartPeriod" class="rounded-lg border-gray-300">
-                                            <option value="weekly">Weekly</option>
-                                            <option value="monthly">Monthly</option>
-                                            <option value="yearly">Yearly</option>
-                                            <option value="custom">Custom Range</option>
-                                        </select>
-            
-                                        
-                                        <div id="chartDateRange" class="flex items-center gap-2" style="display: none;">
-                                            <input type="date" id="chartStartDate" class="rounded-lg border-gray-300">
-                                            <span class="text-gray-500">to</span>
-                                            <input type="date" id="chartEndDate" class="rounded-lg border-gray-300">
-                                            <button id="applyChartRange" class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
-                                                Apply
-                                            </button>
-                                        </div>
-                                    </div> -->
-                                </div>
+                class="bg-green-500 text-white px-4 py-2 m-2 rounded-md hover:bg-green-600">
+                PDF
+            </button>
+            <button type="button" onclick="downloadReport('excel')"
+                class="bg-yellow-500 text-white px-4 py-2 m-2 rounded-md hover:bg-yellow-600">
+                Excel
+            </button>
+            </div>
+                                <!-- Charts Section -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                     <div class="bg-white rounded-lg shadow-lg p-6">
                                         <h2 class="text-xl font-bold mb-4">Sales Overview</h2>
@@ -251,8 +210,7 @@
                              </div>
                             <input type="hidden" id="reportData" value='<%- JSON.stringify(locals.reportData || { chartData: { labels: [], sales: [], orders: [] }}) %>'>
 
-             
-                            
+                        <h1 class="text-2xl font-bold mb-6">Sales Report</h1>
                             <!-- Orders Table -->
                             <% if (reportData.orders && reportData.orders.length> 0) { %>
                                 <div class="overflow-x-auto mt-6">
