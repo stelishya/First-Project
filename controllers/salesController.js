@@ -293,7 +293,7 @@ exports.downloadReport = async (req, res) => {
     try {
         const { format } = req.query;
         const reportData = await generateSalesReport(req.query); 
-
+        console.log(reportData)
         if (format === 'pdf') {
             const doc = new PDFDocument();
             res.setHeader('Content-Type', 'application/pdf');
@@ -312,7 +312,7 @@ exports.downloadReport = async (req, res) => {
                .text(`Total Orders: ${reportData.summary.totalOrders}`)
                doc.fontSize(12).text(`Total Amount: ₹${reportData.summary.totalAmount.toFixed(0)}`)
                doc.fontSize(12).text(`Total Discount: ₹${reportData.summary.totalDiscount.toFixed(0)}`)
-               doc.fontSize(12).text(`Total Coupon Discount: ₹${reportData.summary.totalCouponDiscount.toFixed(0)}`)
+            //    doc.fontSize(12).text(`Total Coupon Discount: ₹${reportData.summary.totalCouponDiscount.toFixed(0)}`)
             //    .text(`Net Amount: ₹${reportData.summary.netAmount.toFixed(2)}`);
             
             doc.moveDown();
@@ -321,8 +321,8 @@ exports.downloadReport = async (req, res) => {
             reportData.orders.forEach(order => {
                 doc.fontSize(12)
                    .text(`Order ID: ${order.orderId}`)
-                   .text(`Customer: ${order.customerName}`)
-                   .text(`Date: ${new Date(order.orderDate).toLocaleDateString()}`)
+                   .text(`Customer: ${order.userId.username}`)
+                   .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
                    .text(`Amount: ₹${order.finalAmount.toFixed(2)}`)
                    .moveDown();
             });
@@ -350,7 +350,7 @@ exports.downloadReport = async (req, res) => {
             worksheet.addRow(['Total Orders', reportData.summary.totalOrders]);
             worksheet.addRow(['Total Amount', reportData.summary.totalAmount]);
             worksheet.addRow(['Total Discount', reportData.summary.totalDiscount]);
-            worksheet.addRow(['Total Coupon Discount', reportData.summary.totalCouponDiscount]);
+            // worksheet.addRow(['Total Coupon Discount', reportData.summary.totalCouponDiscount]);
             worksheet.addRow(['Net Amount', reportData.summary.netAmount]);
 
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -561,7 +561,7 @@ exports.dashboard = async (req, res) => {
     }
 };
 
-const generateSalesReport = async (query) => {
+const   generateSalesReport = async (query) => {
     try {
         const { period, startDate, endDate, page = 1, limit = 10 } = query;
         let dateFilter = {};
@@ -729,7 +729,10 @@ const generateSalesReport = async (query) => {
                 totalAmount: orders.reduce((sum, order) => sum + order.finalAmount, 0),
                 totalDiscount: orders.reduce((sum, order) => {
                     return sum + (order.totalDiscountAmount || 0) + (order.couponDiscount || 0);
-                }, 0)
+                }, 0),
+                totalCouponDiscount : orders.reduce((sum, order)=>{
+                    return sum + (order.couponDiscount || 0)
+                },0)
             }
         };
     } catch (error) {
