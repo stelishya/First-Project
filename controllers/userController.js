@@ -498,7 +498,7 @@ exports.deleteAccount = async (req, res) => {
 
 exports.userLogout = (req, res) => {
     try {
-        req.session.user_id = null;
+        req.session.user = null;
         console.log("userLogout - try")
 
         return res.render('users/login');
