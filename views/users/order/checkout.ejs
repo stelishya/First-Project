@@ -125,7 +125,8 @@
 
                                                 <td class="text-right">
                                                     <div class="text-sm">
-                                                        <div>MRP: ₹<%= (product.productId.mrp.toFixed(0))*product.quantity %>
+                                                        <div>MRP: ₹<%=
+                                                                (product.productId.mrp.toFixed(0))*product.quantity %>
                                                         </div>
                                                         <% if (product.prices.totalDiscount> 0) { %>
                                                             <div class="text-red-500">-₹<%=
@@ -199,7 +200,8 @@
                                             <i class="fas fa-minus-circle text-red-500 mr-2"></i>
                                             Product Discount
                                         </span>
-                                        <span class="text-red-500" id="totalDiscount">-₹<%= totalDiscount.toFixed(0) %></span>
+                                        <span class="text-red-500" id="totalDiscount">-₹<%= totalDiscount.toFixed(0) %>
+                                        </span>
                                         <!-- .toFixed(2) -->
                                     </div>
                                     <% } %>
@@ -227,19 +229,35 @@
                                 <h3 class="font-semibold text-gray-700 mb-3">Payment Methods</h3>
                                 <div class="space-y-2">
                                     <% paymentMethods.forEach(method=> { %>
-                                        <label class="flex flex-col space-y-2 items-center space-x-3 p-3 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
+                                        <label
+                                            class="flex flex-col space-y-2 items-center space-x-3 p-3 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors"
                                             id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
                                             <div class="flex items-center space-x-3">
-                                            <input type="radio" name="payment" value="<%= method %>"
-                                                class="text-gray-500 focus:ring-gray-500"
-                                                id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" 
-                                                <% if (method==='Cash on Delivery' && Number(totalAmount) > 1000) { %> disabled <% } %>
-                                                >
-                                                <span><%= method %></span>
+                                                <input type="radio" name="payment" value="<%= method %>"
+                                                    class="text-gray-500 focus:ring-gray-500"
+                                                    id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" <% if
+                                                    (method==='Cash on Delivery' && Number(totalAmount)> 1000) { %>
+                                                disabled <% } %>
+                                                    <% if (method==='Wallet' && Number(totalAmount)> walletBalance) { %>
+                                                        disabled <% } %>
+                                                            >
+                                                            <span>
+                                                                <%= method %>
+                                                            </span>
                                             </div>
-                                                <% if (method === 'Cash on Delivery' && Number(totalAmount) > 1000) { %>
-                                                <div  class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</div >
-                                                <% } %> 
+                                            <% if (method==='Cash on Delivery' && Number(totalAmount)> 1000) { %>
+                                                <div class="ml-2 text-sm text-red-500">(Not available for orders above
+                                                    ₹1000)</div>
+                                                <% } %>
+                                                    <% if (method==='Wallet' ) { %>
+                                                        <div
+                                                            class="ml-2 text-sm <%= Number(totalAmount) > walletBalance ? 'text-red-500' : 'text-green-500' %>">
+                                                            (Available Balance: ₹<%= walletBalance %>)
+                                                                <% if (Number(totalAmount)> walletBalance) { %>
+                                                                    <div class="text-red-500">Insufficient balance</div>
+                                                                    <% } %>
+                                                        </div>
+                                                        <% } %>
                                         </label>
                                         <% }); %>
                                 </div>
@@ -251,16 +269,15 @@
                                     style="background-color: #716f6e;">
                                     Place Order
                                 </button>
-                            <% } else { %>
+                                <% } else { %>
 
-                            <button onclick="placeOrder('<%= totalAmount %>')"
-                                
-                                class="w-full py-3  text-white rounded-lg hover:bg-gray-500 transition-colors mt-6"
-                                style="background-color: #716f6e;">
-                                Place Order
-                            </button>
-                            <% } %>
-                            <!-- // ,'%= products[0].productId._id %>'" -->
+                                    <button onclick="placeOrder('<%= totalAmount %>')"
+                                        class="w-full py-3  text-white rounded-lg hover:bg-gray-500 transition-colors mt-6"
+                                        style="background-color: #716f6e;">
+                                        Place Order
+                                    </button>
+                                    <% } %>
+                                        <!-- // ,'%= products[0].productId._id %>'" -->
                         </div>
                     </div>
                 </div>
@@ -355,7 +372,7 @@
             /* Enhanced shadow on hover */
         }
     </style>
-    
+
     <!-- Address Modal -->
     <div id="addressModal" class="modal">
         <div class="modal-content w-full max-w-xl bg-white rounded-lg shadow-lg relative">
@@ -500,46 +517,46 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
 
-    function handlePaymentMethodChange(radio) {
-        console.log('Payment method changed:', radio.value);
+        function handlePaymentMethodChange(radio) {
+            console.log('Payment method changed:', radio.value);
 
-        if (radio.value === 'COD') {
-            const totalAmountElement = document.getElementById('totalAmount');
-            console.log('Total amount element:', totalAmountElement);
+            if (radio.value === 'COD') {
+                const totalAmountElement = document.getElementById('totalAmount');
+                console.log('Total amount element:', totalAmountElement);
 
-            const totalAmountText = totalAmountElement.textContent;
-            console.log('Total amount text:', totalAmountText);
+                const totalAmountText = totalAmountElement.textContent;
+                console.log('Total amount text:', totalAmountText);
 
-            const totalAmount = parseFloat(totalAmountText.replace(/[^0-9.]/g, ''));
-            console.log('Parsed Total Amount:', totalAmount);
-            // const totalAmount = parseFloat(document.getElementById('totalAmount').textContent.replace('₹', '').trim());
-            if (totalAmount > 1000) {
-                console.log('Amount exceeds limit, showing toast');
-                radio.checked = false;
+                const totalAmount = parseFloat(totalAmountText.replace(/[^0-9.]/g, ''));
+                console.log('Parsed Total Amount:', totalAmount);
+                // const totalAmount = parseFloat(document.getElementById('totalAmount').textContent.replace('₹', '').trim());
+                if (totalAmount > 1000) {
+                    console.log('Amount exceeds limit, showing toast');
+                    radio.checked = false;
 
-                const toastMessage = 'Cash on Delivery is not available for orders above ₹1000';
-                console.log('Toast message:', toastMessage);
+                    const toastMessage = 'Cash on Delivery is not available for orders above ₹1000';
+                    console.log('Toast message:', toastMessage);
 
-                showToast(toastMessage, true);
-                return false;
+                    showToast(toastMessage, true);
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
-    }
 
-    function showToast(message, isError = false) {
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg z-50 ${isError ? 'bg-red-100 text-red-700 border border-red-500' : 'bg-green-100 text-green-700 border border-green-500'}`;
-        toast.textContent = message;
-        toast.style.zIndex = '1100';
-        document.body.appendChild(toast);
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg z-50 ${isError ? 'bg-red-100 text-red-700 border border-red-500' : 'bg-green-100 text-green-700 border border-green-500'}`;
+            toast.textContent = message;
+            toast.style.zIndex = '1100';
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
         
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
-
-        // Address selection
         let selectedAddressId = null;
         function selectAddress(addressId, buttonElement) {
             selectedAddressId = addressId;
@@ -781,7 +798,7 @@
             }
 
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            
+
             if (!selectedPayment) {
                 showToast('Please select a payment method', true);
                 return;
@@ -792,8 +809,8 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 // const isBuyNow = urlParams.get('buyNow') === 'true';
                 // const quantity = urlParams.get('quantity') || 1;
-                let quantity,totalDiscount,totalMRP,couponDiscount;
-                
+                let quantity, totalDiscount, totalMRP, couponDiscount;
+
                 if (productId) {
                     // For buy now, get quantity from products array
                     quantity = parseInt(productsData[0].quantity);
@@ -801,13 +818,13 @@
                 } else {
                     // For cart checkout, get quantity from products array
                     quantity = parseInt(productsData[0].quantity);
-                    console.log("Cart Quantity:", quantity); 
+                    console.log("Cart Quantity:", quantity);
                 }
                 totalMRP = parseFloat(document.getElementById('totalMRP').textContent.replace('₹', '').trim());
                 totalDiscount = parseFloat(document.getElementById('totalDiscount').textContent.replace('-₹', '').trim());
 
                 const appliedCouponDiscount = document.getElementById('couponDiscountValue');
-                couponDiscount = appliedCouponDiscount ? 
+                couponDiscount = appliedCouponDiscount ?
                     parseFloat(appliedCouponDiscount.textContent.replace('-₹', '').trim()) : 0;
 
                 console.log("Price Details:", { totalMRP, totalDiscount, couponDiscount });
@@ -830,7 +847,7 @@
                     totalMRP: totalMRP,
                     totalDiscount: totalDiscount,
                     couponCode: couponCode,
-                    couponDiscount:couponDiscount
+                    couponDiscount: couponDiscount
                 };
                 // Set buyNow based on whether productId is provided
                 if (productId) {
@@ -858,7 +875,7 @@
                         const response = await axios.post('/user/create-order', {
                             amount: totalAmount,
                             // totalDiscount: discount,
-                            couponDiscount: currentCouponDiscount 
+                            couponDiscount: currentCouponDiscount
                         });
                         console.log("Razorpay order response:", response.data);
 
@@ -906,7 +923,7 @@
                                 handlePaymentSuccess(response, razorpayOrderData);
                             },
                             modal: {
-                                ondismiss: function() {
+                                ondismiss: function () {
                                     console.log("Payment modal dismissed");
                                     handlePaymentFailure(razorpayOrderData);
                                 }
@@ -917,7 +934,7 @@
                         };
 
                         const rzp = new Razorpay(options);
-                        rzp.on('payment.failed', function(response) {
+                        rzp.on('payment.failed', function (response) {
                             console.log("Payment failed event triggered");
                             handlePaymentFailure(response);
                         });
@@ -930,27 +947,48 @@
                         console.error('Razorpay initialization error:', error);
                         showToast('Failed to initialize payment', true);
                     }
-                } else if(selectedPayment.value === 'Cash on Delivery') {
-                try{
-                    console.log("Placing COD order");
-                    // For COD and other payment methods
-                    const response = await axios.post('/user/order/creation', orderData);
-                    if (response.data.success) {
-                        await Swal.fire({
-                            title: 'Order Placed Successfully!',
-                            text: 'Thank you for your purchase.',
-                            icon: 'success',
-                            confirmButtonText: 'View Orders',
-                            confirmButtonColor: '#f97316'
-                        });
-                        window.location.href = '/user/orders';
-                    }else{
-                        showToast(response.data.message || 'Failed to place order', true);
+                } else if (selectedPayment.value === 'Cash on Delivery') {
+                    try {
+                        console.log("Placing COD order");
+                        // For COD and other payment methods
+                        const response = await axios.post('/user/order/creation', orderData);
+                        if (response.data.success) {
+                            await Swal.fire({
+                                title: 'Order Placed Successfully!',
+                                text: 'Thank you for your purchase.',
+                                icon: 'success',
+                                confirmButtonText: 'View Orders',
+                                confirmButtonColor: '#f97316'
+                            });
+                            window.location.href = '/user/orders';
+                        } else {
+                            showToast(response.data.message || 'Failed to place order', true);
+                        }
+                    } catch (error) {
+                        console.error('Error placing COD order:', error);
+                        showToast(error.response?.data?.message || 'Failed to place order - catch', true);
                     }
-                }catch(error){
-                    console.error('Error placing COD order:', error);
-                    showToast(error.response?.data?.message || 'Failed to place order - catch', true);
-                }
+                } else if (selectedPayment.value === 'Wallet') {
+                    try {
+                        console.log("Placing wallet order");
+                        const response = await axios.get('/user/wallet/balance');
+                        console.log("response", response)
+                        if (response.data.success) {
+                            await Swal.fire({
+                                title: 'Order Placed Successfully!',
+                                text: 'Thank you for your purchase.',
+                                icon: 'success',
+                                confirmButtonText: 'View Orders',
+                                confirmButtonColor: '#f97316'
+                            });
+                            window.location.href = '/user/orders';
+                        } else {
+                            showToast(response.data.message || 'Failed to place order', true);
+                        }
+                    } catch (error) {
+                        console.error('Error in order placement:', error);
+                        showToast(error.response?.data?.message || 'Failed to place order. Please try again.', true);
+                    }
                 }
             } catch (error) {
                 console.error('Error in order placement:', error);
@@ -969,7 +1007,7 @@
                 });
 
                 if (verifyResponse.data.success) {
-                    console.log("success aahn")
+                    console.log("success aahn");
                     await Swal.fire({
                         title: 'Payment Successful!',
                         text: 'Your order has been placed.',
@@ -978,7 +1016,7 @@
                         confirmButtonColor: '#f97316'
                     });
                     window.location.href = '/user/orders';
-                } 
+                }
                 // else {
                 //     console.log("failure")
                 //     // Get the orderId from the response
@@ -1000,40 +1038,40 @@
         }
 
         async function handlePaymentFailure(razorpayOrderData) {
-                        console.log("Handling payment failure");
-                        try {
-                            // Create order with failed status
-                            const orderResponse = await axios.post('/user/verify-payment', {
-                                orderData:razorpayOrderData,
-                                paymentStatus: 'Failed'
-                            });
-                            console.log("orderResponse : ",orderResponse)
-                            if (!orderResponse.data.success) {
-                                const orderId = orderResponse.data.order._id;
-                                await Swal.fire({
-                                    title: 'Payment Failed!',
-                                    text: orderResponse.data.message|| 'Payment Failed. Please try again.',
-                                    icon: 'error',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Retry Payment',
-                                    cancelButtonText: 'Cancel',
-                                    confirmButtonColor: '#f97316',
-                                    cancelButtonColor: '#6b7280'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        window.location.href = `/user/order/details/${orderId}`;
-                                    }
-                                })
-                                // .then(()=>window.location.href = `/user/order/details/${orderId}`)
-                                
-                            } else {
-                                showToast('Error creating order', true);
-                            }
-                        } catch (error) {
-                            console.error('Error handling payment failure:', error);
-                            showToast('Error processing payment failure', true);
+            console.log("Handling payment failure");
+            try {
+                // Create order with failed status
+                const orderResponse = await axios.post('/user/verify-payment', {
+                    orderData: razorpayOrderData,
+                    paymentStatus: 'Failed'
+                });
+                console.log("orderResponse : ", orderResponse)
+                if (!orderResponse.data.success) {
+                    const orderId = orderResponse.data.order._id;
+                    await Swal.fire({
+                        title: 'Payment Failed!',
+                        text: orderResponse.data.message || 'Payment Failed. Please try again.',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Retry Payment',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#f97316',
+                        cancelButtonColor: '#6b7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = `/user/order/details/${orderId}`;
                         }
-                    }
+                    })
+                    // .then(()=>window.location.href = `/user/order/details/${orderId}`)
+
+                } else {
+                    showToast('Error creating order', true);
+                }
+            } catch (error) {
+                console.error('Error handling payment failure:', error);
+                showToast('Error processing payment failure', true);
+            }
+        }
         // Form validation functions
         function validateName() {
             const input = document.getElementById('nameInput').value.trim();
@@ -1247,22 +1285,62 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        function verifyPayment(response) {
-            fetch('/user/verify-payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(response)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === "Payment verified successfully") {
-                        // Handle successful payment (e.g., redirect to success page)
-                        window.location.href = '/user/payment-success';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+        async function verifyPayment(response) {
+            try {
+                const verifyResponse = await axios.post('/user/verify-payment', {
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderData: response.orderData
+                });
+
+                if (verifyResponse.data.success) {
+                    console.log("Payment successful");
+                    await Swal.fire({
+                        title: 'Payment Successful!',
+                        text: 'Your order has been placed.',
+                        icon: 'success',
+                        confirmButtonText: 'View Orders',
+                        confirmButtonColor: '#f97316'
+                    });
+                    window.location.href = '/user/orders';
+                } else {
+                    console.log("Payment failed");
+                    const orderId = verifyResponse.data.order._id;
+                    await Swal.fire({
+                        title: 'Payment Failed!',
+                        text: verifyResponse.data.message || 'Payment Failed. Please try again.',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Retry Payment',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#f97316',
+                        cancelButtonColor: '#6b7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = `/user/order/details/${orderId}`;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Payment verification error:', error);
+                showToast(error.response?.data?.message || 'Payment verification failed', true);
+            }
+            // fetch('/user/verify-payment', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(response)
+            // })
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         if (data.message === "Payment verified successfully") {
+            //             // Handle successful payment (e.g., redirect to success page)
+            //             window.location.href = '/user/payment-success';
+            //         }
+            //     })
+            //     .catch(error => console.error('Error:', error));
         }
 
         async function openCouponModal() {
@@ -1391,7 +1469,7 @@
                     // Update total amount
                     // const totalAmountElement = document.getElementById('totalAmount');
                     // if (totalAmountElement) {
-                        totalAmountElement.textContent = `₹${response.data.totalAmount.toFixed(0)}`;
+                    totalAmountElement.textContent = `₹${response.data.totalAmount.toFixed(0)}`;
                     // }
 
                     // Show applied coupon section with details
@@ -1409,7 +1487,7 @@
                     messageDiv.className = 'text-sm text-green-500 mt-2';
                     showToast('Coupon applied successfully!', 'success');
                     closeCouponModal();
-                }else{
+                } else {
                     throw new Error(response.data.message || 'Failed to apply coupon');
                 }
             } catch (error) {
@@ -1433,7 +1511,7 @@
                 const totalAmountElement = document.getElementById('totalAmount');
                 const currentTotal = parseFloat(totalAmountElement.textContent.replace('₹', '').trim());
 
-                const response = await axios.post('/user/remove-coupon',{code,currentTotal });
+                const response = await axios.post('/user/remove-coupon', { code, currentTotal });
                 if (response.data.success) {
                     currentCouponDiscount = 0; // Reset the discount amount
 
@@ -1443,8 +1521,8 @@
                         couponDiscountDiv.classList.add('hidden');
                         document.getElementById('couponDiscountValue').textContent = '-₹0';
                     }
-                     // Update total amount with the original amount from backend
-                     if (totalAmountElement && response.data.originalAmount) {
+                    // Update total amount with the original amount from backend
+                    if (totalAmountElement && response.data.originalAmount) {
                         totalAmountElement.textContent = `₹${response.data.originalAmount}`;
                     }
                     // Get the current discount amount
@@ -1466,8 +1544,8 @@
                     //     const originalTotal = parseFloat(totalMRPElement.textContent.replace('₹', '').trim());
                     //     totalAmountElement.textContent = `₹${originalTotal.toFixed(0)}`;
                     // }
-                     // Hide applied coupon section
-                     const appliedSection = document.getElementById('appliedCouponSection');
+                    // Hide applied coupon section
+                    const appliedSection = document.getElementById('appliedCouponSection');
                     const appliedCode = document.getElementById('appliedCouponCode');
                     if (appliedSection && appliedCode) {
                         appliedSection.classList.add('hidden');
@@ -1488,8 +1566,8 @@
                     // Clear message
                     document.getElementById('couponMessage').textContent = '';
 
-                    showToast('Coupon removed successfully','success');
-                }else {
+                    showToast('Coupon removed successfully', 'success');
+                } else {
                     throw new Error(response.data.message || 'Failed to remove coupon');
                 }
             } catch (error) {

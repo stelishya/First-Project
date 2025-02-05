@@ -39,7 +39,7 @@ app.use((req,res,next)=>{
     next();
 })
 
-// Set up view engine and layouts
+
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');

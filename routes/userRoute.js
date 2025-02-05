@@ -100,7 +100,6 @@ user_route.post('/order/return/:orderId',userAuth,orderController.returnOrder)
 //RazorPay Payment
 user_route.post('/create-order', userAuth, paymentController.createOrder);
 user_route.post('/verify-payment', userAuth, paymentController.verifyPayment);
-// user_route.post('/order/create',userAuth,paymentController.orderCreate)
 user_route.post('/retry-payment', userAuth, paymentController.retryPayment)
 user_route.post('/verify-retry-payment', userAuth, paymentController.verifyRetryPayment)
 

@@ -17,13 +17,12 @@ exports.checkout = async (req, res) => {
         if (!req.session || !req.session.user || !req.session.user._id) {
             return res.redirect('/user/login');
         }
-
+        
         const { productId, quantity, buyNow } = req.body;
         let products, totalMRP = 0, totalDiscount = 0, totalAmount = 0;
         let isBuyNow = false;
 
         if (buyNow && productId) {
-            // Handle Buy Now
             isBuyNow = true;
             const productDetails = await Products.findById(productId).populate('category');
             if (!productDetails) {
@@ -50,7 +49,6 @@ exports.checkout = async (req, res) => {
             totalDiscount = itemPrices.totalDiscount;
             totalAmount = itemPrices.totalPrice;
 
-            // Store in session for later use
             req.session.buyNow = {
                 products,
                 totalMRP,
@@ -62,7 +60,6 @@ exports.checkout = async (req, res) => {
             };
             console.log("Setting buyNow session:", req.session.buyNow);
         } else {
-            // Handle Cart Checkout
             isBuyNow = false;
             const cart = await Carts.findOne({ userId }).populate({
                 path: 'items.productId',
@@ -109,7 +106,7 @@ exports.checkout = async (req, res) => {
         if (walletBalance > 0) {
             paymentMethods.push('Wallet');
         }
-
+        console.log("walletBalance : ",walletBalance)
         // finalAmount = finalAmount || 0; 
         console.log("Checkout data:", {
             products,
@@ -162,7 +159,6 @@ exports.orderCreation = async (req, res) => {
 
         let subtotal, productsWithLatestPrices, totalDiscountAmount, couponDiscount = 0;
 
-        // Calculate subtotal first for buy now or cart
         if (orderData.buyNow) {
             console.log("Processing Buy Now order");
             if (!orderData.singleProductId) {
@@ -173,7 +169,6 @@ exports.orderCreation = async (req, res) => {
             if (!product) {
                 return res.status(400).json({ success: false, message: "Product not found" });
             }
-            //helper function
             const prices = calculateOrderItemPrices({
                 product,
                 quantity: parseInt(orderData.quantity) || 1
@@ -205,7 +200,6 @@ exports.orderCreation = async (req, res) => {
             if (!cart || !cart.items || cart.items.length === 0) {
                 return res.status(400).json({ success: false, message: "Cart is empty" });
             }
-            //helper function
             productsWithLatestPrices = cart.items.map(item => {
                 const prices = calculateOrderItemPrices({
                     product: item.productId,
@@ -232,7 +226,6 @@ exports.orderCreation = async (req, res) => {
         }
         console.log("orderData.couponCode :) ",orderData.couponCode)
         let couponData = null;
-        // Calculate coupon discount if coupon is provided
         if (orderData.couponCode) {
             try {
                 const coupon = await Coupons.findOne({
@@ -248,7 +241,6 @@ exports.orderCreation = async (req, res) => {
                 console.log("coupon: ",coupon);
                 couponData = coupon; 
 
-                // Calculate coupon discount
                 if (subtotal >= coupon.minimumPurchase) {
                     // couponDiscount = (subtotal * coupon.offerPercentage) / 100;
 
@@ -263,7 +255,6 @@ exports.orderCreation = async (req, res) => {
                             message: `Minimum purchase amount of ₹${coupon.minimumPurchase} required for this coupon`
                         });
                     }
-                    // Update coupon usage
                     await Coupons.findByIdAndUpdate(coupon._id, {
                         $inc: { usedCount: 1 },
                         $dec: { usageLimit: 1 }
@@ -319,11 +310,36 @@ exports.orderCreation = async (req, res) => {
                 couponDiscount,
                 finalTotalDiscount: newOrder.totalDiscount,
                 newOrder});
+
             await newOrder.save();
+                if (orderData.paymentMethod === 'Wallet') {
+                    const wallet = await Wallets.findOne({ userId });
+                    if (!wallet || wallet.balance < newOrder.finalAmount) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Insufficient wallet balance"
+                        });
+                    }
+
+                    const walletTransaction = new Wallets({
+                        userId,
+                        orderId: newOrder._id,
+                        type: 'DEBIT',
+                        amount: newOrder.finalAmount,
+                        balance: wallet.balance - newOrder.finalAmount,
+                        description: `Payment for order #${newOrder._id}`
+                    });
+                    newOrder.paymentStatus = 'Paid';
+                    await Promise.all([
+                        walletTransaction.save(),
+                        newOrder.save()
+                    ]);
+                }
+            
             console.log("Order saved successfully.");
 
             console.log("orderData.buyNow : ", orderData.buyNow)
-            // Update inventory
+            // update stock
             if (orderData.buyNow) {
                 console.log("Updating stock for Buy Now order");
                 await Products.findByIdAndUpdate(orderData.singleProductId, {
@@ -367,7 +383,7 @@ exports.showOrdersUser = async (req, res) => {
         // console.log("userId:", userId)
 
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 10;
         const skip = (page - 1) * limit;
 
         const orderCount = await Orders.countDocuments({ userId });
@@ -507,7 +523,6 @@ exports.getOrderDetails = async (req, res) => {
             return res.status(404).render('admin/admin-error', { message: 'Order not found' });
         }
 
-        // Format dates for timeline
         const timeline = [
             { status: 'Order Placed', date: order.orderDate },
             { status: 'Processing', date: order.processingDate },
@@ -559,7 +574,6 @@ exports.cancelOrder = async (req, res) => {
         const userId = req.session.user._id;
         console.log("orderId : ", orderId);
 
-        // Fetch the order
         const order = await Orders.findById(orderId).populate('orderedItems.product');
         console.log("order : ", order);
 
@@ -572,7 +586,6 @@ exports.cancelOrder = async (req, res) => {
                 message: 'Unauthorized to cancel this order'
             });
         }
-        // Check if the order is eligible for cancellation
         if (["Cancelled", "Delivered", "Returned"].includes(order.status)) {
             return res.status(400).json({ message: `Order cannot be cancelled when in ${order.status} status`, success: false });
         }
@@ -675,13 +688,12 @@ exports.updateStatus = async (req, res) => {
         const orderId = req.params.orderId;
         const { status } = req.body;
         console.log("orderId : " + orderId + "status : " + status)
-        // Fetch the order
+
         const order = await Orders.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        // Check for valid status transition
         if (status === "Returned") {
             if (order.status !== "Delivered") {
                 console.log("Only delivered orders can be returned.")
@@ -719,7 +731,7 @@ exports.updateStatus = async (req, res) => {
                     const updateInventoryPromises = order.orderedItems.map((item) =>
                         Products.findByIdAndUpdate(
                             item.product,
-                            { $inc: { inventory: item.quantity } } // Increment inventory
+                            { $inc: { inventory: item.quantity } } // increase stock
                             // { session }
                         )
                     );
@@ -805,34 +817,29 @@ exports.returnOrder = async (req, res) => {
         const orderId = req.params.orderId;
         const returnReason = req.body.returnReason;
 
-        // Validate inputs
         if (!orderId || !returnReason) {
             return res.status(400).json({ message: "Order ID and return reason are required" });
         }
 
-        // Find the order first
         const order = await Orders.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        // Check if order is eligible for return
         if (order.status !== "Delivered") {
             return res.status(400).json({ message: "Only delivered orders can be returned" });
         }
 
-        // Check if return window is still open (7 days)
         const returnWindow = new Date(order.deliveredOn).getTime() + (7 * 24 * 60 * 60 * 1000);
         if (Date.now() > returnWindow) {
             return res.status(400).json({ message: "Return window has expired" });
         }
 
-        // Check if return is already requested
         if (order.returnDetails?.returnRequested) {
             return res.status(400).json({ message: "Return already requested for this order" });
         }
 
-        // Update order with return details
+        // update order with return details
         await Orders.findByIdAndUpdate(orderId, {
             'returnDetails.returnRequested': true,
             'returnDetails.returnReason': returnReason,
@@ -922,18 +929,15 @@ exports.downloadInvoice = async (req, res) => {
         res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
         doc.pipe(res);
 
-        // Header
         doc.fontSize(20).text('INVOICE', { align: 'center' });
         doc.moveDown();
         doc.fontSize(10).text('CAlliope', { align: 'center' });
         doc.fontSize(10).text('www.calliope.com', { align: 'center' });
         doc.moveDown();
 
-        // Separator line
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown();
 
-        // Order Details
         doc.fontSize(12).text(`Order ID: #${orderId}`);
         doc.fontSize(10)
            .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
@@ -941,16 +945,13 @@ exports.downloadInvoice = async (req, res) => {
            .text(`Payment Method: ${order.paymentMethod}`);
         doc.moveDown();
 
-        // Customer and Shipping Details in two columns
         const startY = doc.y;
         
-        // Customer Details (Left Column)
         doc.fontSize(12).text('Customer Details:', 50, startY);
         doc.fontSize(10)
            .text(`Name: ${order.userId.username}`, 50)
            .text(`Email: ${order.userId.email}`, 50);
 
-        // Shipping Address (Right Column)
         doc.fontSize(12).text('Shipping Address:', 300, startY);
         doc.fontSize(10)
            .text(`${order.address.name}`, 300)
@@ -959,19 +960,15 @@ exports.downloadInvoice = async (req, res) => {
            .text(`${order.address.country} - ${order.address.pincode}`, 300)
            .text(`Phone: ${order.address.mobile}`, 300);
 
-        // Ensure proper spacing after addresses
         doc.y = Math.max(doc.y, doc.y + 20);
         doc.moveDown();
 
-        // Separator line
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown();
 
-        // Order Items Section
         doc.fontSize(12).text('Order Items:', 50);
         doc.moveDown();
 
-        // Table Headers with background
         const tableTop = doc.y;
         doc.rect(50, tableTop, 500, 20).fill('#f3f4f6');
         
@@ -985,7 +982,7 @@ exports.downloadInvoice = async (req, res) => {
         doc.moveDown();
         let yPos = doc.y + 10;
 
-        // Product Items
+        // product items
         let totalMRP = 0;
 
         console.log('Processing items:', order.orderedItems.length);
@@ -1015,19 +1012,17 @@ exports.downloadInvoice = async (req, res) => {
             yPos += 25;
         });
 
-        // Summary Section
+        // summary 
         doc.moveDown();
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown();
 
-        // Right-aligned summary box
         const summaryX = 350;
         let currentY = doc.y;
 
-        // Summary details
+        // summary details
         doc.fontSize(10);
         
-        // Helper function for aligned text
         const addAlignedText = (label, value, y) => {
             doc.text(label, summaryX, y);
             doc.text(value, summaryX + 100, y, { align: 'right' });
@@ -1050,14 +1045,12 @@ exports.downloadInvoice = async (req, res) => {
             currentY += 20;
         }
 
-        // Final Total
         doc.moveTo(summaryX, currentY).lineTo(550, currentY).stroke();
         currentY += 10;
         
         doc.fontSize(12).font('Helvetica-Bold');
         addAlignedText('Total Amount:', formatCurrency(Number(order.finalAmount)), currentY);
 
-        // Footer
         doc.fontSize(10).font('Helvetica')
            .text('Thank you for shopping with us!', 50, 700, { align: 'center' });
 

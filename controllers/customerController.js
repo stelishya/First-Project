@@ -1,7 +1,5 @@
 const User = require('../models/userSchema');
 
-
-
 exports.customerInfo = async (req,res)=>{
     try {
         let search='';

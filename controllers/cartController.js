@@ -10,12 +10,10 @@ exports.getCart = async (req,res)=>{
         }
         const userId = req.session.user._id;
 
-        // Pagination parameters
         const page = parseInt(req.query.page) || 1;
         const limit = 6;
         const skip = (page - 1) * limit;
 
-        // Get cart with total count
         const cart = await Carts.findOne({ userId }).populate({
             path: 'items.productId',
             model: 'Product',
@@ -39,11 +37,9 @@ exports.getCart = async (req,res)=>{
             });
         }
 
-        // Get total count for pagination
         const totalItems = cart.items.length;
         const totalPages = Math.ceil(totalItems / limit);
 
-        // Get paginated cart items
         const paginatedCart = await Carts.findOne({ userId })
             .populate({
                 path: 'items.productId',
@@ -88,9 +84,9 @@ exports.getCart = async (req,res)=>{
                 finalAmount: itemPrices.totalPrice,
                 stock: product.stock 
             };
-        }).filter(Boolean); // Remove any null items
+        }).filter(Boolean);
         
-        const countOfProducts = totalItems; // Use total items instead of current page items
+        const countOfProducts = totalItems; 
         console.log("Hi i'm rendering cart page");
         console.log(`products: ${products}`);
         console.log('Cart Totals:');
@@ -133,7 +129,7 @@ exports.addToCart = async (req,res)=>{
         const productId = req.body.productId;
         const quantity = parseInt(req.body.quantity) || 1;
         console.log("\nuserId : "+userId+"\nproductId : "+productId+"\nquantity : "+quantity)
-        // Get product details
+
         const product = await Products.findById(productId);
         console.log(product)
         if (!product) {
@@ -143,7 +139,6 @@ exports.addToCart = async (req,res)=>{
             });
         }
 
-        // Check inventory and max quantity
         const maxAllowedQuantity = Math.min(product.stock, 5);
         if (quantity > maxAllowedQuantity) {
             return res.status(400).json({
@@ -154,11 +149,9 @@ exports.addToCart = async (req,res)=>{
             });
         }
 
-        // Calculate price
         const price = product.discountedPrice || product.mrp;
         const totalPrice = price * quantity;
 
-        // Find or create cart
         let cart = await Carts.findOne({ userId });
         if (!cart) {
             cart = new Carts({
@@ -172,13 +165,11 @@ exports.addToCart = async (req,res)=>{
                 }]
             });
         } else {
-            // Check if product already exists in cart
             const existingItem = cart.items.find(
                 item => item.productId.toString() === productId
             );
 
             if (existingItem) {
-                // Check total quantity
                 const newTotalQuantity = existingItem.quantity + quantity;
                 if (newTotalQuantity > maxAllowedQuantity) {
                     return res.status(400).json({
@@ -189,11 +180,9 @@ exports.addToCart = async (req,res)=>{
                     });
                 }
 
-                // Update existing item
                 existingItem.quantity = newTotalQuantity;
                 existingItem.totalPrice = price * newTotalQuantity;
             } else {
-                // Add new item
                 cart.items.push({
                     productId,
                     quantity,
@@ -238,15 +227,12 @@ exports.updateQuantity = async (req, res) => {
             const product = cart.items[productIndex].productId;
             const newQuantity = cart.items[productIndex].quantity + change;
 
-            // Check if trying to increase quantity
             if (change > 0) {
-                // Get latest product stock
                 const currentProduct = await Products.findById(productId);
                 if (!currentProduct) {
                     return res.status(404).json({ success: false, message: 'Product not found' });
                 }
 
-                // Check if new quantity exceeds stock or max limit
                 const maxAllowedQuantity = Math.min(currentProduct.quantity, 5);
                 if (newQuantity > maxAllowedQuantity) {
                     return res.status(400).json({ 
@@ -256,14 +242,11 @@ exports.updateQuantity = async (req, res) => {
                 }
             }
 
-            // Update quantity if all checks pass
             cart.items[productIndex].quantity = newQuantity < 1 ? 1 : newQuantity;
 
-            // Recalculate total price for the updated item
             const price = product.discountedPrice || product.mrp;
             cart.items[productIndex].totalPrice = price * cart.items[productIndex].quantity;
 
-            // Save the updated cart
             await cart.save();
             return res.json({
                 success: true,
@@ -293,7 +276,6 @@ exports.removeProduct = async (req, res) => {
             populate: { path: 'category', select: 'offer' }
         });
         if (updatedCart) {
-            // Calculate new totals after product removal
             const items = updatedCart.items.map(item => {
                 const product = item.productId;
                 const percentageDiscountFromProduct = product.offer ? Math.floor(product.mrp * (product.offer / 100)) : 0;
@@ -321,14 +303,11 @@ exports.removeProduct = async (req, res) => {
                 };
             });
 
-            // Calculate new total amount
             const totalAmount = items.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
 
-            // Update the cart with new total
             updatedCart.totalAmount = totalAmount;
             await updatedCart.save();
 
-            // Send response with updated data
             res.status(200).json({
                 success: true,
                 message: 'Product removed from cart',

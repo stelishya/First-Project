@@ -13,7 +13,6 @@ exports.showUserAddresses = async (req,res)=>{
         const addresses = await Addresses.find({userId:session._id});
         console.log("Addresses found:", addresses);
 
-        // Transform addresses to match the expected format
         const transformedAddresses = addresses.map(doc => {
             if (doc.address && doc.address.length > 0) {
                 return {
@@ -52,19 +51,17 @@ exports.addAddress = async (req,res)=>{
         const address = req.body;
         const userId = req.session.user._id;
 
-        // Find existing address document or create new one
         let addressDoc = await Addresses.findOne({ userId: userId });
         
         if (!addressDoc) {
             addressDoc = new Addresses({
                 userId: userId,
-                address: [] // Initialize empty array
+                address: [] 
             });
         }
 
-        // Create new address object
         const newAddress = {
-            typeOfAddress: address.typeOfAddress || 'Home', // Default to 'Home' if not provided
+            typeOfAddress: address.typeOfAddress || 'Home',
             name: address.name,
             streetAddress: address.streetAddress,
             city: address.city,
@@ -74,7 +71,6 @@ exports.addAddress = async (req,res)=>{
             mobile: address.mobile
         };
 
-        // Push new address to array
         addressDoc.address.push(newAddress);
         await addressDoc.save();
 
@@ -122,21 +118,18 @@ exports.editAddress = async (req,res)=>{
 
         console.log("Editing address:", { addressId, address, userId });
 
-        // Find the user's address document
         const addressDoc = await Addresses.findOne({ userId: userId });
         if (!addressDoc) {
             return res.status(404).json({ success: false, message: "Address document not found" });
         }
 
-        // Find the specific address in the array
         const addressIndex = addressDoc.address.findIndex(addr => addr._id.toString() === addressId);
         if (addressIndex === -1) {
             return res.status(404).json({ success: false, message: "Specific address not found" });
         }
 
-        // Update the specific address in the array
         addressDoc.address[addressIndex] = {
-            ...addressDoc.address[addressIndex].toObject(), // Convert to plain object
+            ...addressDoc.address[addressIndex].toObject(), 
             typeOfAddress: address.typeOfAddress || addressDoc.address[addressIndex].typeOfAddress,
             name: address.name,
             streetAddress: address.streetAddress,

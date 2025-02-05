@@ -65,13 +65,11 @@ exports.loadDashboard=async (req,res)=>{
         console.log("loadDashboard called")
     if (!req.session.admin) {
         console.log('Unauthorized access to dashboard');
-        return res.redirect('/admin/login'); // Redirect to login if not an admin
+        return res.redirect('/admin/login'); 
     }
         const { startDate, endDate, period } = req.query;
 
-        // Get the report data using the sales controller
         const reportData = await generateSalesReport(req.query);
-        // Prepare query string for download links
         const queryString = new URLSearchParams({
             startDate: startDate || '',
             endDate: endDate || '',
@@ -118,113 +116,7 @@ exports.loadDashboard=async (req,res)=>{
     }
 }
 
-// let query = { status: 'Delivered' };
-        // let start, end;
-        // if (period) {
-        //     const now = new Date();
-        //     switch (period) {
-        //         case 'daily':
-        //             start = new Date(now.setHours(0, 0, 0, 0));
-        //             end = new Date(now.setHours(23, 59, 59, 999));
-        //             break;
-        //         case 'weekly':
-        //             start = new Date(now.setDate(now.getDate() - 7));
-        //             end = new Date();
-        //             break;
-        //         case 'monthly':
-        //             start = new Date(now.setMonth(now.getMonth() - 1));
-        //             end = new Date();
-        //             break;
-        //         case 'yearly':
-        //             start = new Date(now.setFullYear(now.getFullYear() - 1));
-        //             end = new Date();
-        //             break;
-        //     }
-        // } else if (startDate && endDate) {
-        //     // Custom date range
-        //     start = new Date(startDate);
-        //     end = new Date(endDate);
-        // }
-        
-        // if (start && end) {
-        //     query.orderDate = { $gte: start, $lte: end };
-        // }
 
-        // // Fetch orders with populated data
-        // const orders = await Orders.find(query)
-        //     .populate('userId', 'username email')
-        //     .populate('orderedItems.product', 'productName mrp')
-        //     .sort({ orderDate: -1 });
-
-        // // Calculate totals
-        // let totalOrders = orders.length;
-        // let totalAmount = 0;
-        // let totalDiscount = 0;
-        // let totalCouponDiscount = 0;
-
-        // orders.forEach(order => {
-        //     totalAmount += order.totalAmount || 0;
-        //     totalDiscount += order.totalDiscount || 0;
-        //     totalCouponDiscount += order.couponDiscount || 0;
-        // });
-        // // Format data for response
-        // const reportData = {
-        //     orders: orders.map(order => ({
-        //         orderId: order._id,
-        //         customerName: order.userId?.username || 'Unknown',
-        //         orderDate: order.orderDate,
-        //         totalAmount: order.totalAmount || 0,
-        //         discount: order.totalDiscount || 0,
-        //         couponDiscount: order.couponDiscount || 0,
-        //         finalAmount: order.finalAmount || 0,
-        //         status: order.status,
-        //         orderedItems: order.orderedItems.map(item => ({
-        //             productName: item.product?.productName || 'Unknown Product',
-        //             quantity: item.quantity,
-        //             priceAtPurchase: item.priceAtPurchase,
-        //             total: item.priceAtPurchase * item.quantity
-        //         }))
-        //     })),
-        //     summary: {
-        //         totalOrders,
-        //         totalAmount,
-        //         totalDiscount,
-        //         totalCouponDiscount,
-        //         netAmount: totalAmount - totalDiscount - totalCouponDiscount
-        //     }
-        // };
-        // console.log("reportData:",reportData)
-
-        // // Prepare query string for download links
-        // const queryString = new URLSearchParams({
-        //     startDate: start?.toISOString().split('T')[0] || '',
-        //     endDate: end?.toISOString().split('T')[0] || '',
-        //     period: period || ''
-        // }).toString();
-        // console.log("queryString: ",queryString)
-
-        // res.render('admin/dashboard', {
-        //     admin: req.session.admin,
-        //     reportData: reportData || { orders: [], summary: { totalOrders: 0, totalAmount: 0, totalDiscount: 0, totalCouponDiscount: 0, netAmount: 0 } },
-        //     startDate: start?.toISOString().split('T')[0] || '',
-        //     endDate: end?.toISOString().split('T')[0] || '',
-        //     period: period || '',
-        //     query: queryString
-        // });
-    // } catch (error) {
-    //     console.error('Error loading dashboard:', error);
-    //     res.status(500).render('admin/dashboard', {
-    //         admin: req.session.admin,
-    //         error: 'Failed to load dashboard data',
-    //         reportData: { orders: [], summary: { totalOrders: 0, totalAmount: 0, totalDiscount: 0, totalCouponDiscount: 0, netAmount: 0 } },
-    //         startDate: '',
-    //         endDate: '',
-    //         period: '',
-    //         query: ''
-    //     });
-    //     // return res.redirect('/admin/pageError')
-    // }
-// }
 
 
 
@@ -234,7 +126,6 @@ exports.getSalesReport = async (req, res) => {
         let query = { status: 'Delivered' };
         let start, end;
 
-        // Handle different period types
         if (period) {
             const now = new Date();
             switch (period) {
@@ -256,7 +147,6 @@ exports.getSalesReport = async (req, res) => {
                     break;
             }
         } else if (startDate && endDate) {
-            // Custom date range
             start = new Date(startDate);
             end = new Date(endDate);
         }
@@ -265,13 +155,11 @@ exports.getSalesReport = async (req, res) => {
             query.orderDate = { $gte: start, $lte: end };
         }
 
-        // Fetch orders with populated data
         const orders = await Orders.find(query)
             .populate('userId', 'name email')
             .populate('products.productId', 'name mrp')
             .sort({ orderDate: -1 });
 
-        // Calculate totals
         let totalOrders = orders.length;
         let totalAmount = 0;
         let totalDiscount = 0;
@@ -282,7 +170,6 @@ exports.getSalesReport = async (req, res) => {
             totalDiscount += order.totalDiscount || 0;
             totalCouponDiscount += order.couponDiscount || 0;
         });
-        // Format data for response
         const reportData = {
             orders: orders.map(order => ({
                 orderId: order._id,
@@ -321,7 +208,7 @@ exports.getSalesReport = async (req, res) => {
 exports.downloadReport = async (req, res) => {
     try {
         const { format } = req.query;
-        const reportData = await generateSalesReport(req.query); // Reuse logic from getSalesReport
+        const reportData = await generateSalesReport(req.query);
 
         if (format === 'pdf') {
             const doc = new PDFDocument();
@@ -329,11 +216,9 @@ exports.downloadReport = async (req, res) => {
             res.setHeader('Content-Disposition', 'attachment; filename=sales-report.pdf');
             doc.pipe(res);
 
-            // Add content to PDF
             doc.fontSize(20).text('Sales Report', { align: 'center' });
             doc.moveDown();
             
-            // Add summary
             doc.fontSize(14).text('Summary');
             doc.fontSize(12)
                .text(`Total Orders: ${reportData.summary.totalOrders}`)
@@ -344,7 +229,6 @@ exports.downloadReport = async (req, res) => {
             
             doc.moveDown();
 
-            // Add orders table
             doc.fontSize(14).text('Order Details');
             reportData.orders.forEach(order => {
                 doc.fontSize(12)
@@ -361,7 +245,6 @@ exports.downloadReport = async (req, res) => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Sales Report');
 
-            // Add headers
             worksheet.columns = [
                 { header: 'Order ID', key: 'orderId', width: 30 },
                 { header: 'Customer', key: 'customerName', width: 20 },
@@ -372,10 +255,8 @@ exports.downloadReport = async (req, res) => {
                 { header: 'Final Amount', key: 'finalAmount', width: 15 }
             ];
 
-            // Add data
             worksheet.addRows(reportData.orders);
 
-            // Add summary
             worksheet.addRow([]);
             worksheet.addRow(['Summary']);
             worksheet.addRow(['Total Orders', reportData.summary.totalOrders]);

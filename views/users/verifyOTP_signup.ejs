@@ -151,41 +151,13 @@
     </div>
 
     <script>
-       async function verifyOTP(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        try {
-            // Collect OTP values
-            const otpInputs = document.querySelectorAll('.otp-digit');
-            const otpArray = Array.from(otpInputs).map(input => input.value);
-
-            console.log('OTP Array:', otpArray);
-            console.log('Request Payload:', { otp: otpArray });
-
-           
-            const response = await axios.post('/user/verifyOTP', { otp: otpArray });
-            console.log("\notpInputs : "+otpInputs+"\notpArray : "+otpArray)
-          
-            if (response.data.success) {
-                showToast(response.data.message || 'OTP verified successfully');
-                
-                window.location.reload('/user/login')
-            } else {
-                throw new Error(response.data.message || 'OTP verification failed. Please try again.');
-                // alert('OTP verification failed. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error verifying OTP:', error);
-            alert('An error occurred while verifying OTP.');
-        }
-    }
-
+        
         const inputs = document.querySelectorAll('.otp-digit');
         const timerDisplay = document.getElementById('timer');
         const resendButton = document.getElementById('resendButton');
         let timeLeft = 30;
         let timerId;
-
+        
         function startTimer() {
             timeLeft = 30;
             clearInterval(timerId);
@@ -205,14 +177,12 @@
                 }
             }, 1000);
         }
-
-        // Start timer when page loads
+        
         document.addEventListener('DOMContentLoaded', () => {
             startTimer();
             inputs[0].focus();
         });
-
-        // Handle input in OTP fields
+        
         inputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 if (e.target.value.length > 1) {
@@ -222,14 +192,62 @@
                     inputs[index + 1].focus();
                 }
             });
-
+            
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.value && index > 0) {
                     inputs[index - 1].focus();
                 }
             });
         });
+        
+        function stopTimer() {
+            clearInterval(timerId);
+            timerDisplay.textContent = "";
+        }
 
+        async function verifyOTP(event) {
+        event.preventDefault(); 
+ 
+         try {
+             const otpInputs = document.querySelectorAll('.otp-digit');
+             const otpArray = Array.from(otpInputs).map(input => input.value);
+ 
+             console.log('OTP Array:', otpArray);
+             console.log('Request Payload:', { otp: otpArray });
+ 
+            
+             const response = await axios.post('/user/verifyOTP', { otp: otpArray });
+             console.log("\notpInputs : "+otpInputs+"\notpArray : "+otpArray)
+           
+             if (response.data.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP Verified Successfully",
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.href = '/user/login'; 
+                });
+                
+                // window.location.href = '/user/login';
+                // stopTimer();
+                // showToast(response.data.message || 'OTP verified successfully');
+                 
+             } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: response.data.message
+                });
+                //  showToast(response.data.message || 'OTP verification failed. Please try again.')
+                //  throw new Error(response.data.message || 'OTP verification failed. Please try again.');
+                 // alert('OTP verification failed. Please try again.');
+             }
+         } catch (error) {
+             console.error('Error verifying OTP:', error);
+             showToast('An error occurred while verifying OTP.');
+         }
+     }
         function resendOTP() {
             fetch('/user/resendOTP', {
                 method: 'POST',
@@ -240,14 +258,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Reset inputs
                     inputs.forEach(input => {
                         input.value = '';
                         input.disabled = false;
                     });
                     inputs[0].focus();
                     
-                    // Restart timer
                     startTimer();
                     
                     Swal.fire({
@@ -276,13 +292,11 @@ function showToast(message, isError = false) {
     toast.textContent = message;
     document.body.appendChild(toast);
     
-    // Show toast with animation
     requestAnimationFrame(() => {
         toast.style.opacity = '1';
         toast.style.transform = 'translateY(0)';
     });
     
-    // Hide and remove toast
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-20px)';

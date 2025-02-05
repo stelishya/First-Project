@@ -1,6 +1,5 @@
 const Coupon = require('../models/couponSchema');
 
-// Admin Controllers
 exports.createCoupon = async (req, res) => {
     try {
         const {
@@ -14,7 +13,6 @@ exports.createCoupon = async (req, res) => {
             usageLimit
         } = req.body;
 
-        // Validate offer percentage is between 0 and 100
         if (offerPercentage < 0 || offerPercentage > 100) {
             return res.status(400).json({ message: 'Offer percentage must be between 0 and 100' });
         }
@@ -33,7 +31,7 @@ exports.createCoupon = async (req, res) => {
         await coupon.save();
         res.status(201).json({ message: 'Coupon created successfully', coupon });
     } catch (error) {
-        if (error.code === 11000) { // Duplicate key error
+        if (error.code === 11000) { 
             res.status(400).json({ message: 'A coupon with this code already exists' });
         } else {
             res.status(500).json({ message: 'Error creating coupon', error: error.message });
@@ -47,10 +45,8 @@ exports.getAllCoupons = async (req,res) => {
         const limit = parseInt(req.query.limit) || 5;
         const skip = (page - 1) * limit;
 
-        // Get total count of coupons
         const totalCoupons = await Coupon.countDocuments({});
         
-        // Get paginated coupons
         const coupons = await Coupon.find({})
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -167,18 +163,16 @@ exports.couponStatus = async (req, res) => {
     }
 }
 
-// Get available coupons for users
 exports.getAvailableCoupons = async (req, res) => {
     try {
         const currentDate = new Date();
         const coupons = await Coupon.find({
             isActive: true,
             startDate: { $lte: currentDate },
-            expiryDate: { $gt: currentDate } // Use $gt to exclude coupons that expire today
+            expiryDate: { $gt: currentDate } 
         }).select('name code offerPercentage minimumPurchase maximumDiscount startDate expiryDate')
-        .sort({ expiryDate: 1 }); // Sort by expiry date, showing soonest expiring first
+        .sort({ expiryDate: 1 }); 
         
-        // Format dates and add expiry status
         const formattedCoupons = coupons.map(coupon => {
             const expiryDate = new Date(coupon.expiryDate);
             const daysLeft = Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24));
@@ -198,7 +192,6 @@ exports.getAvailableCoupons = async (req, res) => {
     }
 };
 
-// User Controllers
 exports.applyCoupon = async (req, res) => {
     try {
         console.log("applyCoupon callled")
@@ -222,7 +215,6 @@ exports.applyCoupon = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Invalid or expired coupon' });
         }
 
-        // Check minimum purchase
         if (cartTotal < coupon.minimumPurchase) {
             return res.status(400).json({ 
                 success: false,
@@ -234,16 +226,13 @@ exports.applyCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Coupon usage limit has been reached' });
         }
 
-        // Check if user already used this coupon
         // const alreadyUsed = coupon.usedBy.some(use => use.userId.equals(userId));
         // if (alreadyUsed) {
         //     return res.status(400).json({ message: 'You have already used this coupon' });
         // }
 
-        // Calculate percentage discount
         let discount = (cartTotal * coupon.offerPercentage) / 100;
         
-        // Apply maximum discount cap if set
         if (coupon.maximumDiscount) {
             discount = Math.min(discount, coupon.maximumDiscount);
         }
@@ -253,7 +242,6 @@ exports.applyCoupon = async (req, res) => {
         // const finalAmount = Math.round((cartTotal - discount) * 100) / 100;
         // const totalAmount = Math.round((tod))
 
-        // Update coupon usage
         await Coupon.findByIdAndUpdate(coupon._id, {
             $inc: { usedCount: 1 },
             $push: { usedBy: { userId } }
@@ -293,7 +281,6 @@ exports.removeCoupon = async (req, res) => {
                 message: 'Coupon not found'
             });
         }
-        // Calculate the original amount by reversing the discount
         const discountPercentage = coupon.offerPercentage;
         const discountAmount = (currentTotal * discountPercentage) / (100 - discountPercentage);
         const originalAmount = currentTotal + discountAmount;

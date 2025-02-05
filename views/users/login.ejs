@@ -1,21 +1,23 @@
 <title>User Login</title>
 <link rel="stylesheet" href="/User/css/Login.css">
 <script src="/validation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="container">
-        <div class="header rounded-lg" style="margin-left:30%; width:39%">
-            <h1>CAlliope</h1>
-            <!-- <h2>User Login</h2> -->
-            <form action="/user/login" method="post" style="margin-left: 70%;">
-                <input type="hidden" value="delwin@gmail.com" name="email">
-                <input type="hidden" value="Delwin@22" name="password">
-                <button class="btn btn-secondary bg-gray-300 p-2 rounded-lg color-white" type="submit">Demo login</button>
-            </form>
-        </div>
-        <!-- <div class="header" style="margin-bottom: 100px;">
+
+<div class="container">
+    <div class="header rounded-lg" style="margin-left:30%; width:39%">
+        <h1>CAlliope</h1>
+        <!-- <h2>User Login</h2> -->
+        <form action="/user/login" method="post" style="margin-left: 70%;">
+            <input type="hidden" value="delwin@gmail.com" name="email">
+            <input type="hidden" value="Delwin@123" name="password">
+            <button class="btn btn-secondary bg-gray-300 p-2 rounded-lg color-white" type="submit">Demo login</button>
+        </form>
+    </div>
+    <!-- <div class="header" style="margin-bottom: 100px;">
             <h1>CAlliope</h1>
         </div> -->
-        <div class="login-form rounded-lg" style="margin-left: 30%;">
+    <div class="login-form rounded-lg" style="margin-left: 30%;">
         <form action="/user/login" method="post" id="userloginForm">
             <div class="login-container rounded-lg p-5 bg-gray-200 ">
                 <h2 class="text-center mb-1" style="font-size:30px; ">Log In</h2>
@@ -23,44 +25,44 @@
                 <label for="email"><b>Email</b></label>
                 <input id="email" type="text" placeholder="E-mail" name="email" oninput="validateEmail()">
                 <span id="emailError" class="error" style="color:rgb(215, 5, 5)"></span>
-            
+
                 <label for="password"><b>Password</b></label>
-                <input id="password" type="password" placeholder="Password" name="password" oninput="validatePassword()">
+                <input id="password" type="password" placeholder="Password" name="password"
+                    oninput="validatePassword()">
                 <span id="passwordError" class="error" style="color:rgb(193, 6, 6)"></span>
-            
-            
+
+
                 <% if(locals.message && message.length>0){ %>
                     <div class="alert alert-danger text-center">
                         <%= message %>
                     </div>
                     <% } %>
-                        <button id="forgotPasswordBtn"
-                            class="pl-80  hover:text-gray-600 ">
+                        <button id="forgotPasswordBtn" class="pl-80  hover:text-gray-600 ">
                             Forgot Password
                         </button>
-                    
+
                         <!-- <div class="form-group d-flex justify-content-end">
                     <a href="/forgot-password" class="forgot-password-link ms-auto">
                         Forgot Password  
                     </a>
                 </div> -->
-            <button class="login hover:text-gray-600 rounded-lg" type="submit">Log In</button>
-            
-        
-        
-            <div class="signup">
-                <a href="#">Don’t have an account?</a>
-                <a class="hover:text-gray-600" href="/user/signup">Sign Up..</a>
-            </div>
-            <div class="social-login">
-                <p>- or you can log in with -</p>
-                <a href="/user/auth/google" class="google" style="border-radius: 25px;">Google</a>
-            </div>
+                        <button class="login hover:text-gray-600 rounded-lg" type="submit">Log In</button>
+
+
+
+                        <div class="signup">
+                            <a href="#">Don’t have an account?</a>
+                            <a class="hover:text-gray-600" href="/user/signup">Sign Up..</a>
+                        </div>
+                        <div class="social-login">
+                            <p>- or you can log in with -</p>
+                            <a href="/user/auth/google" class="google" style="border-radius: 25px;">Google</a>
+                        </div>
 
             </div>
         </form>
-        </div>
     </div>
+</div>
 <!-- Trigger Button -->
 <!-- <button id="forgotPasswordBtn" class="bg-blue-500 text-white py-2 px-4 rounded">Forgot Password</button> -->
 
@@ -87,7 +89,7 @@
     </div>
 </div>
 
-<div id="resetPasswordModal" 
+<div id="resetPasswordModal"
     class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <div class="flex justify-between items-center mb-4">
@@ -97,16 +99,16 @@
         <form id="resetPasswordForm">
             <input type="hidden" id="resetToken" name="resetToken" />
             <label for="newPassword" class="block text-gray-700 font-medium mb-2">New Password</label>
-            <input type="password" id="newPassword" name="newPassword" 
-                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300" 
+            <input type="password" id="newPassword" name="newPassword"
+                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300"
                 placeholder="Enter new password" required />
-            
+
             <label for="confirmPassword" class="block text-gray-700 font-medium mb-2">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" 
-                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300" 
+            <input type="password" id="confirmPassword" name="confirmPassword"
+                class="border rounded-lg w-full p-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300"
                 placeholder="Confirm new password" required />
-            
-            <button type="submit" 
+
+            <button type="submit"
                 class="bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
                 Reset Password
             </button>
@@ -148,7 +150,12 @@
         const email = document.getElementById('FPemail').value.trim();
 
         if (!email) {
-            alert('Please enter your email!');
+            // alert('Please enter your email!');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Oops...',
+                text: 'Please enter your email!'
+            });
             return;
         }
         try {
@@ -160,15 +167,30 @@
 
             const data = await response.json();
             if (response.ok) {
-                alert('Password reset link sent to your email!');
+                // alert('Password reset link sent to your email!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Password reset link sent to your email!'
+                });
                 document.getElementById('forgotPasswordModal').classList.add('hidden');
                 // forgotPasswordModal.classList.add('hidden');
             } else {
-                alert(data.message || 'An error occurred');
+                // alert(data.message || 'An error occurred');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'An error occurred'
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to send password reset link');
+            // alert('Failed to send password reset link');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to send password reset link'
+            });
         }
     });
     //RESET PASSWORD***************
@@ -203,7 +225,12 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
 
             if (newPassword !== confirmPassword) {
-                alert("Passwords do not match!");
+                // alert("Passwords do not match!");
+                Swal.fire({
+                icon: 'warning',
+                title: 'Oops...',
+                text: 'Passwords do not match!'
+                });
                 return;
             }
             console.log("resetToken", resetToken)
@@ -218,16 +245,31 @@
                 console.log("data", data);
                 console.log("hlo")
                 if (response.ok) {
-                    alert('Password reset successful!');
+                    // alert('Password reset successful!');
+                    Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Password reset successful!'
+                    });
                     window.location.href = '/user/login'; // Redirect to login page
                     // document.getElementById('resetPasswordModal').classList.add('hidden');
                 } else {
-                    alert(data.message || 'An error occurred');
+                    // alert(data.message || 'An error occurred');
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'An error occurred'
+                    });
                 }
             } catch (error) {
                 console.error('Error:', error);
                 console.log(error)
-                alert('Failed to reset password');
+                // alert('Failed to reset password');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to reset password'
+                });
             }
         });
     });

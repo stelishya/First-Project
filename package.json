@@ -1,7 +1,7 @@
 {
   "name": "newwebapp",
   "version": "1.0.0",
-  "main": "nodemon server.js",
+  "main": " server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js"

@@ -537,13 +537,12 @@
                 orderId:orderId
             });
 
-            const data = await response.json();
+            // const data = await response.json();
 
-        if (!data.success) {
-            if (data.insufficientStockItems) {
-                // Show error message with out of stock items
+        if (!response.data.success) {
+            if (response.data.insufficientStockItems) {
                 let message = 'Cannot process payment due to insufficient stock:\n';
-                data.insufficientStockItems.forEach(item => {
+                response.data.insufficientStockItems.forEach(item => {
                     message += `\n${item.productName}:\nRequested: ${item.requestedQuantity}\nAvailable: ${item.availableStock}`;
                 });
 
@@ -555,7 +554,7 @@
                 });
                 return;
             }
-            throw new Error(data.message);
+            throw new Error(response.data.message);
         }
             if (response.status === 200) {
                 const options = {
@@ -567,7 +566,7 @@
                     order_id: response.data.id,
                     handler: async function (response) {
                         try {
-                            // Verify payment
+                            //verify payment
                             const verifyResponse = await axios.post('/user/verify-retry-payment', {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,

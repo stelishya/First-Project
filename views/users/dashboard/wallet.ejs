@@ -229,35 +229,92 @@
 
 <!-- Toast Container -->
 <div id="toast" class="toast"></div>
+
 <!-- Footer -->
 <div class="text-center p-5 bg-white">
     <h1 class="text-4xl">CAlliope</h1>
     <h2 class="text-2xl">Inc</h2>
 </div>
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 async function addAmount(amount) {
     try {
-        const response = await fetch('/user/wallet/add-money', {
+        // First create a Razorpay order
+        const orderResponse = await fetch('/user/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ amount })
+            body: JSON.stringify({ amount: amount })
         });
 
-        const data = await response.json();
-        if (data.success) {
-            // Update wallet balance display
-            document.getElementById('walletBalance').textContent = `₹${data.newBalance.toFixed(2)}`;
-            showToast('Amount added successfully', 'success');
-        } else {
-            showToast(data.message || 'Error adding amount', 'error');
+        const orderData = await orderResponse.json();
+        if (!orderData.success) {
+            throw new Error(orderData.message || 'Failed to create order');
         }
+
+        // Initialize Razorpay payment
+        const options = {
+            key: orderData.key_id,
+            amount: orderData.amount,
+            currency: "INR",
+            name: "CAlliope Wallet",
+            description: "Add Money to Wallet",
+            order_id: orderData.id,
+            handler: async function (response) {
+                try {
+                    // Verify payment and add money to wallet
+                    const verifyResponse = await fetch('/user/wallet/add-money', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: amount,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
+
+                    const data = await verifyResponse.json();
+                    if (data.success) {
+                        // Update wallet balance display
+                        document.getElementById('walletBalance').textContent = `₹${data.newBalance.toFixed(2)}`;
+                        showToast('Amount added successfully', 'success');
+                        
+                        // Refresh page after 1 second to update transaction history
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showToast(data.message || 'Failed to add amount', 'error');
+                    }
+                } catch (error) {
+                    console.error('Payment verification error:', error);
+                    showToast('Payment verification failed', 'error');
+                }
+            },
+            prefill: {
+                name: "<%= session.username %>",
+                email: "<%= session.email %>"
+            },
+            theme: {
+                color: "#3399cc"
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+        rzp.on('payment.failed', function (response) {
+            showToast('Payment failed: ' + response.error.description, 'error');
+        });
+
     } catch (error) {
         console.error('Error:', error);
-        showToast('Error adding amount', 'error');
+        showToast('Error initiating payment', 'error');
     }
 }
 
@@ -267,16 +324,28 @@ function addCustomAmount() {
         showToast('Please enter a valid amount', 'error');
         return;
     }
+    if (amount > 100000) {
+        showToast('Amount exceeds maximum limit of ₹1,00,000', 'error');
+        return;
+    }
     addAmount(Number(amount));
+    document.getElementById('customAmount').value = ''; // Clear input after submission
 }
 
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
-    toast.className = `toast ${type}`;
-    toast.style.display = 'block';
+    toast.className = `toast ${type} show`;
     setTimeout(() => {
-        toast.style.display = 'none';
+        toast.className = 'toast';
     }, 3000);
 }
+
+// Add event listener for Enter key on custom amount input
+document.getElementById('customAmount').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addCustomAmount();
+    }
+});
 </script>

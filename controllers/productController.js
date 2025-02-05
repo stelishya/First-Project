@@ -12,12 +12,12 @@ exports.products = async (req, res) => {
         let search = req.query.search || '';
         const session = req.session.user || {};
         
-        // Pagination
+        // pagination
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
 
-        // Fetch products with search and pagination
+        // fetch products with search and pagination
         const products = await Products.find({
             productName: { $regex: search, $options: 'i' }
         })
@@ -26,7 +26,7 @@ exports.products = async (req, res) => {
         .limit(limit)
         .populate('category', 'name');
 
-        // Fetch total count of products based on search term
+        // fetch total count of products based on search term
         const totalProducts = await Products.countDocuments({
             productName: { $regex: search, $options: 'i' }
         });
@@ -209,7 +209,6 @@ exports.editPage = async (req, res) => {
             activeTab: "products"
         });
 
-        // Clear session messages
         req.session.errorMessage = null;
         req.session.successMessage = null;
     } catch (error) {
@@ -237,7 +236,7 @@ exports.edittingProduct = async (req, res) => {
             return res.redirect("/admin/products")
             // throw new Error('Product not found');
         }
-        // Check for duplicate product name
+        // duplicate productname checking
         const duplicateProduct = await Products.findOne({ productName, _id: { $ne: productId } });
         if (duplicateProduct) {
             req.session.errorMessage = "Product with same name exists";
@@ -271,18 +270,6 @@ exports.edittingProduct = async (req, res) => {
         // });
         // console.log("prices in edit pro:",prices)
         
-        // product.productName = productName;
-        // product.description = description;
-        // product.mrp = mrp;
-        // product.productOffer = productOffer;
-        // product.offer = offer;
-        // product.finalAmount = prices.finalAmount;
-        // product.discount = prices.discount;
-        // product.maxDiscount = prices.maxDiscount;
-        // // product.category = category;
-        // product.stock = stock;
-        // product.isAvailable = isAvailable;
-        // product.isListed = isListed;
 
         async function saveBase64Image(base64String, filename) {
             const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
@@ -399,10 +386,10 @@ exports.productDetailsUser = async (req, res) => {
         
         const relatedProducts = await Products.find({
             category: product.category._id,
-            _id: { $ne: productId }  // Exclude current product
+            _id: { $ne: productId } 
         })
         .populate('category', 'name')
-        .limit(4);  // Show only 4 related products
+        .limit(4);  
         res.render('users/product folder/product', {
             user: req.session.user || null,
             product:productsWithPrices,
@@ -419,7 +406,7 @@ exports.productDetailsUser = async (req, res) => {
     }
 };
 
-// Product page
+// show products page
 exports.showProductsPage = async (req, res) => {
     try {
         const search = req.query.search || ''; 
@@ -520,13 +507,13 @@ exports.showProductsPage = async (req, res) => {
     }
 };
 
-// Dynamic product update
+//  product update
 exports.fetchProducts = async (req, res) => {
     try {
         console.log("fetchProducts called with params:", req.query);
         
         const sortOption = req.query.sortBy || '';
-        let sortCriteria = { createdAt: -1 }; // Default sort by newest
+        let sortCriteria = { createdAt: -1 }; 
 
         if (sortOption) {
             switch (sortOption) {

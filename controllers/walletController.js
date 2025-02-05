@@ -1,5 +1,7 @@
 const Wallets = require('../models/walletSchema');
 const User = require('../models/userSchema');
+const crypto = require('crypto');
+require('dotenv').config();
 
 const getWalletBalance = async (req, res) => {
     try {
@@ -18,7 +20,6 @@ const getWalletBalance = async (req, res) => {
         console.error('Error getting wallet balance:', error);
         res.status(500).json({ success: false, message: 'Failed to get balance' }); 
     }
-
 };
 
 const walletPage = async (req,res)=>{
@@ -47,7 +48,8 @@ const walletPage = async (req,res)=>{
             transactions,
             session,
             search,
-            activeTab: 'wallet'
+            activeTab: 'wallet',
+            razorpayKey: process.env.RAZORPAY_KEY_ID
         });
     } catch (error) {
         console.error(error);
@@ -57,55 +59,75 @@ const walletPage = async (req,res)=>{
 
 const addMoneyToWallet = async (req, res) => {
     try {
-        const { amount } = req.body;
+        const { 
+            amount,
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature 
+        } = req.body;
+        console.log("req.body : ",{amount,
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature })
         const userId = req.session.user._id;
 
-        if(!amount  || amount <= 0){
-            return res.status(400).json({ success: false, message: 'Invalid amount' });
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid amount' 
+            });
         }
 
-        // Update wallet balance in your database
-        // const wallet = await Wallets.findOneAndUpdate(
-        //     { userId },
-        //     { $inc: { balance: amount } },
-        //     { new: true }
-        // );
+        // Verify Razorpay signature
+        if (razorpay_payment_id && razorpay_order_id && razorpay_signature) {
+            const sign = razorpay_order_id + "|" + razorpay_payment_id;
+            const expectedSign = crypto
+                .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+                .update(sign.toString())
+                .digest("hex");
 
-        // if (!wallet) {
-        //     return res.status(404).json({ 
-        //         success: false, 
-        //         message: 'Wallet not found' 
-        //     });
-        // }
+            if (razorpay_signature !== expectedSign) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "Invalid payment signature" 
+                });
+            }
+        }
 
-        // console.log("Money added to wallet successfully");
-        // res.json({ success: true, balance: wallet.balance, message: 'Money added successfully' });
-         // Get current balance
-         const latestTransaction = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
-         const currentBalance = latestTransaction ? latestTransaction.balance : 0;
-         const newBalance = currentBalance + Number(amount);
- 
-         // Create new wallet transaction
-         const transaction = new Wallets({
-             userId,
-             type: 'CREDIT',
-             amount: Number(amount),
-             description: 'Added money to wallet',
-             balance: newBalance
-         });
- 
-         await transaction.save();
- 
-         console.log("Money added to wallet successfully");
-         res.json({ 
-             success: true, 
-             balance: newBalance,
-             message: 'Money added successfully' 
-         });
- 
+        // Get current balance
+        const latestTransaction = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
+        const currentBalance = latestTransaction ? latestTransaction.balance : 0;
+        const newBalance = currentBalance + Number(amount);
+        console.log("latestTransaction : ", latestTransaction);
+        console.log("currentBalance : ", currentBalance);
+        console.log("newBalance : ", newBalance);
+        // Create new wallet transaction
+        const transaction = new Wallets({
+            userId,
+            type: 'CREDIT',
+            amount: Number(amount),
+            description: 'Added money to wallet via Razorpay',
+            balance: newBalance,
+            paymentId: razorpay_payment_id,
+            orderId: razorpay_order_id
+        });
+
+        await transaction.save();
+        console.log("transaction : ", transaction);
+
+        console.log("Money added to wallet successfully");
+        res.json({ 
+            success: true, 
+            newBalance,
+            message: 'Money added successfully'
+        });
+
     } catch (error) {
-        console.error("Error adding money to wallet:", error);
-        res.status(500).json({ success: false, message: 'Failed to add money' });
+        console.error('Error adding money to wallet:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to add money to wallet' 
+        });
     }
 };
 
@@ -155,72 +177,9 @@ const addToWallet = async (req, res) => {
 };
 
 module.exports = {
-    addMoneyToWallet, walletPage, getWalletBalance, loadWallet, addToWallet
+    addMoneyToWallet,
+    walletPage,
+    getWalletBalance,
+    loadWallet,
+    addToWallet
 }
-
-// const Wallets = require('../models/walletSchema');
-
-// const getWalletBalance = async (req, res) => {
-//     const session = req.session.user;
-//     const userId = session._id;
-//     let wallet = await Wallets.findOne({ userId: userId });
-//     if (!wallet) {
-//         wallet = new Wallets({ userId: userId, transactions: [] });
-//         await wallet.save();
-//     }
-//     res.json({ success: true, balance: wallet.balance });
-// };
-
-// const walletPage = async (req,res)=>{
-//     try {
-//         const search = req.query.search || ''; 
-//         const session = req.session.user;
-//         const userId = session._id;
-//         let wallet = await Wallets.findOne({ userId: userId });
-//         if (!wallet) {
-//             wallet = new Wallets({ userId: userId, transactions: [] });
-//             await wallet.save();
-//         }
-//         res.render('users/dashboard/wallet', {
-//             userWallet: wallet, session,search, activeTab: 'wallet', razorpayKey: process.env.RAZORPAY_KEY_ID
-//         } )
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ success: false, message: 'Failed to fetch wallet' });
-//     }
-// }
-
-// const addMoneyToWallet = async (req, res) => {
-//     try {
-//         const { amount } = req.body;
-//         const userId = req.session.user._id;
-
-//         if(!amount  || amount <= 0){
-//             return res.status(400).json({ success: false, message: 'Invalid amount' });
-//         }
-
-//         // Update wallet balance in your database
-//         const wallet = await Wallets.findOneAndUpdate(
-//             { userId },
-//             { $inc: { balance: amount } },
-//             { new: true }
-//         );
-
-//         if (!wallet) {
-//             return res.status(404).json({ 
-//                 success: false, 
-//                 message: 'Wallet not found' 
-//             });
-//         }
-
-//         console.log("Money added to wallet successfully");
-//         res.json({ success: true, balance: wallet.balance, message: 'Money added successfully' });
-//     } catch (error) {
-//         console.error("Error adding money to wallet:", error);
-//         res.status(500).json({ success: false, message: 'Failed to add money' });
-//     }
-// };
-
-// module.exports = {
-//     addMoneyToWallet, walletPage, getWalletBalance,
-// }

@@ -3,7 +3,6 @@ const Orders = require('../models/orderSchema');
 const Wallets = require('../models/walletSchema');
 
 
-// Get all return requests
 exports.getReturns = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -48,7 +47,6 @@ exports.getReturns = async (req, res) => {
     }
 };
 
-// Get return request details
 exports.getReturnDetails = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -70,7 +68,7 @@ exports.getReturnDetails = async (req, res) => {
     }
 };
 
-// Approve return request
+// approve return
 exports.approveReturn = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -84,20 +82,16 @@ exports.approveReturn = async (req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        // Calculate refund amount from ordered items
         const totalOrderValue = order.orderedItems.reduce((total, item) => {
             return total + (item.priceAtPurchase * item.quantity);
         }, 0);
 
-        // Calculate the proportion of this item's value to the total order value
-        const returnedItem = order.orderedItems[0]; // Assuming single item return
+        const returnedItem = order.orderedItems[0]; 
         const itemTotalPrice = returnedItem.priceAtPurchase * returnedItem.quantity;
         const itemProportion = itemTotalPrice / totalOrderValue;
 
-        // Calculate the coupon discount for this item
         const itemCouponDiscount = order.couponDiscount * itemProportion;
 
-        // Calculate final refund amount after deducting proportional coupon discount
         const refundAmount = itemTotalPrice - itemCouponDiscount;
 
         console.log("totalOrderValue: ", totalOrderValue);
@@ -111,18 +105,17 @@ exports.approveReturn = async (req, res) => {
             return res.status(400).json({ message: "Invalid refund amount" });
         }
 
-        // Update product stock
+        // update product stock
         await Products.findByIdAndUpdate(
             returnedItem.product._id,
             { $inc: { stock: returnedItem.quantity } }
         );
-        // Update order status
+        // update order status
         order.status = 'Returned';
         order.returnDetails.returnStatus = 'Approved';
         order.returnDetails.returnDate = new Date();
         await order.save();
         console.log("order saved")
-        // Process refund to wallet for non-COD orders
         // if (order.paymentMethod !== 'COD') {
             // const wallet = await Wallets.findOneAndUpdate(
             //     { userId: order.userId },
@@ -171,7 +164,7 @@ exports.approveReturn = async (req, res) => {
     }
 };
 
-// Reject return request
+// reject return 
 exports.rejectReturn = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -181,7 +174,7 @@ exports.rejectReturn = async (req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        // Update return status
+        // update return status
         order.returnDetails.returnStatus = 'Rejected';
         await order.save();
 

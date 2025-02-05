@@ -1,182 +1,330 @@
-<%-  include ('../partials/user/header', { search: search })%>
+<%- include ('../partials/user/header', { search: search })%>
     <style>
-        body{
+        body {
             background-color: #f4f0e7;
         }
-        .categories , .new-arrivals , .christmas-special , .discount-section{
+
+        .categories,
+        .new-arrivals,
+        .christmas-special,
+        .discount-section {
             background-color: #dedad2;
+        }
+
+        .text-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgb(45, 37, 37);
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: flex-end;
+            padding-left: 50px;
+            padding-bottom: 5px;
+        }
+
+        .text-overlay-top {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgb(123, 193, 207);
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: flex-start;
+            padding-left: 50px;
+            padding-top: 30px;
+        }
+
+        .con {
+            position: relative;
+            display: inline-block;
+        }
+
+        .con img {
+            display: block;
+            width: 100%;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animated-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .animated-text span {
+            display: block;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .animated-text span:first-child {
+            margin-bottom: -35px;
+        }
+
+        .animated-text span:last-child {
+            margin-left: 100px;
+            animation-delay: 0.3s;
+        }
+
+        .hero__title {
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .hero__title:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .hero__title span {
+            display: block;
+        }
+
+        .hero__title span:last-child {
+            margin-left: 100px;
+        }
+
+        .text-with-border {
+            -webkit-text-stroke: 1px #333;
+            /* text-shadow: 
+                2px 2px 0 #333,
+                -2px -2px 0 #333,
+                2px -2px 0 #333,
+                -2px 2px 0 #333; */
+            line-height: 1.5;
+        }
+
+        .text-with-border span {
+            display: block;
+            margin-bottom: 5px;
+            color: rgb(105, 95, 95);
         }
     </style>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <nav>
-     <div class="nav-links">
-      <a href="/user/home">
-       Home
-      </a>
-      <span class="divider">
-      </span>
-      <a href="#">
-       Contact
-      </a>
-      <span class="divider">
-      </span>
-      <a href="#">
-       About
-      </a>
-      <span class="divider">
-      </span>
-      <a href="/user/products">
-       Products
-      </a>
-     </div>
+        <div class="nav-links">
+            <a href="/user/home">
+                Home
+            </a>
+            <span class="divider">
+            </span>
+            <a href="#">
+                Contact
+            </a>
+            <span class="divider">
+            </span>
+            <a href="#">
+                About
+            </a>
+            <span class="divider">
+            </span>
+            <a href="/user/products">
+                Products
+            </a>
+        </div>
     </nav>
-    <div class="p-8" style="display: flex; justify-content: center; align-items: center; gap:50px;">
-        <h1 class="hero__title hero__title--3d h2" style="font-size: 130px;">Wall Decors</h1>
+    <!-- <div class="p-8" style="display: flex; justify-content: center; align-items: center; gap:50px;">
+        <h1 class="hero__title hero__title--3d h2" style="font-size: 110px;">Wall Decors</h1>
         <div class="hero__content-wrapper">
             <div class="hero__description hero__description--3d" style="font-size: 30px;">
-                Explore unique wall decor designs and <br>discover home decorations to transform<br> your space. Find the perfect wall art for<br> every room.
+                Explore unique wall decor designs and <br>discover home decorations to transform<br> your space. Find
+                the perfect wall art for<br> every room.
             </div>
         </div>
-    </div>
+    </div> -->
     <div style="display: flex; justify-content: center; align-items: center; ">
-        <div class="w-50 h-auto ">
-            <img src="https://ctl.s6img.com/society6/img/3znDx_g9s_O3OhF_0aw3NJ0qCFw/h_700,w_700/wall-murals/8x8/lifestyle/~artwork/s6-original-art-uploads/society6/uploads/misc/dd8e8ea1f9b6427980eb8d1e76243c64?width=540&crop=center" alt="Image 1">
+        <div class=" con w-50 h-auto ">
+            <img src="https://ctl.s6img.com/society6/img/3znDx_g9s_O3OhF_0aw3NJ0qCFw/h_700,w_700/wall-murals/8x8/lifestyle/~artwork/s6-original-art-uploads/society6/uploads/misc/dd8e8ea1f9b6427980eb8d1e76243c64?width=540&crop=center"
+                alt="Image 1">
+            <div class="text-overlay">
+                <h1 class="hero__title hero__title--3d h2" style="font-size: 110px;">
+                    <span>Wall</span>
+                    <span>Decors</span>
+                </h1>
+            </div>
         </div>
-        <div class="w-50 h-auto ">
+        <div class="con w-50 h-auto ">
             <!-- <img src="https://society6.com/cdn/shop/files/400ac1746b4d429084c069f0273218eb.jpg?v=1726333939&width=2700&height=2700&crop=center" alt="Image 2"> -->
-            <img src="https://ctl.s6img.com/society6/img/CGAI5RTeZuuUebvtTrVmtVRJ9TE/h_700,w_700/canvas/~artwork/s6-original-art-uploads/society6/uploads/misc/a7c20679b37946599c60ef9ee20768e3?width=2700&crop=center" alt="Image 2">
+            <img src="https://ctl.s6img.com/society6/img/CGAI5RTeZuuUebvtTrVmtVRJ9TE/h_700,w_700/canvas/~artwork/s6-original-art-uploads/society6/uploads/misc/a7c20679b37946599c60ef9ee20768e3?width=2700&crop=center"
+                alt="Image 2">
+            <!-- <div class="text-overlay-top">
+                <h1 class="hero__title hero__title--3d h2">
+                    <span class="text-with-border">Explore unique wall decor designs and</span>
+                    <span class="text-with-border">discover home decorations to transform</span>
+                    <span class="text-with-border">your space. Find the perfect wall art for</span>
+                    <span class="text-with-border">every room.</span>
+                </h1>
+            </div> -->
         </div>
     </div>
-    
+
     <div class="categories">
-     <h2>
-      Categories
-     </h2>
-     <div class="category-item">
-      <img alt="Canvas Prints" height="250"
-      src="https://ctl.s6img.com/society6/img/HzFCAnMDwxCmwm-kbxSPtzEGpRI/h_700,w_700/canvas/~artwork/s6-original-art-uploads/society6/uploads/misc/770ca30064254c13bc007e50556f7613?width=720&crop=center"/>
-      <p>
-       Canvas Prints
-      </p>
-     </div>
-     <div class="category-item">
-      <img alt="Wall Murals" height="250" src="https://ctl.s6img.com/society6/img/EONWVmT4lvI65eabr70uvIzymh8/h_700,w_700/wall-murals/8x8/lifestyle/~artwork/s6-original-art-uploads/society6/uploads/misc/27691b6f96d642b0bf6f4662158658af?width=720&crop=center"/>
-      <p>
-       Wall Murals
-      </p>
-     </div>
-     <div class="category-item">
-      <img alt="Metal Prints" height="250" src="https://ctl.s6img.com/society6/img/DBEyq30ddzoaUN75WF2Go3D9YjM/h_700,w_700/metal-prints/1x1/front/~artwork/s6-original-art-uploads/society6/uploads/misc/3d4cb0101e984af29f8ffe0d176194c7?width=720&crop=center" />
-      <p>
-       Metal Prints
-      </p>
-     </div>
-     <div class="category-item">
-      <img alt="Wood Wall Arts" height="150" src="https://ctl.s6img.com/society6/img/NsOTLsKv4MXIY957s2QtcnW8moU/h_700,w_700/wood-wall-art/3x3/front/~artwork,bg_FFFFFFFF,fw_2601,fh_2601,fx_-5,fy_-1,iw_2600,ih_3733/s6-original-art-uploads/society6/uploads/misc/f0a9939f943846358f3ee8fd4b9fa2ab?width=720&crop=center"/>
-      <p>
-       Wood Wall Arts
-      </p>
-     </div>
+        <h2>
+            Categories
+        </h2>
+        <div class="category-item">
+            <img alt="Canvas Prints" height="250"
+                src="https://ctl.s6img.com/society6/img/HzFCAnMDwxCmwm-kbxSPtzEGpRI/h_700,w_700/canvas/~artwork/s6-original-art-uploads/society6/uploads/misc/770ca30064254c13bc007e50556f7613?width=720&crop=center" />
+            <p>
+                Canvas Prints
+            </p>
+        </div>
+        <div class="category-item">
+            <img alt="Wall Murals" height="250"
+                src="https://ctl.s6img.com/society6/img/EONWVmT4lvI65eabr70uvIzymh8/h_700,w_700/wall-murals/8x8/lifestyle/~artwork/s6-original-art-uploads/society6/uploads/misc/27691b6f96d642b0bf6f4662158658af?width=720&crop=center" />
+            <p>
+                Wall Murals
+            </p>
+        </div>
+        <div class="category-item">
+            <img alt="Metal Prints" height="250"
+                src="https://ctl.s6img.com/society6/img/DBEyq30ddzoaUN75WF2Go3D9YjM/h_700,w_700/metal-prints/1x1/front/~artwork/s6-original-art-uploads/society6/uploads/misc/3d4cb0101e984af29f8ffe0d176194c7?width=720&crop=center" />
+            <p>
+                Metal Prints
+            </p>
+        </div>
+        <div class="category-item">
+            <img alt="Wood Wall Arts" height="150"
+                src="https://ctl.s6img.com/society6/img/NsOTLsKv4MXIY957s2QtcnW8moU/h_700,w_700/wood-wall-art/3x3/front/~artwork,bg_FFFFFFFF,fw_2601,fh_2601,fx_-5,fy_-1,iw_2600,ih_3733/s6-original-art-uploads/society6/uploads/misc/f0a9939f943846358f3ee8fd4b9fa2ab?width=720&crop=center" />
+            <p>
+                Wood Wall Arts
+            </p>
+        </div>
     </div>
     <div class="divider">
     </div>
     <div class="new-arrivals">
-     <h2>
-      NEW Wall Art Arrivals
-     </h2>
-     <div class="arrival-item">
-      <img alt="Macrame Floral Crescent Moon" height="150" src="https://storage.googleapis.com/a1aa/image/c51ca1c0-831c-4914-8417-d17b0a82b2b5.jpeg" width="150"/>
-      <p>
-       Macrame Floral Crescent Moon
-      </p>
-     </div>
-     <div class="arrival-item">
-      <img alt="Art Prints 40% Off" height="150" src="https://ctl.s6img.com/society6/img/gLaePRUnyB0mwUqk29FqqVDeR9Q/h_700,w_700/posters/top/~artwork,fw_2718,fh_3618,fy_-230,iw_2718,ih_4077/s6-original-art-uploads/society6/uploads/misc/4c40fcb56f7e4ce1ac6407946181f89b?width=720&crop=center" width="150"/>
-      <p>
-          Black Stallion Poster
-      </p>
-     </div>
-     <div class="arrival-item">
-      <img alt="Stationery Cards 50% Off" height="150" src="https://ctl.s6img.com/society6/img/2Z6DsNGpJIgotoN0vODme6VUEbM/h_700,w_700/wall-hangings/small/front/~artwork,fw_5678,fh_4058,fy_-810,iw_5678,ih_5678/s6-original-art-uploads/society6/uploads/misc/4ac645b426e14e59b365c65e69b57581?width=720&crop=center" width="150"/>
-      <p>
-          Antique Greek sculpture face 
-      </p>
-     </div>
+        <h2>
+            NEW Wall Art Arrivals
+        </h2>
+        <div class="arrival-item">
+            <img alt="Macrame Floral Crescent Moon" height="150"
+                src="https://storage.googleapis.com/a1aa/image/c51ca1c0-831c-4914-8417-d17b0a82b2b5.jpeg" width="150" />
+            <p>
+                Macrame Floral Crescent Moon
+            </p>
+        </div>
+        <div class="arrival-item">
+            <img alt="Art Prints 40% Off" height="150"
+                src="https://ctl.s6img.com/society6/img/gLaePRUnyB0mwUqk29FqqVDeR9Q/h_700,w_700/posters/top/~artwork,fw_2718,fh_3618,fy_-230,iw_2718,ih_4077/s6-original-art-uploads/society6/uploads/misc/4c40fcb56f7e4ce1ac6407946181f89b?width=720&crop=center"
+                width="150" />
+            <p>
+                Black Stallion Poster
+            </p>
+        </div>
+        <div class="arrival-item">
+            <img alt="Stationery Cards 50% Off" height="150"
+                src="https://ctl.s6img.com/society6/img/2Z6DsNGpJIgotoN0vODme6VUEbM/h_700,w_700/wall-hangings/small/front/~artwork,fw_5678,fh_4058,fy_-810,iw_5678,ih_5678/s6-original-art-uploads/society6/uploads/misc/4ac645b426e14e59b365c65e69b57581?width=720&crop=center"
+                width="150" />
+            <p>
+                Antique Greek sculpture face
+            </p>
+        </div>
     </div>
     <div class="divider">
     </div>
     <div class="christmas-special">
-     <h2>
-      CHRISTMAS SPECIAL
-     </h2>
-     <div class="special-item">
-      <img alt="Christmas Keep Sakes" height="150" src="https://ctl.s6img.com/society6/img/qCR35wGMj96sURRPN0eZ1LqUX3c/h_700,w_700/posters/top/~artwork,fw_2718,fh_3618,fx_-1352,iw_5421,ih_3618/s6-original-art-uploads/society6/uploads/misc/bfd70bef64f04214b7a6b1cf0fa2941c?width=720&crop=center" width="150"/>
-      <p>
-          Watercolor Pine Tree Poster
-      </p>
-     </div>
-     <div class="special-item">
-          <img alt="Christmas Decorations" height="150" src="https://storage.googleapis.com/a1aa/image/6e8d06c2-fe9d-4c11-a683-908090cd7bca.jpeg" width="150"/>
-          <p>
-           Christmas Canvas Prints
-          </p>
-     </div>
-     
-     <div class="special-item">
-      <img alt="Christmas Kids &amp; Babies" height="150" src="https://ctl.s6img.com/society6/img/9FOqR3_oHCYRfPdjBVjWHIzJ1OY/h_700,w_700/prints/~artwork/s6-original-art-uploads/society6/uploads/misc/f39d26a075734b49bda6e2cee63bc9f2?width=720&crop=center" width="150"/>
-      <p>
-          Vintage Christmas Wreath Art Print
-      </p>
-     </div>
-     <div class="special-item">
-      <img alt="Christmas Home &amp; Decor" height="150" src="/User/images/Christmas wall hangings.webp">
-      <p>
-       Christmas Wall Hangings
-      </p>
-     </div>
+        <h2>
+            CHRISTMAS SPECIAL
+        </h2>
+        <div class="special-item">
+            <img alt="Christmas Keep Sakes" height="150"
+                src="https://ctl.s6img.com/society6/img/qCR35wGMj96sURRPN0eZ1LqUX3c/h_700,w_700/posters/top/~artwork,fw_2718,fh_3618,fx_-1352,iw_5421,ih_3618/s6-original-art-uploads/society6/uploads/misc/bfd70bef64f04214b7a6b1cf0fa2941c?width=720&crop=center"
+                width="150" />
+            <p>
+                Watercolor Pine Tree Poster
+            </p>
+        </div>
+        <div class="special-item">
+            <img alt="Christmas Decorations" height="150"
+                src="https://storage.googleapis.com/a1aa/image/6e8d06c2-fe9d-4c11-a683-908090cd7bca.jpeg" width="150" />
+            <p>
+                Christmas Canvas Prints
+            </p>
+        </div>
+
+        <div class="special-item">
+            <img alt="Christmas Kids &amp; Babies" height="150"
+                src="https://ctl.s6img.com/society6/img/9FOqR3_oHCYRfPdjBVjWHIzJ1OY/h_700,w_700/prints/~artwork/s6-original-art-uploads/society6/uploads/misc/f39d26a075734b49bda6e2cee63bc9f2?width=720&crop=center"
+                width="150" />
+            <p>
+                Vintage Christmas Wreath Art Print
+            </p>
+        </div>
+        <div class="special-item">
+            <img alt="Christmas Home &amp; Decor" height="150" src="/User/images/Christmas wall hangings.webp">
+            <p>
+                Christmas Wall Hangings
+            </p>
+        </div>
     </div>
     <div class="divider">
     </div>
     <div class="new-arrivals">
-     <h2>
-          OFFERS
-     </h2>
-     <div class="arrival-item">
-      <img alt="Wall Hangings 20% Off" height="150" src="https://society6.com/cdn/shop/files/mini_art_prints3a_1.jpg?v=1731253439&width=2700&height=2692&crop=center" width="150"/>
-      <p>
-       60% OFF Mini Art Prints
-      </p>
-     </div>
-     <div class="arrival-item">
-      <img alt="Mix Art Prints 30% Off" height="150" src="https://society6.com/cdn/shop/files/stationery_lifestyle_1300x13001_4.jpg?v=1731254199&width=2700&height=2700&crop=center" width="150"/>
-      <p>
-       30% OFF Stationery Cards
-      </p>
-     </div>
-     <div class="arrival-item">
-      <img alt="Canvas Prints 20% Off" height="150" src="https://society6.com/cdn/shop/files/ArtGifts2.jpg?v=1732173347&width=2700&height=2700&crop=center" width="150"/>
-      <p>
-       50% OFF Framed Art Prints 
-      </p>
-     </div>
+        <h2>
+            OFFERS
+        </h2>
+        <div class="arrival-item">
+            <img alt="Wall Hangings 20% Off" height="150"
+                src="https://society6.com/cdn/shop/files/mini_art_prints3a_1.jpg?v=1731253439&width=2700&height=2692&crop=center"
+                width="150" />
+            <p>
+                60% OFF Mini Art Prints
+            </p>
+        </div>
+        <div class="arrival-item">
+            <img alt="Mix Art Prints 30% Off" height="150"
+                src="https://society6.com/cdn/shop/files/stationery_lifestyle_1300x13001_4.jpg?v=1731254199&width=2700&height=2700&crop=center"
+                width="150" />
+            <p>
+                30% OFF Stationery Cards
+            </p>
+        </div>
+        <div class="arrival-item">
+            <img alt="Canvas Prints 20% Off" height="150"
+                src="https://society6.com/cdn/shop/files/ArtGifts2.jpg?v=1732173347&width=2700&height=2700&crop=center"
+                width="150" />
+            <p>
+                50% OFF Framed Art Prints
+            </p>
+        </div>
     </div>
     <div class="divider">
     </div>
     <div class="discount-section">
-     <h2>
-      Get 25% Off for Your First Order
-     </h2>
-     <form>
-      <input placeholder="Enter your email address" type="email"/>
-      <button type="submit">
-       <i class="fas fa-arrow-right">
-       </i>
-      </button>
-     </form>
+        <h2>
+            Get 25% Off for Your First Order
+        </h2>
+        <form>
+            <input placeholder="Enter your email address" type="email" />
+            <button type="submit">
+                <i class="fas fa-arrow-right">
+                </i>
+            </button>
+        </form>
     </div>
-    
-  
 
 
-<%-  include ('../partials/user/footer.ejs')%>
+
+
+    <%- include ('../partials/user/footer.ejs')%>

@@ -20,7 +20,6 @@ function generateOtp() {
 
 async function sendVerificationEmail(email, otp) {
     try {
-        // Debug logging
         console.log('Email Config:', {
             email: process.env.NODEMAILER_EMAIL,
             emailPass: process.env.NODEMAILER_PASSWORD,
@@ -30,7 +29,6 @@ async function sendVerificationEmail(email, otp) {
             console.error('Missing email configuration in environment variables');
             return false;
         }
-        // Configure Nodemailer for Gmail
         const transporter = nodemailer.createTransport({
             port: 587,
             secure: false,
@@ -48,9 +46,9 @@ async function sendVerificationEmail(email, otp) {
         const mailOptions = {
             from: {
                 name: 'Calliope',
-                address: process.env.NODEMAILER_EMAIL  // Sender's email
+                address: process.env.NODEMAILER_EMAIL  // email of sender
             },
-            to: email,                          // Receiver's email
+            to: email,                          // email of receiver
             subject: 'Email Verification - Calliope',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -113,7 +111,7 @@ exports.insertUser = async (req, res) => {
                 await sendVerificationEmail(email, otp)
                 req.session.otp_cred = email;
                 req.session.otp = parseInt(otp);
-                req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-min expiration
+                req.session.otpExpires = Date.now() + 10 * 60 * 1000; 
                 console.log(`generated OTP : ${otp}`);
                 console.log("req.session.otp:", req.session.otp)
                 console.log('OTP sent successfully')
@@ -121,12 +119,11 @@ exports.insertUser = async (req, res) => {
                 console.error('Error sending OTP email', error)
             }
             console.log("Email:", email);
-            // Redirect to OTP page
             return res.render('users/verifyOTP_signup', { email })
         } else {
             req.session.signUp_msg = "User already exists"
             console.error('user already exists');
-            res.redirect('/user/login'); // User already exists
+            res.redirect('/user/login'); 
         }
         
     } catch (error) {
@@ -141,7 +138,7 @@ exports.verifyLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const userData = await User.findOne({ is_admin: 0, email: email });
+        const userData = await User.findOne({ is_admin: false, email: email });
         if (!userData) {
             return res.render('users/login', { 
                 message: "User Not Found",
@@ -156,12 +153,10 @@ exports.verifyLogin = async (req, res) => {
             });
         }
         
-        const passwordMatch = bcrypt.compare(password, userData.password);
+        const passwordMatch = await bcrypt.compare(password, userData.password);
         if (passwordMatch) {
-            // Set session data
             req.session.user = userData;
             
-            // Save session before redirecting
             req.session.save((err) => {
                 if (err) {
                     console.error('Session save error:', err);
@@ -171,7 +166,6 @@ exports.verifyLogin = async (req, res) => {
                     });
                 }
                 
-                // Set success message
                 req.session.message = 'Welcome back, ' + userData.username + '!';
                 res.redirect('/user/home');
             });
@@ -229,12 +223,10 @@ exports.resendOTP = async (req, res) => {
         const newOTP = generateOtp();
 
         try {
-            // Send new OTP via email
             await sendVerificationEmail(email, newOTP);
 
-            // Update session with new OTP
             req.session.otp = parseInt(newOTP);
-            req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-min expiration
+            req.session.otpExpires = Date.now() + 10 * 60 * 1000; 
             console.log('newotp', parseInt(newOTP))
 
             console.log('New OTP generated and saved:', {
@@ -284,32 +276,28 @@ exports.forgotPasswordPage= async(req,res)=>{
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Generate a password reset token (simplified here)
         const resetToken = Math.random().toString(36).substr(2);
         user.resetToken = resetToken;
-        user.resetTokenExpiry = Date.now() + 3600000; // 1-hour expiry
+        user.resetTokenExpiry = Date.now() + 3600000; 
         await user.save();
 
-        // Send reset link via email (mocked here)
         console.log(`Send reset link to: ${email} with token: ${resetToken}`);
         // res.status(200).json({ message: "Reset link sent to your email" });
 
-         // Configure the email transport
          const transporter = nodemailer.createTransport({
             port: 587,
             secure: false,
             service: 'gmail',
             requireTLS: true,
             auth: {
-                user: process.env.NODEMAILER_EMAIL, //email address
-                pass: process.env.NODEMAILER_PASSWORD, // App password
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD, 
             },
             tls: {
-                rejectUnauthorized: false  // Accept self-signed certificates
+                rejectUnauthorized: false  
             }
         });
 
-         // Email content
          const mailOptions = {
             from:{
                 name: 'Calliope',
@@ -324,20 +312,18 @@ exports.forgotPasswordPage= async(req,res)=>{
                 <p>If you did not request this, please ignore this email.</p>
             `,
         };
-        // Verify connection configuration
         await transporter.verify();
         console.log('Transporter verified successfully');
 
-         // Send the email
         const info =  await transporter.sendMail(mailOptions);
         if(info&& info.response){
-            console.log("Email sent: ", info.response); // Logs the email sending status
+            console.log("Email sent: ", info.response); 
             console.log(`Reset email sent to: ${email}`);
             res.status(200).json({ message: 'Reset link sent to your email' });
-            return true;  // Email sent successfully
+            return true; 
         } else {
             console.error("Error: No response from email transporter");
-            return false; // Failure in sending email
+            return false; 
         }
         
  
@@ -353,7 +339,8 @@ exports.resetPassword = async (req, res) => {
     const email = req.session.forgotCred;
 
     try {
-        await User.findOneAndUpdate({email},{password:newPassword});
+        const hashedPassword = await bcrypt.hash( newPassword,10);
+        await User.findOneAndUpdate({email},{password:hashedPassword});
 
         res.status(200).json({ message: 'Password reset successful' });
     } catch (error) {
@@ -383,7 +370,6 @@ exports.loadHome = async (req, res) => {
             return res.redirect('/user/login');
         }
 
-        // Get user data
         const userData = await User.findById(req.session.user._id);
         if (!userData || userData.is_blocked) {
             req.session.destroy((err) => {
@@ -392,7 +378,6 @@ exports.loadHome = async (req, res) => {
             return res.redirect('/user/login');
         }
 
-        // Get featured products
         let products = [];
         try {
             products = await Product.find({ is_blocked: false })
@@ -402,22 +387,19 @@ exports.loadHome = async (req, res) => {
             console.error('Error fetching products:', err);
         }
 
-        // Render home page with all necessary data
         res.render('users/home', {
             title: 'CAlliope - Home',
             session: req.session.user,
             products: products,
             message: req.session.message || '',
-            cartCount: 0, // You can update this with actual cart count if needed
+            cartCount: 0, 
             search 
         });
 
-        // Clear any flash messages
         delete req.session.message;
 
     } catch (error) {
         console.error('Error loading home:', error);
-        // Set error message in session
         req.session.message = 'Error loading home page. Please try logging in again.';
         res.redirect('/login');
     }
