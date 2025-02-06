@@ -219,15 +219,49 @@ exports.editPage = async (req, res) => {
 };
 
 exports.edittingProduct = async (req, res) => {
-    
     try {
+        console.log("edittingProduct called")
         const { productId, productName, description, mrp, productOffer, maxDiscount, category, stock, isAvailable } = req.body;
         const isListed = req.body.isListed === 'true';
         console.log("isListed value:", isListed);
 
         const removedImages = req.body.removedImages ? JSON.parse(req.body.removedImages) : [];
-        const newImages = req.body.newImages ? JSON.parse(req.body.newImages) : [];
-
+        console.log("removedImages : ",removedImages)
+        // const newImages = req.body.newImages ? JSON.parse(req.body.newImages) : [];
+        let newImages = [];
+        if (req.body.newImages) {
+            console.log("Raw newImages from request:", req.body.newImages);
+            console.log("Type of newImages from request:", typeof req.body.newImages);
+            
+            // Handle the case where newImages is already an array
+            if (Array.isArray(req.body.newImages)) {
+                newImages = req.body.newImages;
+            } else {
+                try {
+                    // Try parsing as JSON if it's a string
+                    const parsed = JSON.parse(req.body.newImages);
+                    if (Array.isArray(parsed)) {
+                        newImages = parsed;
+                    } else if (typeof parsed === 'string') {
+                        newImages = [parsed];
+                    } else {
+                        throw new Error('Invalid image data format');
+                    }
+                } catch (error) {
+                    // If parsing fails and it's a string, use it directly
+                    if (typeof req.body.newImages === 'string') {
+                        newImages = [req.body.newImages];
+                    } else {
+                        throw new Error('Invalid image data provided');
+                    }
+                }
+            }
+        }
+        console.log("Final newImages array:", {
+            length: newImages.length,
+            isArray: Array.isArray(newImages),
+            sampleData: newImages[0]?.substring(0, 50) + '...' // Show first 50 chars of first image
+        });
         console.log("Request body:", req.body);
 
         const product = await Products.findById(productId).populate('category');
@@ -236,18 +270,21 @@ exports.edittingProduct = async (req, res) => {
             return res.redirect("/admin/products")
             // throw new Error('Product not found');
         }
+        console.log("product in edittingProduct : ",product)
+
         // duplicate productname checking
         const duplicateProduct = await Products.findOne({ productName, _id: { $ne: productId } });
         if (duplicateProduct) {
             req.session.errorMessage = "Product with same name exists";
             return res.redirect(`/admin/products/edit/${productId}`);
         }
+        console.log("duplicateProduct in edittingProduct : ",duplicateProduct)
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
             req.session.errorMessage = "Invalid category selected";
             return res.redirect("/admin/products");
         }
-
+        console.log("categoryExists : ",categoryExists)
         const prices = calculateProductPrices({
             mrp: Number(mrp),
             productOffer: Number(productOffer),
@@ -278,7 +315,7 @@ exports.edittingProduct = async (req, res) => {
         }
         let productImages = [...product.productImage]; 
         const { images } = req.body;
-
+        console.log("productImages,images : ",productImages,images)
         try {
             if (images && Array.isArray(images)) {
                 for (const [index, base64Image] of images.entries()) {
@@ -316,6 +353,43 @@ exports.edittingProduct = async (req, res) => {
                         // }
                     }
                 }
+            }
+        }
+        if(newImages && newImages.length > 0){
+            try {
+                console.log("Starting to process new images...");
+                console.log("newImages type:", typeof newImages[0]);
+                console.log("newImages content:", newImages);
+
+                for (const [index, base64Image] of newImages.entries()) {
+                    console.log(`Processing image ${index + 1}/${newImages.length}`);
+
+                    if (!base64Image || typeof base64Image !== 'string') {
+                        throw new Error(`Invalid image data for image ${index + 1}. Expected string but got ${typeof base64Image}`);
+                    }
+
+                    if (!base64Image.startsWith('data:image/')) {
+                        throw new Error(`Invalid image format for image ${index + 1}. Image must be in base64 format starting with 'data:image/'`);
+                    }
+                    const filename = `product_${Date.now()}_${index}.png`;
+                    console.log(`Saving image as: ${filename}`);
+                    await saveBase64Image(base64Image, filename);
+                    productImages.push(filename);
+                    console.log(`Successfully saved image ${index + 1}`);
+                }
+                console.log("New images added successfully:", productImages);
+            } catch (error) {
+                console.log("Detailed error in adding new images:", {
+                    message: error.message,
+                    stack: error.stack,
+                    imageCount: newImages.length,
+                    imageType: typeof newImages[0],
+                    isArray: Array.isArray(newImages),
+                    // newImagesData: JSON.stringify(newImages)
+                });
+                // console.error("Error adding new images:", error);
+                req.session.errorMessage = `Error while adding new images: ${error.message}`;
+                return res.redirect(`/admin/products/edit/${productId}`);
             }
         }
         // await Products.findOneAndUpdate({productName:productName},{
