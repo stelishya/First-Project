@@ -556,7 +556,7 @@
             }, 3000);
         }
 
-        
+
         let selectedAddressId = null;
         function selectAddress(addressId, buttonElement) {
             selectedAddressId = addressId;
@@ -682,7 +682,7 @@
 
             // Reset form and clear any previous errors
             form.reset();
-            clearErrors();
+            // clearErrors();
 
             if (address) {
                 // Edit mode
@@ -971,7 +971,7 @@
                 } else if (selectedPayment.value === 'Wallet') {
                     try {
                         console.log("Placing wallet order");
-                        const response = await axios.post('/user/order/creation',orderData);
+                        const response = await axios.post('/user/order/creation', orderData);
                         console.log("response", response)
                         if (response.data.success) {
                             await Swal.fire({
@@ -1089,8 +1089,15 @@
         function validateStreetAddress() {
             const input = document.getElementById('streetInput').value.trim();
             const error = document.getElementById('streetError');
+            // const regex = /^[A-Za-z\s-]+$/;
+            // const regex = /^(?=.*[A-Za-z])[A-Za-z\s,-]*$/;
+            const regex = /^(?=(?:.*[A-Za-z]){5})([A-Za-z\s,-]*)$/;
             if (!input || input.length < 5) {
                 error.textContent = 'Street address should be at least 5 characters long';
+                error.style.color = 'red';
+                return false;
+            } else if (!regex.test(input)) {
+                error.textContent = 'Street address must contain at least 5 letters and can include spaces, hyphens, or commas';
                 error.style.color = 'red';
                 return false;
             } else {
@@ -1201,7 +1208,9 @@
                     let response;
                     if (isEditMode) {
                         const addressId = this.action.split('/').pop();
+                        console.log("edit address")
                         response = await axios.patch(`/user/editAddress/${addressId}`, data);
+                        console.log("response : ", response)
                     } else {
                         response = await axios.post('/user/addAddress', data);
                     }
