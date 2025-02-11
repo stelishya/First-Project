@@ -224,7 +224,7 @@
         <h2 class="text-3xl font-bold text-gray-800" >Customers</h2>
     <form action="/admin/users">
         <div class="search-container">
-            <input type="text" placeholder="Search Customers">
+            <input type="text" placeholder="Search Customers" name="search" value="<%= search %>">
             <button>
                 <i class="fas fa-search"></i>
             </button>
@@ -267,12 +267,14 @@
         <td><%=data[i].email%></td>
         <td><%=data[i].mobile%></td>
         <td><% if(data[i].is_blocked===false){%>
-                <span class="status blocked">
-                    <a href="/admin/blockCustomer?id=<%=data[i]._id%>">Block</a>
+                <span class="status ">
+                    <a href="#" onclick="toggleBlockCustomer('<%= data[i]._id %>', true)">Block</a>
+                    <!-- <a href="/admin/blockCustomer?id=<%=data[i]._id%>">Block</a> -->
                 </span>
             <% } else{ %>
-                <span class="status active">
-                    <a href="/admin/unblockCustomer?id=<%=data[i]._id%>">UnBlock </a>
+                <span class="status ">
+                    <a href="#" onclick="toggleBlockCustomer('<%= data[i]._id %>', false)">UnBlock</a>
+                    <!-- <a href="/admin/unblockCustomer?id=<%=data[i]._id%>">UnBlock </a> -->
                 </span>
             <%} %>
         </td>
@@ -306,3 +308,52 @@
    </div>
   </div>
   </div>
+
+  <script>
+    async function toggleBlockCustomer(customerId, isBlocking) {
+        const action = isBlocking ? 'block' : 'unblock';
+        const confirmationMessage = isBlocking ? 'Are you sure you want to block this customer?' : 'Are you sure you want to unblock this customer?';
+    
+        const result = await Swal.fire({
+            title: 'Confirmation',
+            text: confirmationMessage,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, proceed!'
+        });
+    
+        if (result.isConfirmed) {
+            try {
+                console.log("yes confirmed")
+                const response = await axios.patch(`/admin/${action}Customer?id=${customerId}`);
+                console.log("response : ",response)
+                if (response.data.success) {
+                    console.log("success ahn")
+                    const statusElement = document.querySelector(`a[onclick*="${customerId}"]`);
+                    console.log("statusElement : ",statusElement)
+
+                    if (statusElement) {
+                        const parentElement = statusElement.parentElement;
+                        if (isBlocking) {
+                            console.log("is blocking")
+                            parentElement.innerHTML = `<span class="status "><a href="#" onclick="toggleBlockCustomer('${customerId}', false)">UnBlock</a></span>`;
+                        } else {
+                            console.log("is unblocking")
+                            parentElement.innerHTML = `<span class="status "><a href="#" onclick="toggleBlockCustomer('${customerId}', true)">Block</a></span>`;
+                        }
+                        Swal.fire('Success!', `Customer has been ${action}ed successfully.`, 'success');
+                    }else{
+                    console.error(`Status element not found for customer ID: ${customerId}`);
+                    }
+                } else {
+                    Swal.fire('Error!', response.data.message || 'Failed to update customer status.', 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling customer status:', error);
+                Swal.fire('Error!', 'An error occurred while updating customer status.', 'error');
+            }
+        }
+    }
+    </script>

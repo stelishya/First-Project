@@ -23,7 +23,8 @@ console.log("categories.js is working")
             });
         } catch (error) {
             // Handle errors
-            if (error.response && error.response.data.error === 'Category already exists') {
+            console.log("Error adding category:", error);
+            if (error.response && error.response.data.message === 'Category already exists') {
                 Swal.fire({
                     icon: 'error',
                     title: "Oops",

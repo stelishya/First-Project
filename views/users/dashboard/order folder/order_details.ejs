@@ -533,28 +533,30 @@
 
     async function retryPayment(orderId, amount) {
         try {
+            console.log("hi retry payment")
             const response = await axios.post('/user/retry-payment', {
                 orderId:orderId
             });
-
+            console.log("response : ",response.data)
             // const data = await response.json();
 
         if (!response.data.success) {
             if (response.data.insufficientStockItems) {
                 let message = 'Cannot process payment due to insufficient stock:\n';
                 response.data.insufficientStockItems.forEach(item => {
+                    console.log("Insufficient stock item : ",item)
                     message += `\n${item.productName}:\nRequested: ${item.requestedQuantity}\nAvailable: ${item.availableStock}`;
                 });
 
                 await Swal.fire({
                     title: 'Out of Stock',
-                    text: message,
+                    text: response.data.message,
                     icon: 'error',
                     confirmButtonColor: '#d33'
                 });
                 return;
             }
-            throw new Error(response.data.message);
+            throw new Error(response.data.message || 'Payment initiation failed');
         }
             if (response.status === 200) {
                 const options = {
@@ -567,7 +569,9 @@
                     handler: async function (response) {
                         try {
                             //verify payment
+                            console.log("Razorpay payment success, verifying...");
                             const verifyResponse = await axios.post('/user/verify-retry-payment', {
+                                ...response,
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
@@ -575,6 +579,7 @@
                                 status: 'Success'
                             });
 
+                            console.log("verifyResponse : ",verifyResponse.data)
                             if (verifyResponse.data.success) {
                                 Swal.fire({
                                     title: 'Payment Successful!',
@@ -605,13 +610,17 @@
                     },
                     modal: {
                         ondismiss: function () {
-                            Swal.fire({
-                                title: 'Payment Cancelled',
-                                text: 'You cancelled the payment process.',
-                                icon: 'info',
-                                confirmButtonColor: '#f97316'
-                            });
+                            console.log("Payment modal dismissed");
+                            handlePaymentFailure(orderId)
                         }
+                        // function () {
+                        //     Swal.fire({
+                        //         title: 'Payment Cancelled',
+                        //         text: 'You cancelled the payment process.',
+                        //         icon: 'info',
+                        //         confirmButtonColor: '#f97316'
+                        //     });
+                        // }
                     },
                     theme: {
                         color: "#fb923c"
@@ -631,4 +640,42 @@
             });
         }
     }
+
+    async function handlePaymentFailure(orderId) {
+            console.log("Handling payment failure");
+            try {
+                // Create order with failed status
+                const orderResponse = await axios.post('/user/verify-retry-payment', {
+                    orderId: orderId,
+                    paymentStatus: 'Failed'
+                });
+                console.log("orderResponse : ", orderResponse)
+                if (!orderResponse.data.success) {
+                    const orderId = orderResponse.data.order._id;
+                    await Swal.fire({
+                        title: 'Payment Failed!',
+                        text: orderResponse.data.message || 'Payment Failed. Please try again.',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Retry Payment',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#f97316',
+                        cancelButtonColor: '#6b7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = `/user/order/details/${orderId}`;
+                        }
+                    })
+                    // .then(()=>window.location.href = `/user/order/details/${orderId}`)
+
+                } else {
+                    showToast('Error creating order', true);
+                }
+            } catch (error) {
+                console.error('Error handling payment failure:', error);
+                showToast('Error processing payment failure', true);
+            }
+        }
 </script>
+
+

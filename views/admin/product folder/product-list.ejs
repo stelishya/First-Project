@@ -236,9 +236,10 @@ async function toggleProductStatus(productId, action) {
 
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/admin/products/${action}/${productId}`, {
-                method: 'PATCH'
-            });
+            const response = await axios.patch(`/admin/products/${action}/${productId}`)
+            // , {
+            //     method: 'PATCH'
+            // });
             
             if (response.ok) {
                 showToast('Product status updated successfully', false);

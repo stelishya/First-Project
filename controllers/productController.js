@@ -496,7 +496,9 @@ exports.showProductsPage = async (req, res) => {
             $or:[
                 {productName: {$regex: ".*"+search+".*", $options: 'i'}},
                 {description: {$regex: ".*"+search+".*", $options: 'i'}}
-            ]
+            ],
+            isListed: true,
+            category: { $in: await Category.find({ isListed: true }).distinct('_id') }
         }).countDocuments();
 
         const totalPages = Math.ceil(count / limit);
@@ -506,7 +508,9 @@ exports.showProductsPage = async (req, res) => {
             $or:[
                 {productName: {$regex: ".*"+search+".*", $options: 'i'}},
                 {description: {$regex: ".*"+search+".*", $options: 'i'}}
-            ]
+            ],
+            isListed: true,
+            category: { $in: await Category.find({ isListed: true }).distinct('_id') }
         })
         .populate('category') 
         .sort({ [sortField]: sortOrder })
@@ -557,7 +561,7 @@ exports.showProductsPage = async (req, res) => {
         
         const minPrice = Number(priceRange[0]?.minPrice) || 0;
         const maxPrice = Number(priceRange[0]?.maxPrice) || 5000;
-        const categories = await Category.find({},{name:1});
+        const categories = await Category.find({ isListed: true },{ name:1 });
          
         res.render('users/product folder/products', {
             title: "All Products",
@@ -614,7 +618,7 @@ exports.fetchProducts = async (req, res) => {
 
         const minPrice = parseInt(req.query.min, 10) || 0;
         const maxPrice = parseInt(req.query.max, 10) || Infinity;
-        const categories = await Category.find({}, { name: 1 });
+        const categories = await Category.find({ isListed: true }, { name: 1 });
 
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
@@ -623,11 +627,15 @@ exports.fetchProducts = async (req, res) => {
         let query = {
             productName: { $regex: search, $options: 'i' },
             isListed: true,
-            mrp: { $gte: minPrice, $lte: maxPrice }
+            mrp: { $gte: minPrice, $lte: maxPrice },
+            category: { $in: await Category.find({ isListed: true }).distinct('_id') }
         };
 
         if (categoryId) {
+            const category = await Category.findById(categoryId);
+            if (category && category.isListed) {
             query.category = categoryId;
+            }
         }
         if (search) {
             query.$or = [

@@ -28,21 +28,30 @@ const userAuth = (req, res, next) => {
 
 const adminAuth = async (req, res, next) => {
     try {
-            const isAdmin = await User.findOne({ isAdmin: true });
+            const admin = await User.findOne({ 
+              is_admin: true,
+              is_blocked: { $ne: true }, 
+              is_verified: true 
+             });
+             if (!admin) {
+              console.error('No valid admin account found');
+              return res.status(403).redirect('/admin/login');
+            }
             if(req.path==='/login'){
-                if(req.session.admin && isAdmin){
-                    res.redirect('/admin/dashboard')
+                if(req.session.admin && req.session.adminId === admin._id.toString()){
+                  return res.redirect('/admin/dashboard')
                 }else{
-                    next();
+                  return next();
                 }
-            }else if(req.session.admin){
-                next();
+            }else if(req.session.admin && req.session.adminId === admin._id.toString()){
+              req.admin = admin;
+              return next();
             }else{
-            res.redirect('/admin/login');
+              return res.redirect('/admin/login');
             }
         } catch (error) {
         console.error('Error in admin auth middleware:', error);
-        res.redirect('/admin/login');
+        return res.status(500).redirect('/admin/login');
     }
 };
 

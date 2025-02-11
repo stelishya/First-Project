@@ -99,7 +99,7 @@ exports.checkout = async (req, res) => {
         const addresses = await Addresses.findOne({ userId });
 
 
-        const wallet = await Wallets.findOne({ userId });
+        const wallet = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
         const walletBalance = wallet ? wallet.balance : 0;
 
         const paymentMethods = ['Online Payment', 'Cash on Delivery'];
@@ -295,12 +295,14 @@ exports.orderCreation = async (req, res) => {
                 },
                 orderedItems: orderItems,
                 // finalAmount: subtotal - couponDiscount,
-                finalAmount: subtotal - (totalDiscountAmount + (couponDiscount || 0)) ,
+                finalAmount: subtotal ,
+                // - (totalDiscountAmount + (couponDiscount || 0)) ,
                 totalDiscount: (totalDiscountAmount + couponDiscount).toFixed(2),
                 couponDiscount: couponDiscount || 0,
                 couponCode: orderData.couponCode,
                 coupon: couponData ? couponData._id : null,
-                paymentMethod: orderData.paymentMethod,
+                paymentMethod: orderData.paymentType,
+                // paymentMethod,
                 paymentStatus: orderData.paymentStatus || 'Pending',
                 status: 'Order Placed',
                 paymentType: orderData.paymentType || 'Cash on Delivery'
@@ -312,8 +314,9 @@ exports.orderCreation = async (req, res) => {
                 newOrder});
 
             await newOrder.save();
-                if (orderData.paymentMethod === 'Wallet') {
-                    const wallet = await Wallets.findOne({ userId });
+                if (orderData.paymentType === 'Wallet') {
+                    const wallet = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
+                    console.log("wallet : ",wallet)
                     if (!wallet || wallet.balance < newOrder.finalAmount) {
                         return res.status(400).json({
                             success: false,
@@ -329,6 +332,11 @@ exports.orderCreation = async (req, res) => {
                         balance: wallet.balance - newOrder.finalAmount,
                         description: `Payment for order #${newOrder._id}`
                     });
+
+                    await Users.findOneAndUpdate(
+                        { _id: userId},
+                        { $set: { wallet: wallet.balance - newOrder.finalAmount } } 
+                    )
                     newOrder.paymentStatus = 'Paid';
                     await Promise.all([
                         walletTransaction.save(),

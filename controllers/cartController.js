@@ -1,6 +1,7 @@
 const Carts = require('../models/cartSchema')
 const Products = require('../models/productSchema')
-const { calculateOrderItemPrices } = require('../helpers/priceCalculator');
+const { calculateProductPrices, calculateOrderItemPrices } = require('../helpers/priceCalculator');
+
 
 exports.getCart = async (req,res)=>{
     const search = req.query.search || ''; 
@@ -80,7 +81,7 @@ exports.getCart = async (req,res)=>{
                 mrp: itemPrices.originalPrice,
                 discountedPrice: itemPrices.pricePerUnit,
                 totalDiscount: itemPrices.totalDiscount,
-                bestDiscountType: `${itemPrices.discountPercentage} Discount`,
+                bestDiscountType: `${itemPrices.discountPercentage.toFixed(0)} Discount`,
                 finalAmount: itemPrices.totalPrice,
                 stock: product.stock 
             };
@@ -100,9 +101,9 @@ exports.getCart = async (req,res)=>{
             products,
             mrp: products.mrp,
             countOfProducts,
-            totalAmount: totalAmount.toFixed(2),
-            subtotal: subtotal.toFixed(2),
-            totalDiscount: totalDiscount.toFixed(2),
+            totalAmount: totalAmount.toFixed(0),
+            subtotal: subtotal.toFixed(0),
+            totalDiscount: totalDiscount.toFixed(0),
             search,
             currentPage: page,
             totalPages,
@@ -131,7 +132,7 @@ exports.addToCart = async (req,res)=>{
         console.log("\nuserId : "+userId+"\nproductId : "+productId+"\nquantity : "+quantity)
 
         const product = await Products.findById(productId);
-        console.log(product)
+        console.log("product: ",product)
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -140,6 +141,7 @@ exports.addToCart = async (req,res)=>{
         }
 
         const maxAllowedQuantity = Math.min(product.stock, 5);
+        console.log("maxAllowedQuantity : ",maxAllowedQuantity)
         if (quantity > maxAllowedQuantity) {
             return res.status(400).json({
                 success: false,
@@ -149,10 +151,13 @@ exports.addToCart = async (req,res)=>{
             });
         }
 
-        const price = product.discountedPrice || product.mrp;
+        const calculatedPrices = calculateProductPrices(product);
+        const price = calculatedPrices.finalAmount;
+        // const price = product.discountedPrice || product.mrp;
         const totalPrice = price * quantity;
-
-        let cart = await Carts.findOne({ userId });
+        console.log("price,totalPrice : ",price,totalPrice)
+        let cart = await Carts.findOne({ userId}).populate('items.productId', 'price totalPrice');
+        console.log("cart : ",cart)
         if (!cart) {
             cart = new Carts({
                 userId,
@@ -168,9 +173,10 @@ exports.addToCart = async (req,res)=>{
             const existingItem = cart.items.find(
                 item => item.productId.toString() === productId
             );
-
+            console.log("existingItem : ",existingItem)
             if (existingItem) {
                 const newTotalQuantity = existingItem.quantity + quantity;
+                console.log("newTotalQuantity : ",newTotalQuantity)
                 if (newTotalQuantity > maxAllowedQuantity) {
                     return res.status(400).json({
                         success: false,
@@ -192,7 +198,7 @@ exports.addToCart = async (req,res)=>{
                 });
             }
         }
-
+        console.log("cart : ",cart)
         await cart.save();
 
         res.status(200).json({
@@ -201,7 +207,7 @@ exports.addToCart = async (req,res)=>{
         });
 
     } catch (error) {
-        console.error('Error adding to cart:', error);
+        console.log('Error adding to cart:', error);
         res.status(500).json({
             success: false,
             message: "Error adding product to cart. Please try again."

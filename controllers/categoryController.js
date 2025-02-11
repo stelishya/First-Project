@@ -3,17 +3,20 @@ const Product = require('../models/productSchema');
 
 exports.categoryInfo = async(req,res)=>{
     try {
+        let search = req.query.search || '';
         const {offer} = req.body;
         const page = parseInt(req.query.page) || 1;
         const limit = 7;
         const skip = (page - 1) * limit;
 
-        const categoryData = await Category.find({})
+        const categoryData = await Category.find({
+            name: { $regex: new RegExp(search, 'i') }
+        })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        const totalCategories = await Category.countDocuments();
+        const totalCategories = await Category.countDocuments({ name: { $regex: new RegExp(search, 'i') }});
         const totalPages = Math.ceil(totalCategories / limit);
 
         let adminName = "Admin"; 
@@ -27,6 +30,7 @@ exports.categoryInfo = async(req,res)=>{
 
         res.render("admin/category",{
             title: 'Category Management',
+            search,
             cat: categoryData,
             currentPage: page,
             totalPages,
@@ -55,17 +59,17 @@ exports.addCategory = async(req,res)=>{
             });
         }
 
-        const normalizedName = name.trim().toLowerCase();
-
+        // const normalizedName = name.trim().toLowerCase();
+        // console.log('normalizedName', normalizedName)
         const existingCategory = await Category.findOne({
-            name: { $regex: new RegExp(`^${normalizedName}$`, 'i') }
+            name: { $regex: `^${name}$`,$options: 'i' }
         });
-
+        console.log('existingCategory', existingCategory)
         if (existingCategory) {
             console.log('Category exists:', existingCategory);
             return res.status(400).json({
                 success: false,
-                message: `Category "${name}" already exists`
+                message: `Category already exists`
             });
         }
 
@@ -74,7 +78,7 @@ exports.addCategory = async(req,res)=>{
             description: description.trim(),
             categoryOffer: offer || 0
         });
-        
+        console.log('newCategory', newCategory)
         await newCategory.save();
         console.log('New category created:', newCategory); 
 
@@ -101,10 +105,18 @@ exports.getListCategory = async(req,res)=>{
     try {
         let id = req.query.id;
         await Category.updateOne({_id:id},{$set:{isListed:false}});
-        res.redirect("/admin/category")
+        res.json({
+            success:true,
+            message: 'Category unlisted successfully'
+        })
+        // res.redirect("/admin/category")
     } catch (error) {
         console.error(error);
-        res.redirect("/pageError");
+        res.status(500).json({
+            success: false,
+            message: 'Failed to unlist category'
+        });
+        // res.redirect("/pageError");
     }
 }
 
@@ -112,10 +124,18 @@ exports.getUnlistCategory = async(req,res)=>{
     try {
         let id = req.query.id;
         await Category.updateOne({_id:id},{$set:{isListed:true}});
-        res.redirect("/admin/category")
+        res.json({
+            success: true,
+            message: 'Category listed successfully'
+        });
+        // res.redirect("/admin/category")
     } catch (error) {
         console.error(error);
-        res.redirect("/pageError");
+        res.status(500).json({
+            success: false,
+            message: 'Failed to list category'
+        });
+        // res.redirect("/pageError");
     }
 }
 
@@ -133,7 +153,8 @@ exports.getEditCategory = async(req,res)=>{
             category:category,
             categoryOffer: offer || 0,
             // discountTypes: ['Percentage Discount', 'Fixed Amount'] ,
-            path: '/admin/category'  
+            path: '/admin/category',
+            activeTab: 'categories'
             });
     } catch (error) {
         console.error('Error in getEditCategory:',error);

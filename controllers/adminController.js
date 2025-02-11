@@ -32,6 +32,7 @@ exports.login =async (req,res)=>{
         const passwordMatch= await bcrypt.compare(password,admin.password);
         if(passwordMatch){
             req.session.admin=true;
+            req.session.adminId = admin._id.toString();
             return res.redirect('/admin/dashboard')
         }else{
             console.log('Password does not match');
@@ -52,8 +53,17 @@ exports.login =async (req,res)=>{
 
 exports.logout = async(req,res)=>{
     try {
-        req.session.user_id=null;
-        return res.redirect('/admin/login');    
+        // req.session.user_id=null;
+        // return res.redirect('/admin/login');   
+        req.session.admin = null;
+        req.session.adminId = null;
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Error destroying session:', err);
+                return res.redirect('/admin/pageError');
+            }
+            return res.redirect('/admin/login');
+        }); 
     } catch (error) {
         console.log('unexpected error during logout')
         res.redirect('/admin/pageError')

@@ -2,10 +2,11 @@ const User = require('../models/userSchema');
 
 exports.customerInfo = async (req,res)=>{
     try {
-        let search='';
-        if(req.query.search){
-            search = req.query.search
-        }
+        let search = req.query.search || '';
+        // let search='';
+        // if(req.query.search){
+        //     search = req.query.search
+        // }
         let page=1;
         if(req.query.page){
             page=req.query.page 
@@ -47,22 +48,28 @@ exports.customerInfo = async (req,res)=>{
 
 exports.blockCustomer = async (req,res)=>{
     try {
+        console.log("blockCustomer called")
         let id = req.query.id;
         await User.updateOne({_id:id},{$set:{is_blocked:true}});
-        return res.redirect('/admin/users');
+        res.status(200).json({ success: true, message: 'Customer blocked successfully' });
+        // return res.redirect('/admin/users');
     } catch (error) {
         console.error('block customer error',error)
-        return res.redirect('/pageError');
+        res.json({ success: false, message: 'Failed to block customer' });
+        // return res.redirect('/pageError');
     }
 }
 
 exports.unblockCustomer = async (req,res)=>{
     try {
+        console.log("unblockCustomer called")
         let id = req.query.id;
         await User.updateOne({_id:id},{$set:{is_blocked:false}});
-        return res.redirect('/admin/users');
+        res.status(200).json({ success: true, message: 'Customer unblocked successfully' });
+        // return res.redirect('/admin/users');
     } catch (error) {
         console.error('unblock customer error',error)
-        return res.redirect('/pageError');
+        res.json({ success: false, message: 'Failed to unblock customer' });
+        // return res.redirect('/pageError');
     }
 }

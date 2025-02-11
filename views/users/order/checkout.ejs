@@ -971,7 +971,7 @@
                 } else if (selectedPayment.value === 'Wallet') {
                     try {
                         console.log("Placing wallet order");
-                        const response = await axios.get('/user/wallet/balance');
+                        const response = await axios.post('/user/order/creation',orderData);
                         console.log("response", response)
                         if (response.data.success) {
                             await Swal.fire({
@@ -986,7 +986,7 @@
                             showToast(response.data.message || 'Failed to place order', true);
                         }
                     } catch (error) {
-                        console.error('Error in order placement:', error);
+                        console.error('Error in wallet order placement:', error);
                         showToast(error.response?.data?.message || 'Failed to place order. Please try again.', true);
                     }
                 }

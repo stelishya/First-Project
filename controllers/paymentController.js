@@ -70,7 +70,6 @@ exports.verifyPayment = async (req, res) => {
         console.log("Signature verified successfully");
 
         try {
-            // Get user details
             const user = await User.findById(req.session.user._id);
             console.log("Found user:", user._id);
             if (!user) {
@@ -261,13 +260,15 @@ exports.verifyPayment = async (req, res) => {
 
 exports.retryPayment = async (req, res) => {
     try {
+        console.log('retryPayment called')
+        const user = await User.findById(req.session.user._id);
         const { orderId } = req.body;
         const orderDetails = await Orders.findById(orderId)
             .populate({
                 path: 'orderedItems.product',
                 select: 'productName stock priceAtPurchase'
             });
-
+        console.log("orderDetails in retryPayment",orderDetails)
             if (!orderDetails) {
                 return res.status(404).json({
                     success: false,
@@ -290,6 +291,17 @@ exports.retryPayment = async (req, res) => {
                 });
             }
 
+            const prices = calculateOrderItemPrices({
+                product: item.product,
+                quantity: item.quantity
+            });
+            orderedItems = [{
+                product: item.product._id,
+                quantity: item.quantity,
+                priceAtPurchase: prices.pricePerUnit,
+                total: prices.totalPrice,
+                totalDiscount: prices.totalDiscount
+            }];
             await Products.findByIdAndUpdate(item.product._id, {
                 $inc: { stock: -parseInt(item.quantity) }
             });
@@ -306,14 +318,30 @@ exports.retryPayment = async (req, res) => {
                     });
                 }
             }
-
+            console.log("insufficientStockItems",insufficientStockItems)
             if (insufficientStockItems.length > 0) {
-                return res.status(400).json({
+                return res.status(200).json({
                     success: false,
                     message: 'Some items have insufficient stock',
                     insufficientStockItems
                 });
             }
+            const cart = await Carts.findOne({ userId: user._id }).populate('items.productId');
+                if (!cart || !cart.items || cart.items.length === 0) {
+                    throw new Error('Cart is empty');
+                }
+                //check available stock 
+                for (const item of cart.items) {
+                    const product = await Products.findById(item.productId._id);
+                    if (!product || product.stock < item.quantity) {
+                        throw new Error(`Not enough stock available for product ${product ? product.productName : item.productId._id}`);
+                    }
+                }
+            orderedItems = cart.items.map(item => ({
+                product: item.productId._id,
+                quantity: item.quantity,
+                priceAtPurchase: item.productId.price
+            }));
 
             for (const item of orderDetails.orderedItems) {
                 if (item.product) {
@@ -323,6 +351,10 @@ exports.retryPayment = async (req, res) => {
                     console.log(`Reduced stock for cart product ${item.product._id} for retry payment, decreased by ${item.quantity}`);
                 }
             }
+            await Carts.findOneAndUpdate(
+                { userId: user._id },
+                { $set: { items: [] } }
+            );
         }
         // const insufficientStockItems = [];
         // for (const item of orderDetails.orderedItems) {
@@ -342,15 +374,16 @@ exports.retryPayment = async (req, res) => {
         //     });
         // }
 
-        const amount = orderDetails.finalAmount;
+        const amount = Math.round(orderDetails.finalAmount*100);
         const options = {
-            amount: amount * 100,
+            amount: amount,
             currency: "INR",
             receipt: orderId  
             // `order_${Date.now()}`
         };
 
         const order = await razorpay.orders.create(options);
+        console.log("order",order)
         res.json({
             success: true,
             id: order.id,
@@ -369,17 +402,92 @@ exports.retryPayment = async (req, res) => {
     }
 };
 
+async function restoreProductStock(orderData) {
+    try {
+        console.log('restoreProductStock() called')
+        if (orderData.buyNow) {
+            const product = await Products.findById(orderData.singleProductId);
+            await Products.findByIdAndUpdate(product._id, {
+                $inc: { stock: parseInt(orderData.quantity) }
+            });
+            console.log(`Restored stock for product ${product._id} after failed retryPayment, increased by ${orderData.quantity}`);
+        } else {
+            // Handle cart scenario
+            const order = await Orders.findOne({ 
+                userId: orderData.userId,
+                status: "Pending",
+                paymentStatus: "Failed" 
+            }).sort({ createdAt: -1 }).populate('orderedItems.product');
+
+            if (!order) {
+                console.log("No pending order found for user:", orderData.userId);
+                return res.status(404).json({ success: false, message: "No pending order found" });
+            }
+             // Restore stock for each ordered item
+             for (const item of order.orderedItems) {
+                await Products.findByIdAndUpdate(item.product._id, {
+                    $inc: { stock: parseInt(item.quantity) }
+                });
+                console.log(`Restored stock for product ${item.product._id} after failed retryPayment, increased by ${item.quantity}`);
+            }
+
+            // Create cart items array from order items
+            const cartItems = order.orderedItems.map(item => ({
+                productId: item.product._id,
+                quantity: item.quantity,
+                priceAtPurchase: item.product.price
+            }));
+
+            // Update cart with the original items
+            await Carts.findOneAndUpdate(
+                { userId: orderData.userId },
+                { $set: { items: cartItems } }
+            );
+            console.log("Cart restored with original items after failed order");
+        }
+  
+        // const order = await Orders.findById(orderId).populate('orderedItems.product');
+        // if (!order) return;
+
+        // Restore stock for each ordered item
+        // for (const item of orderData.orderedItems) {
+        //     if (item.product) {
+        //         await Products.findByIdAndUpdate(
+        //             item.product._id,
+        //             { $inc: { stock: item.quantity } }
+        //         );
+        //     }
+        // }
+    } catch (error) {
+        console.error('Error restoring stock:', error);
+    }
+}
+
 exports.verifyRetryPayment = async (req, res) => {
     try {
+        console.log("verifyRetryPayment called")
         const {
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature,
             orderId,
+            paymentStatus
         } = req.body;
 
-        const orderData = await Orders.findById(orderId)
-        console.log("order body:", orderData);
+        const orderData = await Orders.findById(orderId);
+        console.log("Order data:", orderData);
+
+        if (paymentStatus === "Failed") {
+            console.log('payment status failed')
+            await restoreProductStock(orderData);
+            return res.status(400).json({
+                success: false,
+                message: "Payment verification failed"
+            });
+        }
+
+        // const orderData = await Orders.findById(orderId)
+        // console.log("order body:", orderData);
         // console.log("Session user:", req.session.user);
 
         //verify signature
@@ -390,18 +498,36 @@ exports.verifyRetryPayment = async (req, res) => {
             .digest("hex");
 
         if (razorpay_signature !== expectedSign) {
+            await restoreProductStock(orderData);
             console.log("Signature verification failed");
             return res.status(400).json({ success: false, message: "Invalid signature" });
         }
 
         console.log("Signature verified successfully");
 
-        orderData.paymentStatus = "Paid"
-        orderData.status = "Order Placed"
-        await orderData.save()
-        return res.status(200).json({ success: true })
+        await Orders.findByIdAndUpdate(
+            orderId,
+            {
+                $set: {
+                    status: 'Order Placed',
+                    paymentStatus: 'Paid',
+                    razorpay_order_id,
+                    razorpay_payment_id,
+                    razorpay_signature
+                }
+            }
+        );
+        // orderData.paymentStatus = "Paid"
+        // orderData.status = "Order Placed"
+        // await orderData.save()
+        return res.status(200).json({ success: true, message: "Payment verified successfully" })
     } catch (error) {
         console.error('Payment verification error:', error);
+        if (req.body.orderId) {
+            const orderData = await Orders.findById(req.body.orderId);
+            await restoreProductStock(orderData); // Restore stock if there's an error
+        }
+
         res.status(500).json({
             success: false,
             message: error.message || 'Payment verification failed',

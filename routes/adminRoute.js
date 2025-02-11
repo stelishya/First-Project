@@ -33,8 +33,8 @@ admin_route.get('/logout', adminController.logout);
 
 //Customer Management
 admin_route.get('/users', customerController.customerInfo);
-admin_route.get('/blockCustomer', customerController.blockCustomer)
-admin_route.get('/unblockCustomer', customerController.unblockCustomer)
+admin_route.patch('/blockCustomer', customerController.blockCustomer)
+admin_route.patch('/unblockCustomer', customerController.unblockCustomer)
 
 //Category Management
 admin_route.get('/category', categoryController.categoryInfo)

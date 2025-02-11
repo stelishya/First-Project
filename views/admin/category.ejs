@@ -1,52 +1,59 @@
 <%- include ('../partials/admin/sidebar')%>
 
-<link rel="stylesheet" href="/Admin/css/category.css">
+    <link rel="stylesheet" href="/Admin/css/category.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-<div class="min-h-screen bg-[#f5f5f5] ml-64 p-8" style="background-color: #d1cfcf;">
-    <div class="flex justify-between items-center mb-8  ">
-        <h2 class="text-3xl font-bold text-gray-800">Categories</h2>
-        <form action="/admin/category" method="get" class="flex-1 max-w-md">
-            <div class="search-container">
-                <input type="text" placeholder="Search Categories">
-                <button>
-                    <i class="fas fa-search"></i>
-                </button>
+    <div class="min-h-screen bg-[#f5f5f5] ml-64 p-8" style="background-color: #d1cfcf;">
+        <div class="flex justify-between items-center mb-8  ">
+            <h2 class="text-3xl font-bold text-gray-800">Categories</h2>
+            <form action="/admin/category" method="get" class="flex-1 max-w-md">
+                <div class="search-container">
+                    <input type="text" placeholder="Search Categories" name="search" value="<%= search %>">
+                    <button>
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+            </form>
+            <div class="user-info">
+                <div class="name">Selin Steilshya Oliver<br>
+                    <div class="role">Admin</div>
+                </div>
+                <img alt="User Avatar" height="40"
+                    src="https://storage.googleapis.com/a1aa/image/6Frmd66qfz37V6OkvJHOKto7rafaEUORfStf9uiesPYqTb5eE.jpg"
+                    width="40">
             </div>
-            
-        </form>
-        <div class="user-info">
-            <div class="name">Selin Steilshya Oliver<br>
-                <div class="role">Admin</div>
-            </div>
-            <img alt="User Avatar" height="40"
-                src="https://storage.googleapis.com/a1aa/image/6Frmd66qfz37V6OkvJHOKto7rafaEUORfStf9uiesPYqTb5eE.jpg"
-                width="40">
         </div>
-    </div>
 
-    <div class="grid grid-cols-12 gap-8">
-        <!-- <div class="mb-4" style="width: 200px;">
+        <div class="grid grid-cols-12 gap-8">
+            <!-- <div class="mb-4" style="width: 200px;">
             <a href="/admin/categories/add" class="px-6 py-2.5 bg-[#5a5a5a] text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2 font-medium">
                 <span class="text-lg">+</span> Add Category
             </a>
         </div> -->
-        <!-- Add Category Form -->
-        <div class="col-span-4">
-            <div class="bg-white p-6 rounded-lg shadow-sm">
-                <h2 class="text-xl font-semibold mb-6">Add New Category</h2>
-                <form id="addCategoryForm" method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
-                    <div class="mb-4">
-                        <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                        <input type="text" name="name" placeholder="Enter category name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" id="product_name" required />
-                        <div id="name-error" class="text-red-500 text-sm mt-1"></div>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea placeholder="Enter category description" name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" id="descriptionId" rows="4" required></textarea>
-                        <div id="description-error" class="text-red-500 text-sm mt-1"></div>
-                    </div>
+            <!-- Add Category Form -->
+            <div class="col-span-4">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-xl font-semibold mb-6">Add New Category</h2>
+                    <form id="addCategoryForm" method="post" action="/admin/addCategory"
+                        onsubmit="return handleFormSubmit(event)">
+                        <div class="mb-4">
+                            <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                            <input type="text" name="name" placeholder="Enter category name"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                id="product_name" required />
+                            <div id="name-error" class="text-red-500 text-sm mt-1"></div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea placeholder="Enter category description" name="description"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                id="descriptionId" rows="4" required></textarea>
+                            <div id="description-error" class="text-red-500 text-sm mt-1"></div>
+                        </div>
 
-                    <!-- <div class="mb-4">
+                        <!-- <div class="mb-4">
                         <label for="discountType" class="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
                         <select id="discountType" name="discountType" onchange="handleDiscountTypeChange()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400">
                             % discountTypes.forEach((type, index) => { %>
@@ -55,16 +62,19 @@
                         </select>
                     </div> -->
 
-                    <div id="percentageFields" class="mb-4">
-                        <label for="percentage" class="block text-sm font-medium text-gray-700 mb-1">Offer Percentage</label>
-                        <div class="flex items-center">
-                            <input type="number" id="percentage" name="offer" oninput="validatePercentage()" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-400" placeholder="Enter percentage">
-                            <span class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-r-md">%</span>
+                        <div id="percentageFields" class="mb-4">
+                            <label for="percentage" class="block text-sm font-medium text-gray-700 mb-1">Offer
+                                Percentage</label>
+                            <div class="flex items-center">
+                                <input type="number" id="percentage" name="offer" oninput="validatePercentage()"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                    placeholder="Enter percentage">
+                                <span class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-r-md">%</span>
+                            </div>
+                            <p id="percentageError" class="text-red-500 text-sm mt-1 hidden"></p>
                         </div>
-                        <p id="percentageError" class="text-red-500 text-sm mt-1 hidden"></p>
-                    </div>
 
-                    <!-- <div id="fixedFields" class="mb-4 hidden">
+                        <!-- <div id="fixedFields" class="mb-4 hidden">
                         <label for="fixedAmount" class="block text-sm font-medium text-gray-700 mb-1">Fixed Discount Amount</label>
                         <div class="flex items-center">
                             <span class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-l-md">₹</span>
@@ -73,221 +83,411 @@
                         <p id="fixedAmountError" class="text-red-500 text-sm mt-1 hidden"></p>
                     </div> -->
 
-                    <button class="w-full bg-[#5a5a5a] text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors" type="submit">
-                        Create Category
-                    </button>
-                </form>
+                        <button
+                            class="w-full bg-[#5a5a5a] text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
+                            type="submit">
+                            Create Category
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-        <!-- Categories Table -->
-        <div class="col-span-8">
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SI No.</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Offer</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead> 
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <% cat.reverse().forEach((category,index)=>{%>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <%= ((currentPage - 1) * limit) + index + 1 %>
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= category.name.substring(0, 15) %></td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500"><%= category.description.substring(0, 15) %></td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <% if(category.categoryOffer){ %>
-                                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"> 
-                                  <%= category.categoryOffer %> %
-                                  </span> 
-                                  <!-- % } else if(category.fixedAmount) { %>
+            <!-- Categories Table -->
+            <div class="col-span-8">
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    SI No.</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Description</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Offer</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <% cat.reverse().forEach((category,index)=>{%>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <%= ((currentPage - 1) * limit) + index + 1 %>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <%= category.name.substring(0, 15) %>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <%= category.description.substring(0, 15) %>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <% if(category.categoryOffer){ %>
+                                            <span
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                                <%= category.categoryOffer %> %
+                                            </span>
+                                            <!-- % } else if(category.fixedAmount) { %>
                                     <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
                                       ₹%= category.fixedAmount %>
                                     </span> -->
-                                <% } else{ %>
-                                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                                    No Offer
-                                  </span>
-                                  <% } %>
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <% if(category.isListed){ %>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                                  Listed
-                                </span>
-                                <% } else{%>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                                  UnListed
-                                </span>
-                                <% } %>
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div class="flex space-x-2">
-                                    <% if(category.isListed){%>
-                                    <a href="/admin/listCategory?id=<%=category._id%>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Unlist</a>
-                                    <% } else{%>
-                                    <a href="/admin/unlistCategory?id=<%=category._id%>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">List</a>
-                                    <% } %>
-                                    <a href="/admin/editCategory?id=<%= category._id %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Edit</a>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4 flex justify-between items-center">
-                <div class="px-8 py-4 border-b border-gray-200">
-                    <p class="text-sm text-gray-600">
-                        Showing <%= ((currentPage - 1) * limit) + 1 %>-<%= Math.min(currentPage * limit, totalCategories) %> of <%= totalCategories %> categories
-                    </p>
+                                            <% } else{ %>
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                                    No Offer
+                                                </span>
+                                                <% } %>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 status-cell">
+                                        <% if(category.isListed){ %>
+                                            <span
+                                                class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                                Listed
+                                            </span>
+                                            <% } else{%>
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                                                    UnListed
+                                                </span>
+                                                <% } %>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <% if(category.isListed){%>
+                                                <a href="/admin/listCategory?id=<%=category._id%>"
+                                                    onclick="handleListUnlist(this, 'unlist')"
+                                                    class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Unlist</a>
+                                                <% } else{%>
+                                                    <a href="/admin/unlistCategory?id=<%=category._id%>"
+                                                        onclick="handleListUnlist(this, 'list')"
+                                                        class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">List</a>
+                                                    <% } %>
+                                                        <a href="/admin/editCategory?id=<%= category._id %>"
+                                                            class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="flex space-x-2">
-                    <% if(currentPage > 1) {%>
-                    <a href="?page=<%= currentPage - 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo; Previous</a>
-                    <% } %>
-                    <% for(let i=1; i <= totalPages; i++) {%>
-                        <% if(i === currentPage){ %>
-                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded"><%= i %></span>
-                        <% } else { %>
-                        <a href="?page=<%= i %>" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"><%= i %></a>
-                        <% } %>
-                    <% } %>
-                    <% if (currentPage < totalPages){%>
-                    <a href="?page=<%= currentPage + 1 %>" class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next &raquo;</a>
-                    <% } %>
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="px-8 py-4 border-b border-gray-200">
+                        <p class="text-sm text-gray-600">
+                            Showing <%= ((currentPage - 1) * limit) + 1 %>-<%= Math.min(currentPage * limit,
+                                    totalCategories) %> of <%= totalCategories %> categories
+                        </p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <% if(currentPage> 1) {%>
+                            <a href="?page=<%= currentPage - 1 %>"
+                                class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">&laquo;
+                                Previous</a>
+                            <% } %>
+                                <% for(let i=1; i <=totalPages; i++) {%>
+                                    <% if(i===currentPage){ %>
+                                        <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded">
+                                            <%= i %>
+                                        </span>
+                                        <% } else { %>
+                                            <a href="?page=<%= i %>"
+                                                class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                                <%= i %>
+                                            </a>
+                                            <% } %>
+                                                <% } %>
+                                                    <% if (currentPage < totalPages){%>
+                                                        <a href="?page=<%= currentPage + 1 %>"
+                                                            class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">Next
+                                                            &raquo;</a>
+                                                        <% } %>
+                    </div>
                 </div>
             </div>
+
         </div>
-
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('addCategoryForm');
-    const formData = new FormData(form);
-    const urlEncodedData = new URLSearchParams(formData).toString();
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
+    <script>
+        // document.addEventListener('DOMContentLoaded', function() {
+        // });  
 
-    // Basic validation
-    const name = formData.get('name');
-    const description = formData.get('description');
+        function handleFormSubmit(event) {
+            event.preventDefault();
 
-    if (!name || !description) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Validation Error',
-            text: 'Please fill in all required fields',
-            confirmButtonColor: '#1976D2'
-        });
-        return false;
-    }
+            const form = document.getElementById('addCategoryForm');
+            const formData = new FormData(form);
+            const urlEncodedData = new URLSearchParams(formData).toString();
+            console.log("urlEncodedData : ", urlEncodedData)
+            // Basic validation
+            const name = formData.get('name');
+            const description = formData.get('description');
+            const data = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                offer: formData.get('offer')
+            };
+            console.log("data : ", data)
+            if (!data.name || !data.description) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: 'Please fill in all required fields',
+                    confirmButtonColor: '#1976D2'
+                });
+                return false;
+            }
 
-    fetch('/admin/addCategory', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: urlEncodedData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Response:', data); // Debug log
-        
-        if (!data.success) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'Failed to add category',
-                confirmButtonColor: '#1976D2'
-            });
-        } else {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Category added successfully',
-                confirmButtonColor: '#1976D2'
-            }).then(() => {
-                window.location.reload();
-            });
+            // fetch('/admin/addCategory', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/x-www-form-urlencoded',
+            //     },
+            //     body: urlEncodedData
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     console.log('Response:', data); 
+
+            //     if (!data.success) {
+            //         Swal.fire({
+            //             icon: 'error',
+            //             title: 'Error',
+            //             text: data.message || 'Failed to add category',
+            //             confirmButtonColor: '#1976D2'
+            //         });
+            //     } else {
+            //         Swal.fire({
+            //             icon: 'success',
+            //             title: 'Success!',
+            //             text: 'Category added successfully',
+            //             confirmButtonColor: '#1976D2'
+            //         }).then(() => {
+            //             window.location.reload();
+            //         });
+            //     }
+            // })
+            // .catch(error => {
+            //     console.error('Error:', error);
+            //     Swal.fire({
+            //         icon: 'error',
+            //         title: 'Error',
+            //         text: 'An unexpected error occurred',
+            //         confirmButtonColor: '#1976D2'
+            //     });
+            // });
+
+            // $.ajax({
+            // url: '/admin/addCategory',
+            // method: 'POST',
+            // data: urlEncodedData,
+            // contentType: 'application/x-www-form-urlencoded',
+            // dataType: 'json',
+            // success: function(response) {
+            //     console.log('Response:', response);
+
+            //     if (!response.data.success) {
+            //         Swal.fire({
+            //             icon: 'error',
+            //             title: 'Category Already Exists',
+            //             text:response.data.message || 'Failed to add category',
+            //             confirmButtonColor: '#1976D2'
+            //         });
+            //         return;
+            //     }
+
+            //     Swal.fire({
+            //         icon: 'success',
+            //         title: 'Success',
+            //         text: 'Category added successfully',
+            //         confirmButtonColor: '#1976D2'
+            //     }).then(() => {
+            //         location.reload();
+            //     });
+            // },
+            // error: function(xhr, status, error) {
+            //     console.error('Error:', error);
+            //     let errorMessage;
+            //         try {
+            //             const response = JSON.parse(xhr.responseText);
+            //             errorMessage = response.message;
+            //         } catch (e) {
+            //             errorMessage = 'Failed to add category. Please try again.';
+            //         }
+            //         Swal.fire({
+            //             icon: 'error',
+            //             title: 'Error',
+            //             text:  errorMessage,
+            //             confirmButtonColor: '#1976D2'
+            //         });
+            //     }
+            // });
+
+            // axios({
+            //     method: 'post',
+            //     url: '/admin/addCategory',
+            //     data: urlEncodedData,
+            //     headers: {
+            //         'Content-Type': 'application/x-www-form-urlencoded'
+            //     }
+            // })
+            axios.post('/admin/addCategory', data)
+                .then(response => {
+                    console.log('Response:', response);
+
+                    if (!response.data.success) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Category Already Exists',
+                            text: response.data.message,
+                            confirmButtonColor: '#1976D2'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Category added successfully',
+                        confirmButtonColor: '#1976D2'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.response?.data?.message || 'Failed to add category. Please try again.',
+                        confirmButtonColor: '#1976D2'
+                    });
+                });
+            return false;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An unexpected error occurred',
-            confirmButtonColor: '#1976D2'
-        });
-    });
 
-    return false;
-}
+        function handleListUnlist(element, action) {
+            event.preventDefault();
 
-function handleDiscountTypeChange() {
-    const discountType = document.getElementById('discountType').value;
-    const percentageFields = document.getElementById('percentageFields');
-    const fixedFields = document.getElementById('fixedFields');
-    
-    if (discountType === 'Percentage Discount') {
-        percentageFields.classList.remove('hidden');
-        fixedFields.classList.add('hidden');
-        document.getElementById('fixedAmount').value = '';
-    } else {
-        percentageFields.classList.add('hidden');
-        fixedFields.classList.remove('hidden');
-        document.getElementById('percentage').value = '';
-    }
-}
+            const categoryId = element.href.split('id=')[1];
+            console.log("categoryId : ", categoryId)
+            const url = action === 'list'
+                ? `/admin/unlistCategory?id=${categoryId}`
+                : `/admin/listCategory?id=${categoryId}`;
+            console.log("url : ", url)
+            axios.get(url)
+                .then(response => {
+                    if (response.data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.data.message
+                        });
 
-function validatePercentage() {
-    const percentage = document.getElementById('percentage').value;
-    const error = document.getElementById('percentageError');
-    
-    if (percentage < 0 || percentage > 100) {
-        error.textContent = 'Percentage must be between 0 and 100';
-        error.classList.remove('hidden');
-        return false;
-    }
-    error.classList.add('hidden');
-    return true;
-}
+                        const row = element.closest('tr');
+                        console.log("row : ", row)
 
-function validateFixedAmount() {
-    const amount = document.getElementById('fixedAmount').value;
-    const error = document.getElementById('fixedAmountError');
-    
-    if (amount < 0) {
-        error.textContent = 'Amount cannot be negative';
-        error.classList.remove('hidden');
-        return false;
-    }
-    error.classList.add('hidden');
-    return true;
-}
+                        // Update link
+                        if (action === 'list') {
+                            element.href = `/admin/listCategory?id=${categoryId}`;
+                            console.log("element.href : ", element.href)
+                            element.textContent = 'Unlist';
+                        } else {
+                            element.href = `/admin/unlistCategory?id=${categoryId}`;
+                            console.log("element.href : ", element.href)
+                            element.textContent = 'List';
+                        }
 
-// Modify your existing handleFormSubmit function
-const originalHandleFormSubmit = window.handleFormSubmit || function() { return true; };
-window.handleFormSubmit = function(event) {
-    if (!originalHandleFormSubmit()) return false;
-    
-    const discountType = document.getElementById('discountType').value;
-    if (discountType === 'Percentage Discount') {
-        return validatePercentage();
-    } else {
-        return validateFixedAmount();
-    }
-};
-</script>
+                        // Update status cell
+                        const statusCell = row.querySelector('.status-cell');
+                        console.log("statusCell : ", statusCell)
+                        if (statusCell) {
+                            if (action === 'list') {
+                                statusCell.innerHTML = '<span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Listed</span>';
+                            } else {
+                                statusCell.innerHTML = '<span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Unlisted</span>';
+                            }
+                        }
+                        element.onclick = (e) => {
+                            e.preventDefault();
+                            handleListUnlist(element, action === 'list' ? 'unlist' : 'list');
+                        };
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.response?.data?.message || 'An error occurred'
+                    });
+                });
+        }
 
-<script src="/Admin/jsFiles/category.js"></script>
+        function handleDiscountTypeChange() {
+            const discountType = document.getElementById('discountType').value;
+            const percentageFields = document.getElementById('percentageFields');
+            const fixedFields = document.getElementById('fixedFields');
+
+            if (discountType === 'Percentage Discount') {
+                percentageFields.classList.remove('hidden');
+                fixedFields.classList.add('hidden');
+                document.getElementById('fixedAmount').value = '';
+            } else {
+                percentageFields.classList.add('hidden');
+                fixedFields.classList.remove('hidden');
+                document.getElementById('percentage').value = '';
+            }
+        }
+
+        function validatePercentage() {
+            const percentage = document.getElementById('percentage').value;
+            const error = document.getElementById('percentageError');
+
+            if (percentage < 0 || percentage > 100) {
+                error.textContent = 'Percentage must be between 0 and 100';
+                error.classList.remove('hidden');
+                return false;
+            }
+            error.classList.add('hidden');
+            return true;
+        }
+
+        function validateFixedAmount() {
+            const amount = document.getElementById('fixedAmount').value;
+            const error = document.getElementById('fixedAmountError');
+
+            if (amount < 0) {
+                error.textContent = 'Amount cannot be negative';
+                error.classList.remove('hidden');
+                return false;
+            }
+            error.classList.add('hidden');
+            return true;
+        }
+
+        // Modify your existing handleFormSubmit function
+        const originalHandleFormSubmit = window.handleFormSubmit || function () { return true; };
+        window.handleFormSubmit = function (event) {
+            if (!originalHandleFormSubmit()) return false;
+
+            const discountType = document.getElementById('discountType').value;
+            if (discountType === 'Percentage Discount') {
+                return validatePercentage();
+            } else {
+                return validateFixedAmount();
+            }
+        };
+
+    </script>
+
+    <script src="/Admin/jsFiles/category.js"></script>
