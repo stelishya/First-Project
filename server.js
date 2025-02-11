@@ -35,7 +35,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(nocache())
 app.use((req,res,next)=>{
-    res.set('cache-control','no-store');
+    res.set('cache-control','no-store'); 
     next();
 })
 

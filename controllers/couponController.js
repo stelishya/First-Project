@@ -1,5 +1,5 @@
 const Coupon = require('../models/couponSchema');
-
+const Orders = require('../models/orderSchema')
 exports.createCoupon = async (req, res) => {
     try {
         const {
@@ -211,6 +211,10 @@ exports.applyCoupon = async (req, res) => {
             expiryDate: { $gte: new Date() }
         });
         console.log("coupon: ",coupon)
+        const coup= await Orders.findOne({userId},{couponCode:code});
+        if(coup){
+            return res.status(200).json({success:false,message:'Coupon already used'})
+        }
         if (!coupon) {
             return res.status(404).json({ success: false, message: 'Invalid or expired coupon' });
         }

@@ -1,7 +1,7 @@
 const Products = require('../models/productSchema')
 const Orders = require('../models/orderSchema');
 const Wallets = require('../models/walletSchema');
-
+const Users = require('../models/userSchema')
 
 exports.getReturns = async (req, res) => {
     try {
@@ -145,6 +145,11 @@ exports.approveReturn = async (req, res) => {
                     balance: newBalance
                 });
                 await wallet.save();
+                await Users.findOneAndUpdate(
+                    {_id:userId},
+                    {$inc:{wallet:newBalance}}
+                    
+                )
                 console.log("Refund processed successfully. New balance:", newBalance);
             // if (!wallet) {
             //     console.error('Wallet not found for user:', order.userId);
@@ -154,7 +159,7 @@ exports.approveReturn = async (req, res) => {
         console.log('Wallet :', wallet);
         console.log('Stock updated for product:', returnedItem.product._id);
         console.log(`Return request approved successfully. Refund of ₹ ${refundAmount.toFixed(2)} has been processed.`)
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: `Return request approved successfully. Refund of ₹ ${refundAmount.toFixed(2)} has been processed.`
             // message: `Return request approved successfully. ${order.paymentMethod !== 'COD' ? 'Refund of ₹' + refundAmount.toFixed(2) + ' has been processed.' : ''}`
         });
@@ -178,7 +183,7 @@ exports.rejectReturn = async (req, res) => {
         order.returnDetails.returnStatus = 'Rejected';
         await order.save();
 
-        res.status(200).json({ message: "Return request has been rejected" });
+        return res.status(200).json({ message: "Return request has been rejected" });
     } catch (error) {
         console.error('Error rejecting return:', error);
         res.status(500).json({ message: "Failed to reject return request" });

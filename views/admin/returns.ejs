@@ -11,7 +11,7 @@
 
         <!-- Table Section -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <% if (returns && returns.length > 0) { %>
+            <% if (returns && returns.length> 0) { %>
                 <table class="min-w-full">
                     <thead class="bg-gray-50">
                         <tr>
@@ -22,17 +22,19 @@
                             <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Price</th>
                             <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Quantity</th>
                             <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Total</th>
-                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Total - CouponDiscount</th>
-                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Return Reason</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Total -
+                                CouponDiscount</th>
+                            <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Return Reason
+                            </th>
                             <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</th>
                             <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <% returns.forEach((return_request,index) => { 
+                        <% returns.forEach((return_request,index)=> {
                             const item = return_request.orderedItems[0];
                             const product = item.product;
-                        %>
+                            %>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <%= ((currentPage - 1) * limit) + index + 1 %>
@@ -43,39 +45,48 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="text-sm font-medium text-gray-900" data-product-name="<%= item.product ? item.product.productName : 'Product Not Found' %>">
+                                    <div class="text-sm font-medium text-gray-900"
+                                        data-product-name="<%= item.product ? item.product.productName : 'Product Not Found' %>">
                                         <%= item.product ? item.product.productName : 'Product Not Found' %>
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <% if (product.productImage) { %>
-                                        <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="h-16 w-16 object-cover rounded-md">
-                                    <% } else { %>
-                                        <div class="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
-                                            <span class="text-gray-500 text-xs">No image</span>
-                                        </div>
-                                    <% } %>
+                                        <img src="/uploads/product-images/<%= product.productImage[0] %>"
+                                            alt="<%= product.productName %>" class="h-16 w-16 object-cover rounded-md">
+                                        <% } else { %>
+                                            <div
+                                                class="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
+                                                <span class="text-gray-500 text-xs">No image</span>
+                                            </div>
+                                            <% } %>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="text-sm text-gray-900">₹<%= item.priceAtPurchase %></div>
+                                    <div class="text-sm text-gray-900">₹<%= item.priceAtPurchase %>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="text-sm text-gray-900"><%= item.quantity %></div>
+                                    <div class="text-sm text-gray-900">
+                                        <%= item.quantity %>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="text-sm text-gray-900">₹<%= (item.priceAtPurchase * item.quantity).toFixed(2) %></div>
+                                    <div class="text-sm text-gray-900">₹<%= (item.priceAtPurchase *
+                                            item.quantity).toFixed(2) %>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <%
-                                    const itemTotal = item.priceAtPurchase * item.quantity;
-                                        const totalOrderValue = return_request.orderedItems.reduce((total, orderItem) => {
-                                            return total + (orderItem.priceAtPurchase * orderItem.quantity);
+                                    <% const itemTotal=item.priceAtPurchase * item.quantity; const
+                                        totalOrderValue=return_request.orderedItems.reduce((total, orderItem)=> {
+                                        return total + (orderItem.priceAtPurchase * orderItem.quantity);
                                         }, 0);
                                         const itemProportion = itemTotal / totalOrderValue;
-                                        const itemCouponDiscount = (return_request.couponDiscount || 0) * itemProportion;
+                                        const itemCouponDiscount = (return_request.couponDiscount || 0) *
+                                        itemProportion;
                                         const finalAmount = itemTotal - itemCouponDiscount;
-                                    %>
-                                    <div class="text-sm text-gray-900">₹<%= finalAmount.toFixed(2) %></div>
+                                        %>
+                                        <div class="text-sm text-gray-900">₹<%= finalAmount.toFixed(2) %>
+                                        </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="text-sm text-gray-900">
@@ -92,82 +103,89 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <% if (return_request.returnDetails.returnStatus === 'Pending') { %>
+                                    <% if (return_request.returnDetails.returnStatus==='Pending' ) { %>
                                         <div class="flex space-x-2">
-                                            <form action="/admin/approveReturn/<%= return_request._id %>" method="POST" class="inline" onsubmit="return confirmAction('approve', '<%= product.productName %>')">
-                                                <button type="submit" 
+                                            <form action="/admin/approveReturn/<%= return_request._id %>" method="POST"
+                                                class="inline"
+                                                onsubmit="return confirmAction('approve', '<%= product.productName %>')">
+                                                <button type="submit"
                                                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm">
                                                     Approve
                                                 </button>
                                             </form>
-                                            <form action="/admin/rejectReturn/<%= return_request._id %>" method="POST" class="inline" onsubmit="return confirmAction('reject', '<%= product.productName %>')">
+                                            <form action="/admin/rejectReturn/<%= return_request._id %>" method="POST"
+                                                class="inline"
+                                                onsubmit="return confirmAction('reject', '<%= product.productName %>')">
                                                 <button type="submit"
                                                     class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
                                                     Reject
                                                 </button>
                                             </form>
                                         </div>
-                                    <% } else { %>
-                                        <div class="flex items-center">
-                                            <% if (return_request.returnDetails.returnStatus === 'Approved') { %>
-                                                <div class="flex flex-col">
-                                                    <span class="text-green-600 flex items-center">
-                                                        <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                        </svg>
-                                                        Return Approved
-                                                    </span>
-                                                </div>
+                                        <% } else { %>
+                                            <div class="flex items-center">
+                                                <% if (return_request.returnDetails.returnStatus==='Approved' ) { %>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-green-600 flex items-center">
+                                                            <svg class="w-5 h-5 mr-1" fill="currentColor"
+                                                                viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                            Return Approved
+                                                        </span>
+                                                    </div>
+                                                    <% } %>
+                                            </div>
                                             <% } %>
-                                        </div>
-                                    <% } %>
                                 </td>
                             </tr>
-                        <% }); %>
+                            <% }); %>
                     </tbody>
                 </table>
-            <% } else { %>
-                <div class="text-center py-8">
-                    <p class="text-gray-500 text-lg">No return requests found</p>
-                </div>
-            <% } %>
+                <% } else { %>
+                    <div class="text-center py-8">
+                        <p class="text-gray-500 text-lg">No return requests found</p>
+                    </div>
+                    <% } %>
         </div>
         <div class="px-8 py-4 border-b border-gray-200">
-                <p class="text-sm text-gray-600">
-                    Showing <%= startIndex %>-<%= endIndex %> of <%= totalReturns %> returns
-                </p>
+            <p class="text-sm text-gray-600">
+                Showing <%= startIndex %>-<%= endIndex %> of <%= totalReturns %> returns
+            </p>
         </div>
-        <% if (totalReturns > 0) { %>
-                <div class="px-8 py-4 flex justify-end items-center border-t border-gray-200">
-                    <div class="flex space-x-2">
-                        <% if (currentPage > 1) { %>
-                            <a href="?page=<%= currentPage - 1 %>" 
-                               class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">
-                                Previous
-                            </a>
+        <% if (totalReturns> 0) { %>
+            <div class="px-8 py-4 flex justify-end items-center border-t border-gray-200">
+                <div class="flex space-x-2">
+                    <% if (currentPage> 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>"
+                            class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">
+                            Previous
+                        </a>
                         <% } %>
 
-                        <% for(let i = 1; i <= totalPages; i++) { %>
-                            <% if(i === currentPage) { %>
-                                <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded">
-                                    <%= i %>
-                                </span>
-                            <% } else { %>
-                                <a href="?page=<%= i %>" 
-                                   class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
-                                    <%= i %>
-                                </a>
-                            <% } %>
-                        <% } %>
+                            <% for(let i=1; i <=totalPages; i++) { %>
+                                <% if(i===currentPage) { %>
+                                    <span class="px-3 py-1 bg-[#5a5a5a] text-white rounded">
+                                        <%= i %>
+                                    </span>
+                                    <% } else { %>
+                                        <a href="?page=<%= i %>"
+                                            class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                            <%= i %>
+                                        </a>
+                                        <% } %>
+                                            <% } %>
 
-                        <% if (currentPage < totalPages) { %>
-                            <a href="?page=<%= currentPage + 1 %>"
-                               class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">
-                                Next
-                            </a>
-                        <% } %>
-                    </div>
+                                                <% if (currentPage < totalPages) { %>
+                                                    <a href="?page=<%= currentPage + 1 %>"
+                                                        class="px-3 py-1 bg-[#5a5a5a] text-white rounded hover:bg-gray-700 transition-colors">
+                                                        Next
+                                                    </a>
+                                                    <% } %>
                 </div>
+            </div>
             <% } %>
     </main>
 </div>
@@ -179,17 +197,17 @@
         <div id="returnDetails" class="mb-6">
             <!-- Details will be populated by JavaScript -->
         </div>
-        
+
         <div class="flex gap-3">
-            <button onclick="handleReturn('approve')" 
+            <button onclick="handleReturn('approve')"
                 class="flex-1 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
                 Approve Return
             </button>
-            <button onclick="handleReturn('reject')" 
+            <button onclick="handleReturn('reject')"
                 class="flex-1 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
                 Reject Return
             </button>
-            <button onclick="closeReturnModal()" 
+            <button onclick="closeReturnModal()"
                 class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
                 Close
             </button>
@@ -207,7 +225,7 @@
         currentOrderId = orderId;
         document.getElementById('returnModal').classList.remove('hidden');
         document.getElementById('returnModal').classList.add('flex');
-        
+
         // Fetch and display order details
         fetchOrderDetails(orderId);
     }
@@ -216,7 +234,7 @@
         try {
             const response = await axios.get(`/admin/returns/${orderId}`);
             const order = response.data;
-            
+
             const detailsHtml = `
                 <div class="space-y-4">
                     <div>
@@ -236,7 +254,7 @@
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('returnDetails').innerHTML = detailsHtml;
         } catch (error) {
             console.error('Error fetching order details:', error);
@@ -258,11 +276,11 @@
     async function handleReturn(action) {
         console.log("handleReturn is working")
         if (!currentOrderId) return;
-        
+
         try {
             const endpoint = action === 'approve' ? '/admin/approveReturn' : '/admin/rejectReturn';
             const response = await axios.post(`${endpoint}/${currentOrderId}`);
-            console.log("response : ",response)
+            console.log("response : ", response)
             if (response.data && response.status === 200) {
                 await Swal.fire({
                     title: action === 'approve' ? 'Return Approved!' : 'Return Rejected!',
@@ -278,12 +296,20 @@
                 //         background: action === 'approve' ? "linear-gradient(to right, #00b09b, #96c93d)" : "#ff6b6b"
                 //     }
                 // }).showToast();
-                
+
                 closeReturnModal();
                 // Refresh the page after a short delay
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
+            } else {
+                // Handle error case
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'There was an issue processing your request.',
+                    icon: 'error',
+                    confirmButtonColor: '#f44336'
+                });
             }
         } catch (error) {
             console.error('Error:', error);
@@ -299,7 +325,7 @@
     }
 
     // Close modal when clicking outside
-    document.getElementById('returnModal').addEventListener('click', function(e) {
+    document.getElementById('returnModal').addEventListener('click', function (e) {
         if (e.target === this) {
             closeReturnModal();
         }
@@ -307,10 +333,10 @@
 
     async function confirmAction(action, productName) {
         const title = action === 'approve' ? 'Approve Return Request' : 'Reject Return Request';
-        const text = action === 'approve' 
+        const text = action === 'approve'
             ? `Are you sure you want to approve the return request for "${productName}"?`
             : `Are you sure you want to reject the return request for "${productName}"?`;
-            
+
         const result = await Swal.fire({
             title: title,
             text: text,
@@ -327,13 +353,13 @@
     }
 
     // Update form submission to use async/await
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', async function(e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
                 const action = this.querySelector('button[type="submit"]').textContent.trim().toLowerCase();
                 const productName = this.closest('tr').querySelector('[data-product-name]').dataset.productName;
-                
+
                 if (await confirmAction(action, productName)) {
                     this.submit();
                 }
