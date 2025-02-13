@@ -6,6 +6,9 @@ const Products = require('../models/productSchema')
 const Wallets = require('../models/walletSchema')
 const Coupons = require('../models/couponSchema')
 const PDFDocument = require('pdfkit');
+const httpStatus = require('../config/statusCode');
+const MESSAGES = require('../config/strings')
+
 const { calculateOrderItemPrices, calculateTotals, calculateCouponDiscount  } = require('../helpers/priceCalculator');
 // const mongoose = require('mongoose');
 
@@ -130,7 +133,7 @@ exports.checkout = async (req, res) => {
 
     } catch (error) {
         console.error('Checkout error:', error);
-        res.status(500).send('Error processing checkout');
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Error processing checkout');
     }
 };
 
@@ -141,17 +144,17 @@ exports.orderCreation = async (req, res) => {
     console.log("orderData:", orderData);
     try {
         if (!orderData.addressId) {
-            return res.status(400).json({ message: "Please select a delivery address" });
+            return res.status(httpStatus.BAD_REQUEST).json({ message: "Please select a delivery address" });
         }
 
         const userAddressDoc = await Addresses.findOne({ userId: userId });
         if (!userAddressDoc) {
-            return res.status(400).json({ success: false, message: "No addresses found for user" });
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: "No addresses found for user" });
         }
 
         const selectedAddress = userAddressDoc.address.find(addr => addr._id.toString() === orderData.addressId);
         if (!selectedAddress) {
-            return res.status(400).json({ success: false, message: "Invalid delivery address" });
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: "Invalid delivery address" });
         }
 
         console.log("Selected address:", selectedAddress);
@@ -162,12 +165,12 @@ exports.orderCreation = async (req, res) => {
         if (orderData.buyNow) {
             console.log("Processing Buy Now order");
             if (!orderData.singleProductId) {
-                return res.status(400).json({ success: false, message: "Product ID is required for buy now order" });
+                return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: "Product ID is required for buy now order" });
             }
 
             const product = await Products.findById(orderData.singleProductId).populate('category');
             if (!product) {
-                return res.status(400).json({ success: false, message: "Product not found" });
+                return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: "Product not found" });
             }
             const prices = calculateOrderItemPrices({
                 product,
@@ -198,7 +201,7 @@ exports.orderCreation = async (req, res) => {
                 });
             console.log("cart :", cart)
             if (!cart || !cart.items || cart.items.length === 0) {
-                return res.status(400).json({ success: false, message: "Cart is empty" });
+                return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: MESSAGES.CART_EMPTY });
             }
             productsWithLatestPrices = cart.items.map(item => {
                 const prices = calculateOrderItemPrices({
@@ -236,7 +239,7 @@ exports.orderCreation = async (req, res) => {
                 });
 
                 if (!coupon) {
-                    return res.status(400).json({ success: false, message: "Invalid or expired coupon" });
+                    return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: "Invalid or expired coupon" });
                 }
                 console.log("coupon: ",coupon);
                 couponData = coupon; 
@@ -250,7 +253,7 @@ exports.orderCreation = async (req, res) => {
                     couponDiscount = calculateCouponDiscount(coupon, subtotal);
                     console.log("couponDiscount : ",couponDiscount)
                     if (couponDiscount === 0) {
-                        return res.status(400).json({
+                        return res.status(httpStatus.BAD_REQUEST).json({
                             success: false,
                             message: `Minimum purchase amount of ₹${coupon.minimumPurchase} required for this coupon`
                         });
@@ -260,14 +263,14 @@ exports.orderCreation = async (req, res) => {
                         $dec: { usageLimit: 1 }
                     });
                 } else {
-                    return res.status(400).json({
+                    return res.status(httpStatus.BAD_REQUEST).json({
                         success: false,
                         message: `Minimum purchase amount of ₹${coupon.minimumPurchase} required for this coupon`
                     });
                 }
             } catch (error) {
                 console.error("Error applying coupon:", error);
-                return res.status(500).json({ success: false, message: "Error applying coupon" });
+                return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error applying coupon" });
             }
         }
 

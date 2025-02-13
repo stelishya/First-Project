@@ -5,6 +5,8 @@ const Products = require('../models/productSchema');
 const User = require('../models/userSchema');
 const Address = require('../models/addressSchema');
 const Carts = require('../models/cartSchema');
+const httpStatus = require('../config/statusCode');
+const MESSAGES = require('../config/strings')
 require('dotenv').config();
 
 const { calculateOrderItemPrices } = require('../helpers/priceCalculator');
@@ -194,7 +196,7 @@ exports.verifyPayment = async (req, res) => {
             console.log("Order saved successfully:", savedOrder);
 
             if (paymentStatus === "Failed") {
-                console.log("Payment verification failed");
+                console.log(MESSAGES.PAYMENT_FAILED);
                 if (orderData.buyNow) {
                     const product = await Products.findById(orderData.singleProductId);
                     await Products.findByIdAndUpdate(product._id, {
@@ -236,7 +238,7 @@ exports.verifyPayment = async (req, res) => {
                     console.log("Cart restored with original items after failed order");
                 }
 
-                return res.status(200).json({ success: false, message: "Payment Verification Failed", order: savedOrder })
+                return res.status(200).json({ success: false, message: MESSAGES.PAYMENT_FAILED, order: savedOrder })
             }
             res.json({
                 success: true,
@@ -252,7 +254,7 @@ exports.verifyPayment = async (req, res) => {
         console.error('Payment verification error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Payment verification failed',
+            message: error.message || MESSAGES.PAYMENT_FAILED,
             error: error.stack
         });
     }
@@ -482,7 +484,7 @@ exports.verifyRetryPayment = async (req, res) => {
             await restoreProductStock(orderData);
             return res.status(400).json({
                 success: false,
-                message: "Payment verification failed"
+                message: MESSAGES.PAYMENT_FAILED
             });
         }
 
@@ -530,7 +532,7 @@ exports.verifyRetryPayment = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: error.message || 'Payment verification failed',
+            message: error.message || MESSAGES.PAYMENT_FAILED,
             error: error.stack
         });
     }

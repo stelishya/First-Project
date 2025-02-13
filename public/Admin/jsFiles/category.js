@@ -76,6 +76,7 @@ console.log("categories.js is working")
         // })
     
      function validateForm(){
+        console.log("validateForm called")
         clearErrorMessages();
         const name= document.getElementsByName('name')[0].value.trim();
         const description = document.getElementById('descriptionId').value.trim();
@@ -92,6 +93,9 @@ console.log("categories.js is working")
         // Validate description field
         if(description === ""){
             displayErrorMessage("description-error","Please enter a description");
+            isValid = false;
+        }else if (!/^[a-zA-Z\s]+$/.test(description)){
+            displayErrorMessage("description-error","Description should contain only alphabetic characters");
             isValid = false;
         }
         return isValid;

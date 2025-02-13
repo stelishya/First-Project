@@ -9,13 +9,13 @@
             <form action="/admin/editCategory/<%= category._id %>" method="POST" onsubmit="return handleFormSubmit()">
                 <div class="mb-4">
                     <label for="categoryName" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
-                    <input type="text" id="categoryName" name="category" value="<%= category.name %>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+                    <input type="text" id="categoryName" name="name" value="<%= category.name %>" oninput="validateForm()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" required>
                     <div id="name-error" class="text-red-500 text-sm mt-1"></div>
                 </div>
 
                 <div class="mb-4">
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea id="description" name="description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" rows="4" required><%= category.description %></textarea>
+                    <textarea id="descriptionId" name="description"  oninput="validateForm()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400" rows="4" required><%= category.description %></textarea>
                     <div id="description-error" class="text-red-500 text-sm mt-1"></div>
                 </div>
         
@@ -87,15 +87,18 @@ function validatePercentage() {
 //     return true;
 // }
 
-function handleFormSubmit() {
-    const discountType = document.getElementById('discountType').value;
-    if (discountType === 'Percentage Discount') {
-        return validatePercentage();
-    } else {
-        return validateFixedAmount();
-    }
-}
+// function handleFormSubmit() {
+//     if(!validateForm()){
+//             return;
+//         }
+//     const discountType = document.getElementById('discountType').value;
+//     if (discountType === 'Percentage Discount') {
+//         return validatePercentage();
+//     } else {
+//         return validateFixedAmount();
+//     }
+// }
 </script>
 
-
+<script src="/Admin/jsFiles/category.js"></script>
 <%-  include ('../partials/admin/footer')%>
