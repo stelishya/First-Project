@@ -143,31 +143,31 @@
         </div>
 
         <!-- Order Timeline -->
-        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <!-- <div class="mt-8 bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold mb-6 text-gray-800">Order Timeline</h2>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                 <div class="space-y-6 relative">
-                    <% const timeline = [
+                    % const timeline = [
                         { status: 'Pending', date: order.orderDate },
                         { status: 'Processing', date: order.processingDate },
                         { status: 'Shipped', date: order.shippedDate },
                         { status: 'Delivered', date: order.deliveredDate }
                     ].filter(item => item.date); %>
 
-                    <% timeline.forEach((item, index) => { %>
+                    % timeline.forEach((item, index) => { %>
                         <div class="flex items-center">
                             <div class="absolute left-4 -ml-2">
-                                <div class="h-4 w-4 rounded-full <%= index === timeline.length - 1 ? 'bg-green-500' : 'bg-blue-500' %>"></div>
+                                <div class="h-4 w-4 rounded-full %= index === timeline.length - 1 ? 'bg-green-500' : 'bg-blue-500' %>"></div>
                             </div>
                             <div class="ml-12">
-                                <div class="text-sm font-medium text-gray-900"><%= item.status %></div>
-                                <div class="text-sm text-gray-500"><%= formatDate(item.date) %></div>
+                                <div class="text-sm font-medium text-gray-900">%= item.status %></div>
+                                <div class="text-sm text-gray-500">%= formatDate(item.date) %></div>
                             </div>
                         </div>
-                    <% }); %>
+                    % }); %>
                 </div>
             </div>
-        </div>
+        </div> -->
     </main>
 </div>

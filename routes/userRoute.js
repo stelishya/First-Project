@@ -95,7 +95,7 @@ user_route.get('/orders',userAuth,orderController.showOrdersUser)
 user_route.get('/order/details/:orderId',userAuth,orderController.orderDetailsUser)
 user_route.get('/order/invoice/:orderId',userAuth,orderController.downloadInvoice)
 user_route.patch('/order/cancel/:orderId',userAuth,orderController.cancelOrder)
-user_route.post('/order/return/:orderId',userAuth,orderController.returnOrder)
+user_route.post('/order/return/:orderId/:productId',userAuth,orderController.returnOrder)
 
 //RazorPay Payment
 user_route.post('/create-order', userAuth, paymentController.createOrder);

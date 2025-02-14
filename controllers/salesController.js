@@ -343,7 +343,17 @@ exports.downloadReport = async (req, res) => {
                 { header: 'Final Amount', key: 'finalAmount', width: 15 }
             ];
 
-            worksheet.addRows(reportData.orders);
+            // worksheet.addRows(reportData.orders);
+            worksheet.addRows(reportData.orders.map(order => ({
+                orderId: order.orderId,
+                customerName: order.userId.username,
+                orderDate: new Date(order.createdAt).toLocaleDateString(), // Format the date
+                // mrp: `₹${order.mrp.toFixed(2)}`, 
+                totalamount:`₹${order.orderedItems.reduce((total, item)=> total + (item.product.mrp * item.quantity), 0).toFixed(0)}`,
+                totalDiscount: `₹${order.totalDiscount.toFixed(2)}`,
+                couponDiscount: `₹${order.couponDiscount.toFixed(2)}`,
+                finalAmount: `₹${order.finalAmount.toFixed(2)}` // Format the amount
+            })));
 
             worksheet.addRow([]);
             worksheet.addRow(['Summary']);
@@ -351,7 +361,7 @@ exports.downloadReport = async (req, res) => {
             worksheet.addRow(['Total Amount', reportData.summary.totalAmount]);
             worksheet.addRow(['Total Discount', reportData.summary.totalDiscount]);
             // worksheet.addRow(['Total Coupon Discount', reportData.summary.totalCouponDiscount]);
-            worksheet.addRow(['Net Amount', reportData.summary.netAmount]);
+            // worksheet.addRow(['Net Amount', reportData.summary.netAmount]);
 
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             res.setHeader('Content-Disposition', 'attachment; filename=sales-report.xlsx');

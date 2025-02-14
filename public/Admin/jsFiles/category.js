@@ -89,6 +89,9 @@ console.log("categories.js is working")
         }else if(!/^[a-zA-Z\s]+$/.test(name)){
             displayErrorMessage("name-error","Category name should contain only alphabetic characters  ")
             isValid = false;
+        }else{
+            displayErrorMessage("name-error","");
+            isValid = true;
         }
         // Validate description field
         if(description === ""){
@@ -97,6 +100,9 @@ console.log("categories.js is working")
         }else if (!/^[a-zA-Z\s]+$/.test(description)){
             displayErrorMessage("description-error","Description should contain only alphabetic characters");
             isValid = false;
+        }else{
+            displayErrorMessage("description-error","");
+            isValid = true;
         }
         return isValid;
      }  

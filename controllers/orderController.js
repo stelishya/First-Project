@@ -825,18 +825,26 @@ exports.updateStatus = async (req, res) => {
 
 exports.returnOrder = async (req, res) => {
     try {
-        const orderId = req.params.orderId;
+        // const orderId = req.params.orderId;
+        const {orderId,productId} = req.params;
         const returnReason = req.body.returnReason;
-
+        console.log("orderId : " + orderId + "returnReason : " + returnReason)
         if (!orderId || !returnReason) {
             return res.status(400).json({ message: "Order ID and return reason are required" });
         }
 
-        const order = await Orders.findById(orderId);
+        const order = await Orders.findOne({_id:orderId,userId:req.session.user._id})
+        .populate('orderedItems.product');
+        console.log("order in returnOrder: ",order)
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
-
+        // const orderItem = order.orderedItems.id(productId)
+        const orderItem = order.orderedItems.find(item => item.product._id.toString() === productId);
+        console.log("orderItem in returnOrder: ",orderItem)
+        if(!orderItem){
+            return res.status(404).json({ message: "Order item not found" });
+        }
         if (order.status !== "Delivered") {
             return res.status(400).json({ message: "Only delivered orders can be returned" });
         }

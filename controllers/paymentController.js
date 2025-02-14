@@ -142,12 +142,20 @@ exports.verifyPayment = async (req, res) => {
                     }
                 }
                 
-                orderedItems = cart.items.map(item => ({
-                    product: item.productId._id,
-                    quantity: item.quantity,
-                    priceAtPurchase: item.productId.price
-                }));
+                orderedItems = cart.items.map(item => {
+                    const prices= calculateOrderItemPrices({
+                        product: item.productId,
+                        quantity: item.quantity
+                    });
+                    return {
+                        product: item.productId._id,
+                        quantity: item.quantity,
+                        priceAtPurchase: prices.pricePerUnit
+                        // priceAtPurchase: item.productId.price
+                    }
+                });
 
+                console.log("Ordered items:", orderedItems);
                 //update product stock
                 for (const item of cart.items) {
                     await Products.findByIdAndUpdate(item.productId._id, {
@@ -230,6 +238,7 @@ exports.verifyPayment = async (req, res) => {
                         quantity: item.quantity,
                         priceAtPurchase: item.product.price
                     }));
+                    console.log("Cart items:", cartItems);
                     //update cart with the org items
                     await Carts.findOneAndUpdate(
                         { userId: user._id },
@@ -304,6 +313,7 @@ exports.retryPayment = async (req, res) => {
                 total: prices.totalPrice,
                 totalDiscount: prices.totalDiscount
             }];
+            console.log("orderedItems in retryPayment buy now",orderedItems)
             await Products.findByIdAndUpdate(item.product._id, {
                 $inc: { stock: -parseInt(item.quantity) }
             });
@@ -344,7 +354,7 @@ exports.retryPayment = async (req, res) => {
                 quantity: item.quantity,
                 priceAtPurchase: item.productId.price
             }));
-
+            console.log("orderedItems in retryPayment cart",orderedItems)
             for (const item of orderDetails.orderedItems) {
                 if (item.product) {
                     await Products.findByIdAndUpdate(item.product._id, {
@@ -439,7 +449,7 @@ async function restoreProductStock(orderData) {
                 quantity: item.quantity,
                 priceAtPurchase: item.product.price
             }));
-
+            console.log("Cart items in restoreProductStock :", cartItems);
             // Update cart with the original items
             await Carts.findOneAndUpdate(
                 { userId: orderData.userId },

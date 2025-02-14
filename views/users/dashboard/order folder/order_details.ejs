@@ -468,8 +468,9 @@
             returnReason = otherReasonText.value.trim();
         }
 
-        try {console.log('currentOrderId :',currentOrderId)
-            const response = await axios.post(`/user/order/return/${currentOrderId}`, {
+        try {
+            console.log('currentOrderId :',currentOrderId)
+            const response = await axios.post(`/user/order/return/${currentOrderId}/${currentProductId}`, {
                 returnReason,
                 productId: currentProductId
             });

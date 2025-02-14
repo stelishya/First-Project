@@ -72,6 +72,7 @@ exports.getReturnDetails = async (req, res) => {
 exports.approveReturn = async (req, res) => {
     try {
         const orderId = req.params.orderId;
+        
         const order = await Orders.findById(orderId)
             .populate({
                 path: 'orderedItems.product',
