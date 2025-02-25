@@ -165,10 +165,10 @@ exports.getEditCategory = async(req,res)=>{
 exports.editCategory = async (req, res) => {
     try {
         const id = req.params.id;
-        const { category: categoryName, description,  offer } = req.body;
-        
+        const { name, description,  offer } = req.body;
+        console.log("categoryName: ",name)
         const existingCategory = await Category.findOne({ 
-            name: categoryName,
+            name: name,
             _id: { $ne: id } 
         });
 
@@ -177,11 +177,11 @@ exports.editCategory = async (req, res) => {
         }
 
         const updateData = {
-            name: categoryName,
+            name: name,
             description: description,
             categoryOffer: offer || 0
         };
-
+        console.log("updateData: ",updateData)
         // // Add offer details if provided
         // if (discountType === 'Percentage Discount' && offer) {
         //     updateData.categoryOffer = offer;
