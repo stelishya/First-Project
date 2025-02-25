@@ -1,4 +1,7 @@
+// const { STATUS_CODES } = require('http');
 const Coupon = require('../models/couponSchema');
+const User = require('../models/userSchema')
+const httpStatus = require('../config/statusCode');
 
 exports.createCoupon = async (req, res) => {
     try {
@@ -212,18 +215,24 @@ exports.applyCoupon = async (req, res) => {
         });
         console.log("coupon: ",coupon)
         if (!coupon) {
-            return res.status(404).json({ success: false, message: 'Invalid or expired coupon' });
+            return res.status(httpStatus.NOT_FOUND).json({ success: false, message: 'Invalid or expired coupon' });
         }
-
+        const coupUsed=await User.findOne({userId},{couponCode:code});
+        if(coupUsed){
+            return res.status(httpStatus.BAD_REQUEST).json({
+                success:false,
+                message:"Coupon already used"
+            })
+        }
         if (cartTotal < coupon.minimumPurchase) {
-            return res.status(400).json({ 
+            return res.status(httpStatus.BAD_REQUEST).json({ 
                 success: false,
                 message: `Minimum purchase amount of ₹${coupon.minimumPurchase} required`
             });
         }
 
         if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-            return res.status(400).json({ success: false, message: 'Coupon usage limit has been reached' });
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'Coupon usage limit has been reached' });
         }
 
         // const alreadyUsed = coupon.usedBy.some(use => use.userId.equals(userId));
@@ -246,8 +255,16 @@ exports.applyCoupon = async (req, res) => {
             $inc: { usedCount: 1 },
             $push: { usedBy: { userId } }
         });
-        req.session.user.appliedCoupon=coupon._id;
-        res.status(200).json({
+        // req.session.user.appliedCoupon=coupon._id;
+        req.session.user.appliedCoupon = {
+            id: coupon._id,
+            code: coupon.code,
+            name: coupon.name,
+            offerPercentage: coupon.offerPercentage,
+            discount: discount,
+            totalAmount: totalAmount
+        };
+        res.status(httpStatus.OK).json({
             success: true,
             message: 'Coupon applied successfully',
             couponDetails: {

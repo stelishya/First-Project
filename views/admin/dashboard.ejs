@@ -231,7 +231,7 @@
                                                 <% reportData.orders.forEach((order, index) => { %>
                                                     <tr>
                                                         <td class="px-6 py-4 whitespace-nowrap"><%= ((reportData.pagination.currentPage - 1) * 10) + index + 1 %></td>
-                                                        <td class="px-6 py-4 whitespace-nowrap"><%= order._id %></td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">#<%= order.orderId.substring(0, 10) %>...</td>
                                                         <td class="px-6 py-4 whitespace-nowrap"><%= order.userId ? order.userId.username : 'N/A' %></td>
                                                         <td class="px-6 py-4 whitespace-nowrap"><%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
                                                         <!-- <td class="px-6 py-4 whitespace-nowrap">₹%= order.mrp ? order.mrp.toFixed(2) : '0.00' %></td> -->

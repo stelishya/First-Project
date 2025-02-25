@@ -236,7 +236,7 @@
                                                 <input type="radio" name="payment" value="<%= method %>"
                                                     class="text-gray-500 focus:ring-gray-500"
                                                     id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>" <% if
-                                                    (method==='Cash on Delivery' && Number(totalAmount)> 1000) { %>
+                                                    (method==='COD' && Number(totalAmount)> 1000) { %>
                                                 disabled <% } %>
                                                     <% if (method==='Wallet' && Number(totalAmount)> walletBalance) { %>
                                                         disabled <% } %>
@@ -245,7 +245,7 @@
                                                                 <%= method %>
                                                             </span>
                                             </div>
-                                            <% if (method==='Cash on Delivery' && Number(totalAmount)> 1000) { %>
+                                            <% if (method==='COD' && Number(totalAmount)> 1000) { %>
                                                 <div class="ml-2 text-sm text-red-500">(Not available for orders above
                                                     ₹1000)</div>
                                                 <% } %>
@@ -789,7 +789,7 @@
             }
         }
 
-        const productsData = <%- JSON.stringify(products) %>;
+        const productsData = <%- JSON.stringify(products).replace(/</g, '\\u003C') %>
 
         async function placeOrder(finalAmount, productId = null) {
             if (!selectedAddressId) {
@@ -947,7 +947,7 @@
                         console.error('Razorpay initialization error:', error);
                         showToast('Failed to initialize payment', true);
                     }
-                } else if (selectedPayment.value === 'Cash on Delivery') {
+                } else if (selectedPayment.value === 'COD') {
                     try {
                         console.log("Placing COD order");
                         // For COD and other payment methods
@@ -1492,6 +1492,12 @@
                     // const couponDetails = response.data.couponDetails;
                     // document.getElementById('appliedCouponCode').textContent = `Applied: ${code} - ${couponDetails.name} (${couponDetails.offerPercentage}% OFF)`;
 
+                    localStorage.setItem('appliedCoupon', JSON.stringify({
+                        code: code,
+                        discount: currentCouponDiscount,
+                        totalAmount: response.data.totalAmount
+                    }));
+
                     messageDiv.textContent = `Coupon ${code} applied successfully!`;
                     messageDiv.className = 'text-sm text-green-500 mt-2';
                     showToast('Coupon applied successfully!', 'success');
@@ -1508,6 +1514,21 @@
             }
         }
 
+        function loadAppliedCoupon() {
+            const savedCoupon = JSON.parse(localStorage.getItem('appliedCoupon'));
+
+            if (savedCoupon) {
+                document.getElementById('appliedCouponSection').classList.remove('hidden');
+                document.getElementById('appliedCouponCode').textContent = `Applied: ${savedCoupon.code}`;
+
+                document.getElementById('couponDiscount').classList.remove('hidden');
+                document.getElementById('couponDiscountValue').textContent = `-₹${savedCoupon.discount.toFixed(0)}`;
+
+                document.getElementById('totalAmount').textContent = `₹${savedCoupon.totalAmount.toFixed(0)}`;
+            }
+        }
+        window.onload = loadAppliedCoupon;
+
         async function removeCoupon() {
             try {
                 //hi hello
@@ -1522,6 +1543,8 @@
 
                 const response = await axios.post('/user/remove-coupon', { code, currentTotal });
                 if (response.data.success) {
+                    localStorage.removeItem('appliedCoupon');
+
                     currentCouponDiscount = 0; // Reset the discount amount
 
                     // Hide coupon discount

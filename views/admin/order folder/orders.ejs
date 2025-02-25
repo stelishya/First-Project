@@ -218,12 +218,12 @@
                             </td>
                             <td class="py-2">
                                 <a class="text-gray-500" href="#">
-                                    <%= order.orderId ? order.orderId.substring(0, 10) : order._id %>...
+                                    #<%= order.orderId ? order.orderId.substring(0, 10) : order._id %>...
                                 </a>
                             </td>
                             <td class="text-center py-2">
                                 <% if (order.orderedItems.length> 0) { %>
-                                    <%= order.orderedItems[0].product.productName.substring(0, 10) %>
+                                    <%= order.orderedItems[0].product.productName.substring(0,10) %>
                                         <% if (order.orderedItems.length> 1) { %>
                                             <br />
                                             <span class="text-gray-500 text-sm">+ <%= order.orderedItems.length - 1 %>
@@ -271,7 +271,7 @@
                                                             onchange="updateOrderStatus('<%= order._id %>', this); updateStatusColor(this)"
                                                             data-status="<%= order.status %>">
                                                             <% orderStatuses.forEach((status)=> { %>
-                                                                <% if (status !=="Returned" ) { %>
+                                                                <% if (status !=="Returned" && status !=="Return Request" && !(order.paymentStatus === "Failed" && status === "Order Placed")) { %>
                                                                     <option value="<%= status %>"
                                                                         <%=order.status===status ? 'selected' : '' %>>
                                                                         <%= status %>
@@ -290,10 +290,8 @@
                             <td class="py-2">
                                 <% if (order.status==="Cancelled" || order.status==="Out for delivery" ||
                                     order.status==="Returned" || order.status==="Delivered" ) { %>
-                                    <!-- Hide cancel button if cancellation isn't allowed -->
                                     <i class="fas fa-ban text-gray-400"></i>
                                     <% } else { %>
-                                        <!-- Show cancel button if cancellation is allowed -->
                                         <button onclick="cancelOrder('<%= order._id %>')">
                                             <i class="fas fa-ban text-red-600" style="font-size: small;"> Cancel</i>
                                         </button>

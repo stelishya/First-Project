@@ -132,7 +132,7 @@
                 </div>
                 <!-- Order Info -->
                 <div class="flex-1 ml-4">
-                    <p class="text-sm">Order ID: <%= order.orderId ? order.orderId : order._id || 'N/A' %></p>
+                    <p class="text-sm">Order ID: #<%= order.orderId ? order.orderId : order._id || 'N/A' %></p>
                     <p class="text-sm">Ordered on: <%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Date not available' %></p>
                 </div>
                 <!-- Total Amount -->

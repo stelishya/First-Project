@@ -136,7 +136,7 @@
                 <div class="flex items-center space-x-4">
                     <div class="text-gray-600">
                         <span id="itemSummary">
-                            <%= products.map(p => `${p.quantity} × ${p.productId.productName}`).join(', ') %>
+                            <%= products.map(p => `${p.quantity} × ${p.productId.productName.substring(0,10)}`).join(', ') %>
                         </span>
                     </div>
                 </div>
@@ -144,7 +144,7 @@
                 <div class="flex items-center space-x-6" id="checkoutButton" style="display: '<%= countOfProducts ? countOfProducts : false > 0 ? 'flex' : 'none' %>'">
                     <div class="text-right">
                         <div class="text-gray-600">Total Amount</div>
-                        <div class="text-xl font-bold text-green-600">₹ <%= totalAmount %></div>
+                        <div class="text-xl font-bold text-green-600" id="totalAmount">₹ <%= totalAmount %></div>
                     </div>
                     <a href="/user/checkout" 
                        class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors">
@@ -222,6 +222,7 @@
             });
 
             const data = response.data;
+            console.log("data : ", data)
             if (data.success) {
                 // Update quantity display
                 quantityElement.value = newQuantity;
@@ -233,8 +234,9 @@
                 }
 
                 // Update cart total
+                console.log("data.totalAmount : ", data.totalAmount)
                 if (data.totalAmount !== undefined) {
-                    const totalElement = document.querySelector('.text-xl.font-bold.text-green-600');
+                    const totalElement = document.getElementById('totalAmount');
                     if (totalElement) {
                         totalElement.textContent = `₹ ${data.totalAmount}`;
                     }
@@ -245,7 +247,7 @@
                     const summaryElement = document.getElementById('itemSummary');
                     if (summaryElement) {
                         const itemSummary = data.items
-                            .map(item => `${item.quantity} × ${item.productId.productName}`)
+                            .map(item => `${item.quantity} × ${item.productId.productName.substring(0,10)}`)
                             .join(', ');
                         summaryElement.textContent = itemSummary;
                     }
@@ -324,7 +326,7 @@
                     
                     if (response.data.products) {
                         const itemSummary = response.data.products
-                            .map(p => `${p.quantity} × ${p.productId.productName}`)
+                            .map(p => `${p.quantity} × ${p.productId.productName.substring(0,10)}`)
                             .join(', ');
                         document.getElementById('itemSummary').textContent = itemSummary;
                     }

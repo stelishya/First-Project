@@ -21,6 +21,10 @@ exports.checkout = async (req, res) => {
             return res.redirect('/user/login');
         }
         
+        const cart = await Carts.findOne({ userId: req.session.user._id }).populate('items.productId');
+
+        const appliedCoupon = req.session.user.appliedCoupon || null;
+
         const { productId, quantity, buyNow } = req.body;
         let products, totalMRP = 0, totalDiscount = 0, totalAmount = 0;
         let isBuyNow = false;
@@ -105,7 +109,7 @@ exports.checkout = async (req, res) => {
         const wallet = await Wallets.findOne({ userId }).sort({ createdAt: -1 });
         const walletBalance = wallet ? wallet.balance : 0;
 
-        const paymentMethods = ['Online Payment', 'Cash on Delivery'];
+        const paymentMethods = ['Online Payment', 'COD'];
         if (walletBalance > 0) {
             paymentMethods.push('Wallet');
         }
@@ -128,7 +132,9 @@ exports.checkout = async (req, res) => {
             totalAmount,
             walletBalance,
             paymentMethods,
-            isBuyNow
+            isBuyNow,
+            cart,
+            appliedCoupon
         });
 
     } catch (error) {
@@ -308,7 +314,7 @@ exports.orderCreation = async (req, res) => {
                 // paymentMethod,
                 paymentStatus: orderData.paymentStatus || 'Pending',
                 status: 'Order Placed',
-                paymentType: orderData.paymentType || 'Cash on Delivery'
+                paymentType: orderData.paymentType || 'COD'
             });
             console.log("Creating order with data - newOrder :", {
                 totalDiscountAmount,
@@ -479,6 +485,7 @@ exports.getOrdersAdmin = async (req, res) => {
     try {
         console.log("getOrdersAdmin called")
         let search = req.query.search || '';
+        console.log("search : ", search)
         const orderStatuses = Orders.schema.path('status').enumValues;
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
@@ -491,7 +498,11 @@ exports.getOrdersAdmin = async (req, res) => {
         }).populate('userId', 'username email')
         .sort({ createdAt: -1 });
         console.log("returnRequests : ", returnRequests)
-        const orders = await Orders.find({})
+
+        const query = search ? { orderId: { $regex: search, $options: 'i' } } : {}; // Adjust to search by other fields if needed
+
+
+        const orders = await Orders.find(query)
             .populate('userId', 'username email')
             .populate({
                 path: 'orderedItems.product',

@@ -442,7 +442,13 @@ exports.productDetailsUser = async (req, res) => {
         const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
             .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
         
-        const product = await Products.findById(productId).populate('category', 'name categoryOffer').lean();
+        // const product = await Products.findById(productId).populate('category', 'name categoryOffer').lean();
+        const listedCategories = await Category.find({ isListed: true }).distinct('_id');
+        const product = await Products.findOne({
+            _id: productId,
+            isListed: true,
+            category: { $in: listedCategories }  // Ensures product's category is listed
+        }).populate('category', 'name categoryOffer').lean();
         console.log("product Details from DB:",product)
         if (!product) {
             console.log("Product not found for ID:", productId);

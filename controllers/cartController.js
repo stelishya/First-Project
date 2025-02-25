@@ -3,8 +3,8 @@ const Products = require('../models/productSchema')
 const { calculateProductPrices, calculateOrderItemPrices } = require('../helpers/priceCalculator');
 
 
-exports.getCart = async (req,res)=>{
-    const search = req.query.search || ''; 
+exports.getCart = async (req, res) => {
+    const search = req.query.search || '';
     try {
         if (!req.session.user) {
             return res.redirect('/login');
@@ -19,13 +19,13 @@ exports.getCart = async (req,res)=>{
             path: 'items.productId',
             model: 'Product',
             select: 'productName description productImage mrp productOffer maxDiscount  category stock',
-            populate: { 
+            populate: {
                 path: 'category',
                 select: 'name categoryOffer '
             }
         });
 
-        if(!cart || !cart.items || cart.items.length === 0){
+        if (!cart || !cart.items || cart.items.length === 0) {
             return res.render('users/cart/cart', {
                 session: req.session.user,
                 countOfProducts: 0,
@@ -46,7 +46,7 @@ exports.getCart = async (req,res)=>{
                 path: 'items.productId',
                 model: 'Product',
                 select: 'productName description productImage mrp productOffer maxDiscount category stock',
-                populate: { 
+                populate: {
                     path: 'category',
                     select: 'name categoryOffer'
                 }
@@ -65,7 +65,7 @@ exports.getCart = async (req,res)=>{
                 product: product,
                 quantity: item.quantity
             });
-            
+
             totalAmount += itemPrices.totalPrice;
             totalDiscount += itemPrices.totalDiscount;
             subtotal += itemPrices.originalPrice * item.quantity;
@@ -83,11 +83,11 @@ exports.getCart = async (req,res)=>{
                 totalDiscount: itemPrices.totalDiscount,
                 bestDiscountType: `${itemPrices.discountPercentage.toFixed(0)} Discount`,
                 finalAmount: itemPrices.totalPrice,
-                stock: product.stock 
+                stock: product.stock
             };
         }).filter(Boolean);
-        
-        const countOfProducts = totalItems; 
+
+        const countOfProducts = totalItems;
         console.log("Hi i'm rendering cart page");
         console.log(`products: ${products}`);
         console.log('Cart Totals:');
@@ -110,29 +110,30 @@ exports.getCart = async (req,res)=>{
             totalItems,
             limit
         });
-        
+
     } catch (error) {
         console.error('Error in getCart:', error);
         res.status(500).send('Error loading cart. Please try again.');
     }
 }
 
-exports.addToCart = async (req,res)=>{
+exports.addToCart = async (req, res) => {
     try {
+        console.log("addToCart called")
         if (!req.session.user || !req.session.user._id) {
-            return res.status(401).json({ 
-                success: false, 
-                message: "Please login to add items to cart" 
+            return res.status(401).json({
+                success: false,
+                message: "Please login to add items to cart"
             });
         }
 
         const userId = req.session.user._id;
         const productId = req.body.productId;
         const quantity = parseInt(req.body.quantity) || 1;
-        console.log("\nuserId : "+userId+"\nproductId : "+productId+"\nquantity : "+quantity)
+        console.log("\nuserId : " + userId + "\nproductId : " + productId + "\nquantity : " + quantity)
 
         const product = await Products.findById(productId);
-        console.log("product: ",product)
+        console.log("product: ", product)
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -141,11 +142,11 @@ exports.addToCart = async (req,res)=>{
         }
 
         const maxAllowedQuantity = Math.min(product.stock, 5);
-        console.log("maxAllowedQuantity : ",maxAllowedQuantity)
+        console.log("maxAllowedQuantity : ", maxAllowedQuantity)
         if (quantity > maxAllowedQuantity) {
             return res.status(400).json({
                 success: false,
-                message: maxAllowedQuantity === 5 
+                message: maxAllowedQuantity === 5
                     ? "Maximum limit of 5 items per product"
                     : `Only ${maxAllowedQuantity} items available in stock`
             });
@@ -155,10 +156,11 @@ exports.addToCart = async (req,res)=>{
         const price = calculatedPrices.finalAmount;
         // const price = product.discountedPrice || product.mrp;
         const totalPrice = price * quantity;
-        console.log("price,totalPrice : ",price,totalPrice)
-        let cart = await Carts.findOne({ userId}).populate('items.productId', 'price totalPrice');
-        console.log("cart : ",cart)
+        console.log("price,totalPrice : ", price, totalPrice)
+        let cart = await Carts.findOne({ userId }).populate('items.productId', 'price totalPrice');
+        console.log("cart : ", cart)
         if (!cart) {
+            console.log("cart not found")
             cart = new Carts({
                 userId,
                 items: [{
@@ -170,17 +172,23 @@ exports.addToCart = async (req,res)=>{
                 }]
             });
         } else {
-            const existingItem = cart.items.find(
-                item => item.productId.toString() === productId
-            );
-            console.log("existingItem : ",existingItem)
+            console.log("cart found")
+            const existingItem = cart.items.find((item) => {
+                // (item) => item.productId.toString() === productId
+                const productIdString = item.productId._id.toString();
+                console.log("Current item productId:", productIdString);
+                return productIdString === productId;
+            });
+            console.log("existingItem : ", existingItem);
+            console.log("cart.items : ", cart.items);
+
             if (existingItem) {
                 const newTotalQuantity = existingItem.quantity + quantity;
-                console.log("newTotalQuantity : ",newTotalQuantity)
+                console.log("newTotalQuantity : ", newTotalQuantity)
                 if (newTotalQuantity > maxAllowedQuantity) {
                     return res.status(400).json({
                         success: false,
-                        message: maxAllowedQuantity === 5 
+                        message: maxAllowedQuantity === 5
                             ? "Maximum limit of 5 items per product"
                             : `Only ${maxAllowedQuantity} items available in stock`
                     });
@@ -188,6 +196,13 @@ exports.addToCart = async (req,res)=>{
 
                 existingItem.quantity = newTotalQuantity;
                 existingItem.totalPrice = price * newTotalQuantity;
+
+                await cart.save();
+
+                return res.status(200).json({
+                    success: true,
+                    message: "Product quantity updated in cart"
+                });
             } else {
                 cart.items.push({
                     productId,
@@ -198,7 +213,7 @@ exports.addToCart = async (req,res)=>{
                 });
             }
         }
-        console.log("cart : ",cart)
+        console.log("cart before saving: ", cart)
         await cart.save();
 
         res.status(200).json({
@@ -231,6 +246,7 @@ exports.updateQuantity = async (req, res) => {
         const productIndex = cart.items.findIndex(item => item.productId._id.toString() === productId);
         if (productIndex > -1) {
             const product = cart.items[productIndex].productId;
+            if (!product) return res.status(404).json({ success: false, message: "Product not found" });
             const newQuantity = cart.items[productIndex].quantity + change;
 
             if (change > 0) {
@@ -241,8 +257,8 @@ exports.updateQuantity = async (req, res) => {
 
                 const maxAllowedQuantity = Math.min(currentProduct.quantity, 5);
                 if (newQuantity > maxAllowedQuantity) {
-                    return res.status(400).json({ 
-                        success: false, 
+                    return res.status(400).json({
+                        success: false,
                         message: `Cannot add more items. ${maxAllowedQuantity === 5 ? 'Maximum limit is 5' : 'Not enough stock available'}`
                     });
                 }
@@ -250,14 +266,37 @@ exports.updateQuantity = async (req, res) => {
 
             cart.items[productIndex].quantity = newQuantity < 1 ? 1 : newQuantity;
 
-            const price = product.discountedPrice || product.mrp;
-            cart.items[productIndex].totalPrice = price * cart.items[productIndex].quantity;
+            const itemPrices = calculateOrderItemPrices({
+                product: product,
+                quantity: newQuantity
+            });
+
+            cart.items[productIndex].totalPrice = itemPrices.totalPrice;
+
+            let totalAmount = 0;
+            let totalDiscount = 0;
+            let subtotal = 0;
+
+            cart.items.forEach(item => {
+                const prices = calculateOrderItemPrices({
+                    product: item.productId,
+                    quantity: item.quantity
+                });
+                
+                totalAmount += prices.totalPrice;
+                totalDiscount += prices.totalDiscount;
+                subtotal += prices.originalPrice * item.quantity;
+            });
+
+            // const price = product.discountedPrice || product.mrp;
+            // cart.items[productIndex].totalPrice = price * cart.items[productIndex].quantity;
+            console.log("totalAmount in updateQuantity : ", totalAmount)
 
             await cart.save();
             return res.json({
                 success: true,
                 items: cart.items,
-                totalAmount: cart.totalAmount,
+                totalAmount: totalAmount,
                 message: 'Quantity updated successfully'
             });
         } else {

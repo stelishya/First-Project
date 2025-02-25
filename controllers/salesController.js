@@ -2,13 +2,13 @@ const Orders = require('../models/orderSchema');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 
-exports.loadDashboard=async (req,res)=>{
-    try{
+exports.loadDashboard = async (req, res) => {
+    try {
         console.log("loadDashboard called")
-    if (!req.session.admin) {
-        console.log('Unauthorized access to dashboard');
-        return res.redirect('/admin/login'); 
-    }
+        if (!req.session.admin) {
+            console.log('Unauthorized access to dashboard');
+            return res.redirect('/admin/login');
+        }
         const { startDate, endDate, period } = req.query;
 
         // const last7Days = new Date();
@@ -31,7 +31,7 @@ exports.loadDashboard=async (req,res)=>{
                     _id: null,
                     totalOrders: { $sum: 1 },
                     totalAmount: { $sum: '$finalAmount' },
-                    totalDiscount: { 
+                    totalDiscount: {
                         $sum: {
                             $add: [
                                 { $ifNull: ['$totalDiscountAmount', 0] },
@@ -50,9 +50,9 @@ exports.loadDashboard=async (req,res)=>{
             endDate: endDate || '',
             period: period || ''
         }).toString();
-        
+
         const productAggregation = await Orders.aggregate([
-            { $match: { status: { $ne: ['Cancelled','Returned','Payment failed']  } } },
+            { $match: { status: { $ne: ['Cancelled', 'Returned', 'Payment failed'] } } },
             { $unwind: '$orderedItems' },
             {
                 $lookup: {
@@ -76,14 +76,14 @@ exports.loadDashboard=async (req,res)=>{
                 $project: {
                     _id: 1,
                     totalSold: 1,
-                    name: 1 
+                    name: 1
                 }
             }
         ]);
 
         //top selling categories
         const categoryAggregation = await Orders.aggregate([
-            { $match: { status: { $ne: ['Cancelled','Returned','Payment failed'] } } },
+            { $match: { status: { $ne: ['Cancelled', 'Returned', 'Payment failed'] } } },
             { $unwind: '$orderedItems' },
             {
                 $lookup: {
@@ -122,15 +122,15 @@ exports.loadDashboard=async (req,res)=>{
         console.log("Report data:", reportData);
         res.render('admin/dashboard', {
             admin: req.session.admin,
-            reportData: reportData || { 
-                orders: [], 
-                summary: { 
-                    totalOrders: 0, 
-                    totalAmount: 0, 
-                    totalDiscount: 0, 
-                    totalCouponDiscount: 0, 
-                    netAmount: 0 
-                } 
+            reportData: reportData || {
+                orders: [],
+                summary: {
+                    totalOrders: 0,
+                    totalAmount: 0,
+                    totalDiscount: 0,
+                    totalCouponDiscount: 0,
+                    netAmount: 0
+                }
             },
             overallStats: overallStats[0] || {
                 totalOrders: 0,
@@ -150,15 +150,15 @@ exports.loadDashboard=async (req,res)=>{
         res.status(500).render('admin/dashboard', {
             admin: req.session.admin,
             error: 'Failed to load dashboard data',
-            reportData: { 
-                orders: [], 
-                summary: { 
-                    totalOrders: 0, 
-                    totalAmount: 0, 
-                    totalDiscount: 0, 
-                    totalCouponDiscount: 0, 
-                    netAmount: 0 
-                } 
+            reportData: {
+                orders: [],
+                summary: {
+                    totalOrders: 0,
+                    totalAmount: 0,
+                    totalDiscount: 0,
+                    totalCouponDiscount: 0,
+                    netAmount: 0
+                }
             },
             startDate: '',
             endDate: '',
@@ -167,7 +167,7 @@ exports.loadDashboard=async (req,res)=>{
         });
     }
 }
-exports.topProduct = async(req,res)=>{
+exports.topProduct = async (req, res) => {
     try {
         const productAggregation = await Orders.aggregate([
             { $match: { status: { $ne: 'Cancelled' } } },
@@ -189,7 +189,7 @@ exports.topProduct = async(req,res)=>{
                 }
             },
             {
-                $match:{"productDetails": { $totalSold: 0 } }
+                $match: { "productDetails": { $totalSold: 0 } }
             },
             { $sort: { totalSold: 1 } },
             { $limit: 10 },
@@ -197,12 +197,12 @@ exports.topProduct = async(req,res)=>{
                 $project: {
                     _id: 1,
                     totalSold: 1,
-                    name: 1 
+                    name: 1
                 }
             }
         ]);
     } catch (error) {
-        
+
     }
 }
 exports.getSalesReport = async (req, res) => {
@@ -292,88 +292,239 @@ exports.getSalesReport = async (req, res) => {
 exports.downloadReport = async (req, res) => {
     try {
         const { format } = req.query;
-        const reportData = await generateSalesReport(req.query); 
+        const reportData = await generateSalesReport(req.query);
         console.log(reportData)
         if (format === 'pdf') {
-            const doc = new PDFDocument();
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename=sales-report.pdf');
-            doc.pipe(res);
-
-            doc.fontSize(20).text('Sales Report', { align: 'center' });
-            doc.moveDown();
-            doc.fontSize(10).text('CAlliope', { align: 'center' });
-            doc.fontSize(10).text('www.calliope.com', { align: 'center' });
-            doc.moveDown();
-            doc.moveDown();
-            
-            doc.fontSize(14).text('Summary');
-            doc.fontSize(12)
-               .text(`Total Orders: ${reportData.summary.totalOrders}`)
-               doc.fontSize(12).text(`Total Amount: ₹${reportData.summary.totalAmount.toFixed(0)}`)
-               doc.fontSize(12).text(`Total Discount: ₹${reportData.summary.totalDiscount.toFixed(0)}`)
-            //    doc.fontSize(12).text(`Total Coupon Discount: ₹${reportData.summary.totalCouponDiscount.toFixed(0)}`)
-            //    .text(`Net Amount: ₹${reportData.summary.netAmount.toFixed(2)}`);
-            
-            doc.moveDown();
-
-            doc.fontSize(14).text('Order Details');
-            reportData.orders.forEach(order => {
-                doc.fontSize(12)
-                   .text(`Order ID: ${order.orderId}`)
-                   .text(`Customer: ${order.userId.username}`)
-                   .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
-                   .text(`Amount: ₹${order.finalAmount.toFixed(2)}`)
-                   .moveDown();
+            const totalDiscountSum = reportData.orders.reduce((sum, order) => {
+                return sum + order.totalDiscount; // Ensure this is the raw number, not formatted
+            }, 0);
+    
+            const totalAmountSum = reportData.orders.reduce((sum, order) => {
+                return sum + order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0); // Sum of all amounts
+            }, 0);
+            const doc = new PDFDocument({
+                autoFirstPage: true,
+                size: 'A4',
+                margin: 50,
+                bufferPages: true
             });
+            let chunks = [];
+            doc.on('data', chunk => chunks.push(chunk));
+            doc.on('end', () => {
+                const result = Buffer.concat(chunks);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', 'attachment; filename=sales-report.pdf');
+                res.setHeader('Content-Length', Buffer.byteLength(result));
+                res.end(result);
+            });
+            doc.font('Helvetica-Bold')
+                .fontSize(20)
+                .text('Sales Report', { align: 'center' });
+            doc.moveDown();
+            doc.font('Helvetica-Bold')
+                .fontSize(14)
+                .text('Summary', { underline: true });
+            doc.moveDown(0.5);
 
+            doc.font('Helvetica')
+                .fontSize(12)
+                .text(`Total Orders: ${reportData.summary.totalOrders}`)
+                .text(`Total Amount: Rs.${totalAmountSum.toFixed(2)}`)
+                .text(`Total Discount: Rs.${totalDiscountSum.toFixed(2)}`)
+                .text(`Total Coupon Discount: Rs.${reportData.summary.totalDiscount.toFixed(2)}`)
+                .text(`Total Revenue: Rs.${reportData.summary.totalAmount.toFixed(2)}`);
+            doc.moveDown();
+            doc.font('Helvetica-Bold')
+                .fontSize(14)
+                .text('Order Details', { underline: true });
+            doc.moveDown(0.5);
+
+            // Table configuration
+            const pageWidth = doc.page.width - 2 * doc.page.margins.left;
+            const columns = {
+                orderId: { x: 50, width: 150, header: 'Order ID' },
+                date: { x: 200, width: 80, header: 'Date' },
+                customer: { x: 280, width: 100, header: 'Customer' },
+                amount: { x: 370, width: 40, header: 'Amount' },
+                status: { x: 490, width: 70, header: 'Status' }
+            };
+
+            
+            // Draw table header
+            const drawTableHeader = () => {
+                const headerHeight = 20;
+                const currentY = doc.y;
+
+                // Draw header background
+                doc.fillColor('#f4f4f4')
+                    .rect(doc.page.margins.left, currentY, pageWidth, headerHeight)
+                    .fill();
+
+                // Draw all headers on the same line
+                doc.fillColor('#000')
+                    .font('Helvetica-Bold')
+                    .fontSize(10);
+
+                // Draw each header text
+                Object.values(columns).forEach(column => {
+                    doc.text(
+                        column.header,
+                        column.x,
+                        currentY + 5,
+                        {
+                            width: column.width,
+                            align: column.header === 'Amount' ? 'right' : 'left'
+                        }
+                    );
+                });
+
+                // Draw vertical lines for column separation
+                doc.strokeColor('#cccccc')
+                    .lineWidth(0.5);
+                Object.values(columns).forEach(column => {
+                    doc.moveTo(column.x, currentY)
+                        .lineTo(column.x, currentY + headerHeight)
+                        .stroke();
+                });
+
+                // Move position below header
+                doc.y = currentY + headerHeight+10;
+                return doc.y;
+            };
+            // Draw the table header
+            drawTableHeader();
+
+            // Draw each order in the table
+            reportData.orders.forEach(order => {
+                const currentY = doc.y;
+                doc.font('Helvetica')
+                    .fontSize(10)
+                    .text(order.orderId, columns.orderId.x, currentY)
+                    .text(new Date(order.createdAt).toLocaleDateString(), columns.date.x, currentY)
+                    .text(order.userId.username, columns.customer.x, currentY)
+                    .text(`Rs.${order.finalAmount.toFixed(2)}`, columns.amount.x, currentY, { align: 'left' })
+                    .text(order.status, columns.status.x, currentY);
+
+                // Draw horizontal line
+                doc.strokeColor('#cccccc')
+                    .lineWidth(0.5)
+                    .moveTo(doc.page.margins.left, currentY + 15)
+                    .lineTo(doc.page.margins.left + pageWidth, currentY + 15)
+                    .stroke();
+
+                // Move to the next row
+                doc.y += 20; // Adjust row height as needed
+            });
+            // Finalize the PDF document
             doc.end();
+        // };
+        // const doc = new PDFDocument();
+        // res.setHeader('Content-Type', 'application/pdf');
+        // res.setHeader('Content-Disposition', 'attachment; filename=sales-report.pdf');
+        // doc.pipe(res);
 
-        } else if (format === 'excel') {
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Sales Report');
+        // doc.fontSize(20).text('Sales Report', { align: 'center' });
+        // doc.moveDown();
+        // doc.fontSize(10).text('CAlliope', { align: 'center' });
+        // doc.fontSize(10).text('www.calliope.com', { align: 'center' });
+        // doc.moveDown();
+        // doc.moveDown();
 
-            worksheet.columns = [
-                { header: 'Order ID', key: 'orderId', width: 30 },
-                { header: 'Customer', key: 'customerName', width: 20 },
-                { header: 'Date', key: 'orderDate', width: 15 },
-                { header: 'Amount', key: 'totalAmount', width: 15 },
-                { header: 'Discount', key: 'discount', width: 15 },
-                { header: 'Coupon', key: 'couponDiscount', width: 15 },
-                { header: 'Final Amount', key: 'finalAmount', width: 15 }
-            ];
+        // doc.fontSize(14).text('Summary');
+        // doc.fontSize(12)
+        //    .text(`Total Orders: ${reportData.summary.totalOrders}`)
+        // doc.fontSize(12).text(`Total Amount: ₹${reportData.summary.totalAmount.toFixed(0)}`)
+        // doc.fontSize(12).text(`Total Discount: ₹${reportData.summary.totalDiscount.toFixed(0)}`)
+        //    doc.fontSize(12).text(`Total Coupon Discount: ₹${reportData.summary.totalCouponDiscount.toFixed(0)}`)
+        //    .text(`Net Amount: ₹${reportData.summary.netAmount.toFixed(2)}`);
 
-            // worksheet.addRows(reportData.orders);
-            worksheet.addRows(reportData.orders.map(order => ({
-                orderId: order.orderId,
-                customerName: order.userId.username,
-                orderDate: new Date(order.createdAt).toLocaleDateString(), // Format the date
-                // mrp: `₹${order.mrp.toFixed(2)}`, 
-                totalamount:`₹${order.orderedItems.reduce((total, item)=> total + (item.product.mrp * item.quantity), 0).toFixed(0)}`,
-                totalDiscount: `₹${order.totalDiscount.toFixed(2)}`,
-                couponDiscount: `₹${order.couponDiscount.toFixed(2)}`,
-                finalAmount: `₹${order.finalAmount.toFixed(2)}` // Format the amount
-            })));
+        // doc.moveDown();
 
-            worksheet.addRow([]);
-            worksheet.addRow(['Summary']);
-            worksheet.addRow(['Total Orders', reportData.summary.totalOrders]);
-            worksheet.addRow(['Total Amount', reportData.summary.totalAmount]);
-            worksheet.addRow(['Total Discount', reportData.summary.totalDiscount]);
-            // worksheet.addRow(['Total Coupon Discount', reportData.summary.totalCouponDiscount]);
-            // worksheet.addRow(['Net Amount', reportData.summary.netAmount]);
+        // doc.fontSize(14).text('Order Details');
+        // reportData.orders.forEach(order => {
+        //     doc.fontSize(12)
+        //         .text(`Order ID: ${order.orderId}`)
+        //         .text(`Customer: ${order.userId.username}`)
+        //         .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
+        //         .text(`Amount: ₹${order.finalAmount.toFixed(2)}`)
+        //         .moveDown();
+        // });
 
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=sales-report.xlsx');
+        // doc.end();
 
-            await workbook.xlsx.write(res);
-            res.end();
-        }
+    } else if (format === 'excel') {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
+        console.log("excel report data",reportData.orders.map(order => ({
+            orderId: order.orderId,
+            customerName: order.userId.username,
+            orderDate: new Date(order.createdAt).toLocaleDateString(), // Format the date
+            // mrp: `₹${order.mrp.toFixed(2)}`, 
+            totalamount: `₹ ${order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0).toFixed(0)}`,
+            totalDiscount: `₹ ${order.totalDiscount.toFixed(2)}`,
+            couponDiscount: `₹ ${order.couponDiscount.toFixed(2)}`,
+            finalAmount: `₹${order.finalAmount.toFixed(2)}` // Format the amount
+        })));
+        worksheet.columns = [
+            { header: 'Order ID', key: 'orderId', width: 30 },
+            { header: 'Customer', key: 'customerName', width: 20 },
+            { header: 'Date', key: 'orderDate', width: 15 },
+            { header: 'Amount', key: 'totalAmount', width: 15 },
+            { header: 'Discount', key: 'totalDiscount', width: 15 },
+            { header: 'Coupon', key: 'couponDiscount', width: 15 },
+            { header: 'Final Amount', key: 'finalAmount', width: 15 }
+        ];
 
-    } catch (error) {
-        console.error('Error downloading report:', error);
-        res.status(500).json({ error: 'Failed to download report' });
+        // worksheet.addRows(reportData.orders);
+        const totalDiscountSum = reportData.orders.reduce((sum, order) => {
+            return sum + order.totalDiscount; // Ensure this is the raw number, not formatted
+        }, 0);
+
+        const totalAmountSum = reportData.orders.reduce((sum, order) => {
+            return sum + order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0); // Sum of all amounts
+        }, 0);
+        
+        const rowsToAdd = reportData.orders.map(order => ({
+            orderId: order.orderId,
+            customerName: order.userId.username,
+            orderDate: new Date(order.createdAt).toLocaleDateString(), // Format the date
+            // mrp: `₹${order.mrp.toFixed(2)}`, 
+            totalAmount: `₹ ${order.orderedItems.reduce((total, item) => total + (item.product.mrp * item.quantity), 0).toFixed(0)}`,
+            totalDiscount: `₹ ${order.totalDiscount.toFixed(2)}`,
+            couponDiscount: `₹ ${order.couponDiscount.toFixed(2)}`,
+            finalAmount: `₹${order.finalAmount.toFixed(2)}` // Format the amount
+        }))
+        console.log("rowsToAdd:",rowsToAdd)
+        worksheet.addRows(rowsToAdd.map(order => ({
+            orderId: order.orderId,
+            customerName: order.customerName,
+            orderDate: order.orderDate,
+            totalAmount: order.totalAmount, 
+            totalDiscount: order.totalDiscount, // Format for display
+            couponDiscount: order.couponDiscount,
+            finalAmount: order.finalAmount
+        })));
+
+        worksheet.addRow([]);
+        worksheet.addRow(['Summary']);
+        worksheet.addRow(['Total Orders', reportData.summary.totalOrders]);
+        worksheet.addRow(['Total Amount', `₹ ${totalAmountSum.toFixed(2)}`]);
+        worksheet.addRow(['Total Discount', `₹ ${totalDiscountSum.toFixed(2)}`]);
+        worksheet.addRow(['Total Coupon Discount', `₹ ${reportData.summary.totalDiscount.toFixed(2)}`]);
+        worksheet.addRow(['Total Revenue', `₹ ${reportData.summary.totalAmount.toFixed(2)}`]);
+        // worksheet.addRow(['Net Amount', reportData.summary.netAmount]);
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=sales-report.xlsx');
+
+        await workbook.xlsx.write(res);
+        res.end();
     }
+
+} catch (error) {
+    console.error('Error downloading report:', error);
+    res.status(500).json({ error: 'Failed to download report' });
+}
 };
 
 exports.getChartData = async (req, res) => {
@@ -458,7 +609,7 @@ exports.dashboard = async (req, res) => {
         const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalSales = orders.length;
         const totalDiscount = orders.reduce((sum, order) => sum + (order.totalDiscountAmount || 0), 0);
-        console.log("totalRevenue,totalSales,totalDiscount:", totalRevenue,totalSales,totalDiscount)
+        console.log("totalRevenue,totalSales,totalDiscount:", totalRevenue, totalSales, totalDiscount)
 
         const last7Days = new Date();
         last7Days.setDate(last7Days.getDate() - 7);
@@ -476,7 +627,7 @@ exports.dashboard = async (req, res) => {
             customerName: order.userId.fullname || order.userId.username,
             products: order.orderedItems.map(item => item.product.productName),
             amount: order.orderedItems.reduce((sum, prod) => sum + (prod.product.mrp * prod.quantity), 0),
-            discount: order.totalDiscountAmount || 0,   
+            discount: order.totalDiscountAmount || 0,
             finalAmount: order.totalAmount
         }));
 
@@ -509,7 +660,7 @@ exports.dashboard = async (req, res) => {
                 $project: {
                     _id: 1,
                     totalSold: 1,
-                    name: 1 
+                    name: 1
                 }
             }
         ]);
@@ -571,7 +722,7 @@ exports.dashboard = async (req, res) => {
     }
 };
 
-const   generateSalesReport = async (query) => {
+const generateSalesReport = async (query) => {
     try {
         const { period, startDate, endDate, page = 1, limit = 10 } = query;
         let dateFilter = {};
@@ -579,7 +730,7 @@ const   generateSalesReport = async (query) => {
 
         const now = new Date();
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
+
         switch (period) {
             case 'daily':
                 const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -596,10 +747,12 @@ const   generateSalesReport = async (query) => {
                     week: {
                         $ceil: {
                             $divide: [
-                                { $subtract: [
-                                    { $dayOfMonth: '$createdAt' },
-                                    1
-                                ]},
+                                {
+                                    $subtract: [
+                                        { $dayOfMonth: '$createdAt' },
+                                        1
+                                    ]
+                                },
                                 7
                             ]
                         }
@@ -645,12 +798,14 @@ const   generateSalesReport = async (query) => {
                     orderCount: { $sum: 1 }
                 }
             },
-            { $sort: { 
-                '_id.year': 1, 
-                '_id.month': 1, 
-                '_id.week': 1,
-                '_id.day': 1
-            }}
+            {
+                $sort: {
+                    '_id.year': 1,
+                    '_id.month': 1,
+                    '_id.week': 1,
+                    '_id.day': 1
+                }
+            }
         ]);
 
         const formattedChartData = {
@@ -740,9 +895,9 @@ const   generateSalesReport = async (query) => {
                 totalDiscount: orders.reduce((sum, order) => {
                     return sum + (order.totalDiscountAmount || 0) + (order.couponDiscount || 0);
                 }, 0),
-                totalCouponDiscount : orders.reduce((sum, order)=>{
+                totalCouponDiscount: orders.reduce((sum, order) => {
                     return sum + (order.couponDiscount || 0)
-                },0)
+                }, 0)
             }
         };
     } catch (error) {
@@ -777,7 +932,7 @@ exports.downloadSalesReport = async (req, res) => {
             doc.pipe(res);
 
             doc.rect(0, 0, doc.page.width, 120)
-                .fill('#2196f3'); 
+                .fill('#2196f3');
 
             doc.rect(0, 120, doc.page.width, 3)
                 .fill('#1976d2');
@@ -810,27 +965,27 @@ exports.downloadSalesReport = async (req, res) => {
                 .text(`Period: ${dateRangeText}`, 50, 85, { align: 'center' });
 
             doc.fontSize(10)
-                .fillColor('#ffffff')  
+                .fillColor('#ffffff')
                 .text(`Generated on: ${new Date().toLocaleString()}`, 50, 140, { align: 'right' })
                 .text(T`otal Orders: ${reportData.length}`, 50, 155, { align: 'right' });
 
             const tableTop = 190;
             const pageWidth = doc.page.width;
-            const rightMargin = 50; 
+            const rightMargin = 50;
             const columnSpacing = {
-                srNo: 35,      
-                orderId: 85,   
-                date: 230,     
-                customer: 310,  
-                amount: 380,  
-                discount: 445, 
-                final: 500     
+                srNo: 35,
+                orderId: 85,
+                date: 230,
+                customer: 310,
+                amount: 380,
+                discount: 445,
+                final: 500
             };
 
             doc.fontSize(10)
                 .font('Helvetica-Bold');
 
-            doc.roundedRect(30, tableTop - 5, pageWidth - 80, 25, 3) 
+            doc.roundedRect(30, tableTop - 5, pageWidth - 80, 25, 3)
                 .fill('#f3f4f6');
 
             doc.fillColor('#1976d2')
@@ -851,7 +1006,7 @@ exports.downloadSalesReport = async (req, res) => {
             doc.font('Helvetica');
 
             reportData.forEach((sale, index) => {
-                if (position > 750) { 
+                if (position > 750) {
                     doc.addPage();
                     doc.rect(0, 0, doc.page.width, 50)
                         .fill('#1a237e');
@@ -889,7 +1044,7 @@ exports.downloadSalesReport = async (req, res) => {
                 }
 
                 doc.fillColor('#333333')
-                    .fontSize(9) 
+                    .fontSize(9)
                     .text(index + 1, columnSpacing.srNo, position)
                     .text(sale.orderId.toString(), columnSpacing.orderId, position, { width: 130 })
                     .text(sale.date, columnSpacing.date, position)
@@ -976,7 +1131,7 @@ exports.downloadSalesReport = async (req, res) => {
             worksheet.spliceRows(1, 0, ['Sales Report']);
             worksheet.spliceRows(2, 0, [`Period: ${dateRangeText}`]);
             worksheet.spliceRows(3, 0, [`Generated on: ${new Date().toLocaleString()}`]);
-            worksheet.spliceRows(4, 0, []); 
+            worksheet.spliceRows(4, 0, []);
 
             worksheet.getRow(1).font = { bold: true, size: 16, color: { argb: 'FF1A237E' } };
             worksheet.getRow(1).height = 30;
@@ -989,7 +1144,7 @@ exports.downloadSalesReport = async (req, res) => {
             headerRow.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: '2196F3' }  
+                fgColor: { argb: '2196F3' }
             };
 
             headerRow.eachCell((cell) => {
@@ -1059,7 +1214,7 @@ exports.downloadSalesReport = async (req, res) => {
 async function getFilteredOrders(type, date, startDate, endDate) {
     let dateFilter = {};
 
-    switch(type) {
+    switch (type) {
         case 'today':
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -1133,12 +1288,12 @@ exports.getAnalyticsData = async (req, res) => {
                     startDate = new Date(now.setDate(now.getDate() - 49));
                     break;
                 case 'monthly':
-                    dateFormat = '%Y-%m'; 
+                    dateFormat = '%Y-%m';
                     groupBy = { $month: '$createdAt' };
                     startDate = new Date(now.setMonth(now.getMonth() - 6));
                     break;
                 case 'yearly':
-                    dateFormat = '%Y'; 
+                    dateFormat = '%Y';
                     groupBy = { $year: '$createdAt' };
                     startDate = new Date(2000, 0, 1);
                     break;
