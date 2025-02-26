@@ -130,7 +130,14 @@ exports.verifyPayment = async (req, res) => {
                 console.log(`Updated stock for product ${product._id}, reduced by ${orderData.quantity}`);
             } else {
                 console.log("cart order");
-                const cart = await Carts.findOne({ userId: user._id }).populate('items.productId');
+                const cart = await Carts.findOne({ userId: user._id })
+                .populate({
+                    path:'items.productId',
+                    populate:{
+                        path: 'category', 
+                        select: 'categoryOffer'
+                    }
+                });
                 if (!cart || !cart.items || cart.items.length === 0) {
                     throw new Error('Cart is empty');
                 }
@@ -143,10 +150,14 @@ exports.verifyPayment = async (req, res) => {
                 }
                 
                 orderedItems = cart.items.map(item => {
+                    console.log("Populated product:", item.productId); 
+
                     const prices= calculateOrderItemPrices({
                         product: item.productId,
                         quantity: item.quantity
                     });
+                    
+                    console.log("prices in verify payment -cart ",prices)
                     return {
                         product: item.productId._id,
                         quantity: item.quantity,

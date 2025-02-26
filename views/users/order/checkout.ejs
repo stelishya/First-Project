@@ -1007,6 +1007,7 @@
                 });
 
                 if (verifyResponse.data.success) {
+                    localStorage.removeItem('appliedCoupon');
                     console.log("success aahn");
                     await Swal.fire({
                         title: 'Payment Successful!',

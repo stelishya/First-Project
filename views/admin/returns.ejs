@@ -199,6 +199,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
     let currentOrderId = null;
@@ -262,7 +263,7 @@
         try {
             const endpoint = action === 'approve' ? '/admin/approveReturn' : '/admin/rejectReturn';
             const response = await axios.post(`${endpoint}/${currentOrderId}`);
-            console.log("response : ",response)
+            console.log("response in handleReturn: ",response)
             if (response.data && response.status === 200) {
                 await Swal.fire({
                     title: action === 'approve' ? 'Return Approved!' : 'Return Rejected!',
@@ -335,7 +336,27 @@
                 const productName = this.closest('tr').querySelector('[data-product-name]').dataset.productName;
                 
                 if (await confirmAction(action, productName)) {
-                    this.submit();
+                    try {
+                        const response = await axios.post(this.action, {});
+
+                        Swal.fire({
+                        title: 'Success',
+                        text: response.data.message, // Show backend response in SweetAlert
+                        icon: 'success',
+                        confirmButtonColor: '#4CAF50'
+                    }).then(() => {
+                        window.location.reload(); // Reload page after alert confirmation
+                    });
+
+                    } catch (error) {
+                        Swal.fire({
+                        title: 'Error',
+                        text: error.response?.data?.message || 'Something went wrong! Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#f44336'
+                    });
+                    }
+                    // this.submit();
                 }
             });
         });

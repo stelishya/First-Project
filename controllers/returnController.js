@@ -142,7 +142,7 @@ exports.approveReturn = async (req, res) => {
                     orderId,
                     type: 'CREDIT',
                     amount: refundAmount,
-                    description: `Refund for returned order #${order._id} `,
+                    description: `Refund for returned order #${order.orderId} `,
                     balance: newBalance
                 });
                 await wallet.save();
@@ -155,13 +155,13 @@ exports.approveReturn = async (req, res) => {
         console.log('Wallet :', wallet);
         console.log('Stock updated for product:', returnedItem.product._id);
         console.log(`Return request approved successfully. Refund of ₹ ${refundAmount.toFixed(2)} has been processed.`)
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: `Return request approved successfully. Refund of ₹ ${refundAmount.toFixed(2)} has been processed.`
             // message: `Return request approved successfully. ${order.paymentMethod !== 'COD' ? 'Refund of ₹' + refundAmount.toFixed(2) + ' has been processed.' : ''}`
         });
     } catch (error) {
         console.error('Error approving return:', error);
-        res.status(500).json({ message: "Failed to approve return request" });
+        return res.status(500).json({ message: "Failed to approve return request" });
     }
 };
 
@@ -179,9 +179,9 @@ exports.rejectReturn = async (req, res) => {
         order.returnDetails.returnStatus = 'Rejected';
         await order.save();
 
-        res.status(200).json({ message: "Return request has been rejected" });
+        return res.status(200).json({ message: "Return request has been rejected" });
     } catch (error) {
         console.error('Error rejecting return:', error);
-        res.status(500).json({ message: "Failed to reject return request" });
+        return res.status(500).json({ message: "Failed to reject return request" });
     }
 };

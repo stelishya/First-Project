@@ -4,9 +4,12 @@
      * @returns {Object} - Object containing calculated prices and discounts
      */
     const calculateProductPrices = (product) => {
+        console.log("Product before price calculation:", product);
         const mrp = Number(product.mrp || 0);
         const productOffer = Number(product.productOffer || 0);
         const categoryOffer = Number(product.category?.categoryOffer || 0);
+        const cat = Number(product.category.categoryOffer || 0);
+        console.log("categoryOffer, cat :",categoryOffer,cat)
         const maxDiscount = Number(product.maxDiscount || 0);
         const offer = Math.max(productOffer, categoryOffer);
         const discount = Math.round((mrp * offer / 100) * 100) / 100;

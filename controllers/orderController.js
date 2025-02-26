@@ -512,7 +512,7 @@ exports.getOrdersAdmin = async (req, res) => {
             .sort({ createdAt: -1 }).skip(skip).limit(limit)
         const totalOrders = await Orders.countDocuments();
         const totalPages = Math.ceil(totalOrders / limit);
-
+            console.log("orders in getOrdersAdmin",orders)
         res.render('admin/order folder/orders', {
             orders, 
             orderStatuses, 
